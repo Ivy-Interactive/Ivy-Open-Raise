@@ -27,10 +27,8 @@ public class DeployApp : ViewBase
         [MinLength(10, ErrorMessage = "API key must be at least 10 characters")]
         public string LlmApiKey { get; set; } = "";
 
-        [Url(ErrorMessage = "Email host must be a valid URL")]
         public string? EmailHost { get; set; }
 
-        [EmailAddress(ErrorMessage = "Email user must be a valid email address")]
         public string? EmailUser { get; set; }
 
         [MinLength(6, ErrorMessage = "Email password must be at least 6 characters")]
