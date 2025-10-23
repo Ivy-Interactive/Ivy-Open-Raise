@@ -31,12 +31,10 @@ public class DealPipelineBlade : ViewBase
             }
         }, [refreshToken]);
 
-        var onCardClicked = new Action<Event<object>>(e =>
+        var onCardClicked = new Action<Event<ListItem>>(e =>
         {
-            if (e.Sender.Tag is DealRecord deal)
-            {
-                blades.Push(this, new DealDetailsBlade(deal.Id), deal.ContactName);
-            }
+            var deal = (DealRecord)e.Sender.Tag!;
+            blades.Push(this, new DealDetailsBlade(deal.Id), deal.ContactName);
         });
 
         var createBtn = Icons.Plus.ToButton(_ =>
@@ -47,7 +45,6 @@ public class DealPipelineBlade : ViewBase
         return Layout.Vertical(
             Layout.Horizontal(
                 Text.H3("Deal Pipeline"),
-                Spacer.Flex(),
                 createBtn
             ),
             
@@ -59,7 +56,7 @@ public class DealPipelineBlade : ViewBase
                     descriptionSelector: deal => deal.Description,
                     orderSelector: deal => deal.Order)
                 .Height(Size.Units(400))
-                .ColumnOrder(stateName => GetDealStateOrder(stateName))
+                .ColumnOrder(deal => GetDealStateOrder(deal.DealStateName))
                 .ColumnTitle(stateName => GetCustomColumnTitle(stateName))
                 .HandleAdd(columnKey =>
                 {
@@ -84,10 +81,11 @@ public class DealPipelineBlade : ViewBase
                 })
                 .HandleMove(moveData =>
                 {
-                    var dealId = Guid.Parse(moveData.CardId?.ToString() ?? "");
-                    
+                    var dealId = moveData.CardId?.ToString();
+                    if (string.IsNullOrEmpty(dealId)) return;
+
                     var updatedDeals = deals.Value.Select(deal =>
-                        deal.Id == dealId
+                        deal.Id.ToString() == dealId
                             ? new DealRecord
                             {
                                 Id = deal.Id,
@@ -109,8 +107,10 @@ public class DealPipelineBlade : ViewBase
                 })
                 .HandleDelete(cardId =>
                 {
-                    var dealId = Guid.Parse(cardId?.ToString() ?? "");
-                    var updatedDeals = deals.Value.Where(deal => deal.Id != dealId).ToArray();
+                    var dealId = cardId?.ToString();
+                    if (string.IsNullOrEmpty(dealId)) return;
+
+                    var updatedDeals = deals.Value.Where(deal => deal.Id.ToString() != dealId).ToArray();
                     deals.Set(updatedDeals);
                     
                     // Here you would typically delete from database
@@ -133,17 +133,18 @@ public class DealPipelineBlade : ViewBase
             .Include(d => d.Owner)
             .Where(d => d.DeletedAt == null)
             .OrderBy(d => d.Order)
-            .Select(d => new DealRecord(
-                d.Id,
-                $"{d.Contact.FirstName} {d.Contact.LastName}",
-                d.DealState.Name,
-                d.Notes ?? "No description",
-                d.Order,
-                d.AmountFrom,
-                d.AmountTo,
-                d.Priority ?? 1,
-                $"{d.Owner.FirstName} {d.Owner.LastName}"
-            ))
+            .Select(d => new DealRecord
+            {
+                Id = d.Id,
+                ContactName = $"{d.Contact.FirstName} {d.Contact.LastName}",
+                DealStateName = d.DealState.Name,
+                Description = d.Notes ?? "No description",
+                Order = d.Order,
+                AmountFrom = d.AmountFrom,
+                AmountTo = d.AmountTo,
+                Priority = d.Priority ?? 1,
+                OwnerName = $"{d.Owner.FirstName} {d.Owner.LastName}"
+            })
             .ToArrayAsync();
     }
 
@@ -175,15 +176,16 @@ public class DealPipelineBlade : ViewBase
         return dealsInColumn.Count + 1;
     }
 
-    private record DealRecord(
-        Guid Id,
-        string ContactName,
-        string DealStateName,
-        string Description,
-        float Order,
-        int? AmountFrom,
-        int? AmountTo,
-        int Priority,
-        string OwnerName
-    );
+    private class DealRecord
+    {
+        public Guid Id { get; set; }
+        public string ContactName { get; set; } = "";
+        public string DealStateName { get; set; } = "";
+        public string Description { get; set; } = "";
+        public float Order { get; set; }
+        public int? AmountFrom { get; set; }
+        public int? AmountTo { get; set; }
+        public int Priority { get; set; }
+        public string OwnerName { get; set; } = "";
+    }
 }
