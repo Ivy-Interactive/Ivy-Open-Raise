@@ -12,11 +12,6 @@
   font-family: "Inter", sans-serif;
   color: colors.$color-text-white;
 
-  // Default variant (static card)
-  &--default {
-    // Default styles already applied above
-  }
-
   // Hover variant (for interactive cards like features)
   &--hover {
     cursor: pointer;
@@ -37,6 +32,14 @@
   }
 
   // Padding variants
+  &--padding-none {
+    padding: 0;
+
+    @media (max-width: 768px) {
+      padding: 0;
+    }
+  }
+
   &--padding-small {
     padding: 16px;
 
@@ -62,7 +65,12 @@
   }
 
   // Common heading styles for content inside cards
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     color: colors.$color-text-white;
     font-family: "Inter", sans-serif;
     font-weight: 600;
