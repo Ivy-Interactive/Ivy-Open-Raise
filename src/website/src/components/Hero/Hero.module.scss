@@ -23,11 +23,13 @@
   gap: 81px;
   width: 100%;
   flex: 1;
+  justify-content: center;
 }
 
 .header {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
 }
 
@@ -56,38 +58,90 @@
 .content {
   display: flex;
   flex-direction: column;
+  gap: 48px;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+
+  @media (max-width: 1024px) {
+    flex-direction: column;
+    gap: 40px;
+    align-items: center;
+  }
+}
+
+.textContent {
+  display: flex;
+  flex-direction: column;
   gap: 24px;
   flex: 1;
+  max-width: 600px;
+  text-align: center;
+  align-items: center;
+
+  @media (max-width: 1024px) {
+    max-width: 100%;
+  }
+}
+
+.mediaContent {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+
+  @media (max-width: 1024px) {
+    width: 100%;
+  }
+}
+
+.media {
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+
+  @media (max-width: 1024px) {
+    max-width: 600px;
+  }
 }
 
 .heroTitle {
   color: colors.$color-text-white;
   font-family: "Inter", sans-serif;
-  font-size: 80px;
+  font-size: 72px;
   font-weight: 700;
-  letter-spacing: -1.6px;
+  letter-spacing: -1.2px;
   line-height: 1.1;
   margin: 0;
+  text-align: center;
+
+  @media (max-width: 1024px) {
+    font-size: 48px;
+    letter-spacing: -1px;
+  }
 
   @media (max-width: 768px) {
-    font-size: 40px;
-    letter-spacing: -1px;
+    font-size: 36px;
+    letter-spacing: -0.8px;
   }
 }
 
 .description {
   color: colors.$color-text-white;
   font-family: "Inter", sans-serif;
-  font-size: 24px;
+  font-size: 18px;
   font-weight: 400;
-  letter-spacing: -0.48px;
-  line-height: 1.5;
+  letter-spacing: -0.36px;
+  line-height: 1.6;
   margin: 0;
-  max-width: 760px;
+  text-align: center;
 
   @media (max-width: 768px) {
     font-size: 16px;
-    letter-spacing: -0.36px;
+    letter-spacing: -0.32px;
   }
 }
 
@@ -95,7 +149,7 @@
   display: flex;
   flex-direction: column;
   gap: 24px;
-  align-items: flex-start;
+  align-items: center;
 }
 
 .h2TitleContainer {
