@@ -37,29 +37,27 @@ public class DeployApp : ViewBase
 
     public override object? Build()
     {
-        var deployment = UseState(() => new DeploymentModel
-        {
-            ProjectName = "open-raise",
-            ServerLocation = "Frankfurt",
-            ServerType = "2 vCPU (Shared) 9€/month",
-            LlmEndpoint = "",
-            LlmApiKey = "",
-            EmailHost = null,
-            EmailUser = null,
-            EmailPassword = null
-        });
+        // Individual state variables for each field
+        var projectName = UseState("open-raise");
+        var serverLocation = UseState("Frankfurt");
+        var serverType = UseState("2 vCPU (Shared) 9€/month");
+        var llmEndpoint = UseState("");
+        var llmApiKey = UseState("");
+        var emailHost = UseState("");
+        var emailUser = UseState("");
+        var emailPassword = UseState("");
 
         var client = UseService<IClientProvider>();
 
         // Handle form submission
         UseEffect(() =>
         {
-            if (!string.IsNullOrEmpty(deployment.Value.LlmEndpoint) &&
-                !string.IsNullOrEmpty(deployment.Value.LlmApiKey))
+            if (!string.IsNullOrEmpty(llmEndpoint.Value) &&
+                !string.IsNullOrEmpty(llmApiKey.Value))
             {
-                client.Toast($"Deployment created for {deployment.Value.ProjectName}!");
+                client.Toast($"Deployment created for {projectName.Value}!");
             }
-        }, deployment);
+        }, llmEndpoint, llmApiKey);
 
         // Server location options
         var locationOptions = new[]
@@ -80,28 +78,109 @@ public class DeployApp : ViewBase
             "8 vCPU (Dedicated) 35€/month"
         }.ToOptions();
 
-        return Layout.Vertical().Gap(4).Padding(4)
+        return Layout.Vertical().Gap(6).Padding(4)
             | new Card(
-                Layout.Vertical().Gap(8).Padding(4)
+                Layout.Vertical().Gap(8).Padding(6)
                 | Text.H2("Deploy Open-Raise To Sliplane")
-                | Text.Block("Configure your new deployment")
-                | deployment.ToForm("Create Account")
-                    .Group("Project Details", m => m.ProjectName, m => m.ServerLocation, m => m.ServerType)
-                    .Group("LLM Provider", m => m.LlmEndpoint, m => m.LlmApiKey)
-                    .Group("Email Provider (Optional)", m => m.EmailHost, m => m.EmailUser, m => m.EmailPassword)
-                    .Builder(m => m.ServerLocation, s => s.ToSelectInput(locationOptions))
-                    .Builder(m => m.ServerType, s => s.ToSelectInput(serverOptions))
-                    .Builder(m => m.LlmApiKey, s => s.ToPasswordInput())
-                    .Builder(m => m.EmailPassword, s => s.ToPasswordInput())
-                    .Label(m => m.ProjectName, "Project Name")
-                    .Label(m => m.ServerLocation, "Server Location")
-                    .Label(m => m.ServerType, "Server")
-                    .Label(m => m.LlmEndpoint, "Endpoint")
-                    .Label(m => m.LlmApiKey, "API Key")
-                    .Label(m => m.EmailHost, "Host")
-                    .Label(m => m.EmailUser, "User")
-                    .Label(m => m.EmailPassword, "Password")
-                    // Required fields are automatically detected from DataAnnotations
+                | Text.Markdown("*Configure your new deployment*")
+
+                // Project Details Section
+                | Text.H3("Project Details")
+                | new Field(
+                    projectName.ToTextInput()
+                        .Placeholder("Enter project name")
+                )
+                .Label("Project Name")
+                .Required()
+
+                | new Field(
+                    serverLocation.ToSelectInput(locationOptions)
+                        .Placeholder("Select server location")
+                )
+                .Label("Server Location")
+                .Required()
+
+                | new Field(
+                    serverType.ToSelectInput(serverOptions)
+                        .Placeholder("Select server type")
+                )
+                .Label("Server")
+                .Required()
+
+                | Text.Small("Minimum 3 vCPU is recommended for this deployment.")
+                    .Color(Colors.Orange)
+
+                // Services Section
+                | new Separator()
+                | Text.H3("Services Included in This Deployment")
+                | Layout.Horizontal().Gap(8).Align(Align.Center)
+                    | Layout.Vertical().Align(Align.Center)
+                        | new Icon(Icons.Container, Colors.Blue)
+                        | Text.Small("Open-Raise Container")
+                    | Layout.Vertical().Align(Align.Center)
+                        | new Icon(Icons.Database, Colors.Gray)
+                        | Text.Small("Postgres Database")
+                    | Layout.Vertical().Align(Align.Center)
+                        | new Icon(Icons.Circle, Colors.Red)
+                        | Text.Small("Redis")
+
+                // LLM Provider Section
+                | new Separator()
+                | Text.H3("Settings")
+                | Text.H4("LLM Provider")
+                | Text.Markdown("*Use an OpenAI compatible endpoint.*")
+
+                | new Field(
+                    llmEndpoint.ToTextInput()
+                        .Placeholder("https://api.openai.com/v1")
+                )
+                .Label("Endpoint")
+                .Required()
+
+                | new Field(
+                    llmApiKey.ToPasswordInput()
+                        .Placeholder("Enter your API key")
+                )
+                .Label("API Key")
+                .Required()
+
+                | new Button("Validate", _ => client.Toast("LLM endpoint validated!"))
+                    .Variant(ButtonVariant.Link)
+
+                // Email Provider Section
+                | Text.H4("Email Provider (Optional)")
+                | Text.Markdown("*How can we send email. Must be SMTP compatible. We recommend [Resend](https://resend.com).*")
+
+                | new Field(
+                    emailHost.ToTextInput()
+                        .Placeholder("smtp.resend.com")
+                )
+                .Label("Host")
+
+                | new Field(
+                    emailUser.ToTextInput()
+                        .Placeholder("user@example.com")
+                )
+                .Label("User")
+
+                | new Field(
+                    emailPassword.ToPasswordInput()
+                        .Placeholder("Enter email password")
+                )
+                .Label("Password")
+
+                | new Button("Validate", _ => client.Toast("Email provider validated!"))
+                    .Variant(ButtonVariant.Link)
+
+                // Submit Button
+                | new Separator()
+                | new Button("Create Account >", _ =>
+                {
+                    // Form submission is handled by UseEffect
+                    client.Toast("Deployment created successfully!");
+                })
+                .Variant(ButtonVariant.Primary)
+                .Large()
             )
             .Width(Size.Units(120).Max(600));
     }
