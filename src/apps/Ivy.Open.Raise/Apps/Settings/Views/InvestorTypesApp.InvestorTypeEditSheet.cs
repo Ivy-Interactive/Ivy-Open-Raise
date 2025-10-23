@@ -17,6 +17,7 @@ public class InvestorTypeEditSheet(IState<bool> isOpen, RefreshToken refreshToke
 
         return investorType
             .ToForm()
+            .Remove(e => e.Id)
             .Place(e => e.Name)
             .ToSheet(isOpen, "Edit Investor Type");
     }

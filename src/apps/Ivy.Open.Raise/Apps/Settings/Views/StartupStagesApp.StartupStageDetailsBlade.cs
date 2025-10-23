@@ -31,14 +31,14 @@ public class StartupStageDetailsBlade(int startupStageId) : ViewBase
                     Delete(factory);
                     blades.Pop(refresh: true);
                 }
-            }, "Delete Startup Stage", AlertButtonSet.OkCancel);
+            }, "Delete Startup Stage");
         };
 
         var dropDown = Icons.Ellipsis
             .ToButton()
             .Ghost()
             .WithDropDown(
-                MenuItem.Default("Delete").Icon(Icons.Trash).HandleSelect(OnDelete)
+                MenuItem.Default("Delete").Disabled(organizationSettingsCount.Value>0).Icon(Icons.Trash).HandleSelect(OnDelete)
             );
 
         var editBtn = new Button("Edit")
@@ -49,32 +49,30 @@ public class StartupStageDetailsBlade(int startupStageId) : ViewBase
         var detailsCard = new Card(
             content: new
             {
-                startupStageValue.Id,
-                startupStageValue.Name
-            }.ToDetails()
-                .RemoveEmpty()
-                .Builder(e => e.Id, e => e.CopyToClipboard()),
+                startupStageValue.Name,
+                OrganizationSettings = organizationSettingsCount
+            }.ToDetails(),
             footer: Layout.Horizontal().Width(Size.Full()).Gap(1).Align(Align.Right)
                     | dropDown
                     | editBtn
         ).Title("Startup Stage Details");
 
-        var relatedCard = new Card(
-            new List(
-                new ListItem("Organization Settings", onClick: _ =>
-                {
-                    blades.Push(this, new StartupStageOrganizationSettingsBlade(startupStageId), "Organization Settings");
-                }, badge: organizationSettingsCount.Value.ToString("N0"))
-            ));
-
         return new Fragment()
-               | (Layout.Vertical() | detailsCard | relatedCard)
+               | (Layout.Vertical() | detailsCard)
                | alertView;
     }
 
     private void Delete(DataContextFactory dbFactory)
     {
         using var db = dbFactory.CreateDbContext();
+
+        var connectedOrganizationSettingsCount = db.OrganizationSettings.Count(e => e.StartupStage == startupStageId);
+
+        if (connectedOrganizationSettingsCount > 0)
+        {
+            throw new InvalidOperationException($"Cannot delete startup stage with {connectedOrganizationSettingsCount} connected organization setting(s).");
+        }
+
         var startupStage = db.StartupStages.FirstOrDefault(e => e.Id == startupStageId)!;
         db.StartupStages.Remove(startupStage);
         db.SaveChanges();

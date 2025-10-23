@@ -31,14 +31,14 @@ public class InvestorTypeDetailsBlade(int investorTypeId) : ViewBase
                     Delete(factory);
                     blades.Pop(refresh: true);
                 }
-            }, "Delete Investor Type", AlertButtonSet.OkCancel);
+            }, "Delete Investor Type");
         };
 
         var dropDown = Icons.Ellipsis
             .ToButton()
             .Ghost()
             .WithDropDown(
-                MenuItem.Default("Delete").Icon(Icons.Trash).HandleSelect(OnDelete)
+                MenuItem.Default("Delete").Disabled(investorCount.Value>0).Icon(Icons.Trash).HandleSelect(OnDelete)
             );
 
         var editBtn = new Button("Edit")
@@ -49,32 +49,30 @@ public class InvestorTypeDetailsBlade(int investorTypeId) : ViewBase
         var detailsCard = new Card(
             content: new
             {
-                investorTypeValue.Id,
-                investorTypeValue.Name
-            }.ToDetails()
-                .RemoveEmpty()
-                .Builder(e => e.Id, e => e.CopyToClipboard()),
+                investorTypeValue.Name,
+                Investors = investorCount
+            }.ToDetails(),
             footer: Layout.Horizontal().Width(Size.Full()).Gap(1).Align(Align.Right)
                     | dropDown
                     | editBtn
         ).Title("Investor Type Details");
 
-        var relatedCard = new Card(
-            new List(
-                new ListItem("Investors", onClick: _ =>
-                {
-                    blades.Push(this, new InvestorTypeInvestorsBlade(investorTypeId), "Investors");
-                }, badge: investorCount.Value.ToString("N0"))
-            ));
-
         return new Fragment()
-               | (Layout.Vertical() | detailsCard | relatedCard)
+               | (Layout.Vertical() | detailsCard)
                | alertView;
     }
 
     private void Delete(DataContextFactory dbFactory)
     {
         using var db = dbFactory.CreateDbContext();
+
+        var connectedInvestorsCount = db.Investors.Count(e => e.InvestorTypeId == investorTypeId);
+
+        if (connectedInvestorsCount > 0)
+        {
+            throw new InvalidOperationException($"Cannot delete investor type with {connectedInvestorsCount} connected investor(s).");
+        }
+
         var investorType = db.InvestorTypes.FirstOrDefault(e => e.Id == investorTypeId)!;
         db.InvestorTypes.Remove(investorType);
         db.SaveChanges();

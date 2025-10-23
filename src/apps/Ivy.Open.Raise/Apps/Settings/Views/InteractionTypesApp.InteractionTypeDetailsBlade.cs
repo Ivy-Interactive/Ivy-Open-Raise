@@ -31,14 +31,14 @@ public class InteractionTypeDetailsBlade(int interactionTypeId) : ViewBase
                     Delete(factory);
                     blades.Pop(refresh: true);
                 }
-            }, "Delete Interaction Type", AlertButtonSet.OkCancel);
+            }, "Delete Interaction Type");
         };
 
         var dropDown = Icons.Ellipsis
             .ToButton()
             .Ghost()
             .WithDropDown(
-                MenuItem.Default("Delete").Icon(Icons.Trash).HandleSelect(OnDelete)
+                MenuItem.Default("Delete").Disabled(interactionCount.Value>0).Icon(Icons.Trash).HandleSelect(OnDelete)
             );
 
         var editBtn = new Button("Edit")
@@ -49,32 +49,30 @@ public class InteractionTypeDetailsBlade(int interactionTypeId) : ViewBase
         var detailsCard = new Card(
             content: new
             {
-                interactionTypeValue.Id,
-                interactionTypeValue.Name
-            }.ToDetails()
-                .RemoveEmpty()
-                .Builder(e => e.Id, e => e.CopyToClipboard()),
+                interactionTypeValue.Name,
+                Interactions = interactionCount
+            }.ToDetails(),
             footer: Layout.Horizontal().Width(Size.Full()).Gap(1).Align(Align.Right)
                     | dropDown
                     | editBtn
         ).Title("Interaction Type Details");
 
-        var relatedCard = new Card(
-            new List(
-                new ListItem("Interactions", onClick: _ =>
-                {
-                    blades.Push(this, new InteractionTypeInteractionsBlade(interactionTypeId), "Interactions");
-                }, badge: interactionCount.Value.ToString("N0"))
-            ));
-
         return new Fragment()
-               | (Layout.Vertical() | detailsCard | relatedCard)
+               | (Layout.Vertical() | detailsCard)
                | alertView;
     }
 
     private void Delete(DataContextFactory dbFactory)
     {
         using var db = dbFactory.CreateDbContext();
+
+        var connectedInteractionsCount = db.Interactions.Count(e => e.InteractionType == interactionTypeId);
+
+        if (connectedInteractionsCount > 0)
+        {
+            throw new InvalidOperationException($"Cannot delete interaction type with {connectedInteractionsCount} connected interaction(s).");
+        }
+
         var interactionType = db.InteractionTypes.FirstOrDefault(e => e.Id == interactionTypeId)!;
         db.InteractionTypes.Remove(interactionType);
         db.SaveChanges();

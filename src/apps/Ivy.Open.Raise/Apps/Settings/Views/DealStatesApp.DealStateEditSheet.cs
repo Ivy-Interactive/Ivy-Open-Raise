@@ -17,6 +17,7 @@ public class DealStateEditSheet(IState<bool> isOpen, RefreshToken refreshToken, 
 
         return dealState
             .ToForm()
+            .Remove(e => e.Id)
             .Place(e => e.Name)
             .ToSheet(isOpen, "Edit Deal State");
     }

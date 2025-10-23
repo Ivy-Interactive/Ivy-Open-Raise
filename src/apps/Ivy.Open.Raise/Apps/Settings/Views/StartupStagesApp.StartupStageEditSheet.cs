@@ -17,6 +17,7 @@ public class StartupStageEditSheet(IState<bool> isOpen, RefreshToken refreshToke
 
         return startupStage
             .ToForm()
+            .Remove(e => e.Id)
             .Place(e => e.Name)
             .ToSheet(isOpen, "Edit Startup Stage");
     }

@@ -17,6 +17,7 @@ public class StartupVerticalEditSheet(IState<bool> isOpen, RefreshToken refreshT
 
         return startupVertical
             .ToForm()
+            .Remove(e => e.Id)
             .Place(e => e.Name)
             .ToSheet(isOpen, "Edit Startup Vertical");
     }

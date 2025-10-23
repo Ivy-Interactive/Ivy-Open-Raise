@@ -17,6 +17,7 @@ public class InteractionTypeEditSheet(IState<bool> isOpen, RefreshToken refreshT
 
         return interactionType
             .ToForm()
+            .Remove(e => e.Id)
             .Builder(e => e.Name, e => e.ToTextAreaInput())
             .ToSheet(isOpen, "Edit Interaction Type");
     }

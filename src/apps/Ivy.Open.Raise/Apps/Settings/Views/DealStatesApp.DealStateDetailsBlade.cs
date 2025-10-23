@@ -31,14 +31,14 @@ public class DealStateDetailsBlade(int dealStateId) : ViewBase
                     Delete(factory);
                     blades.Pop(refresh: true);
                 }
-            }, "Delete Deal State", AlertButtonSet.OkCancel);
+            }, "Delete Deal State");
         };
 
         var dropDown = Icons.Ellipsis
             .ToButton()
             .Ghost()
             .WithDropDown(
-                MenuItem.Default("Delete").Icon(Icons.Trash).HandleSelect(OnDelete)
+                MenuItem.Default("Delete").Disabled(dealCount.Value>0).Icon(Icons.Trash).HandleSelect(OnDelete)
             );
 
         var editBtn = new Button("Edit")
@@ -49,32 +49,30 @@ public class DealStateDetailsBlade(int dealStateId) : ViewBase
         var detailsCard = new Card(
             content: new
             {
-                dealStateValue.Id,
-                dealStateValue.Name
-            }.ToDetails()
-                .RemoveEmpty()
-                .Builder(e => e.Id, e => e.CopyToClipboard()),
+                dealStateValue.Name,
+                Deals = dealCount
+            }.ToDetails(),
             footer: Layout.Horizontal().Width(Size.Full()).Gap(1).Align(Align.Right)
                     | dropDown
                     | editBtn
         ).Title("Deal State Details");
 
-        var relatedCard = new Card(
-            new List(
-                new ListItem("Deals", onClick: _ =>
-                {
-                    blades.Push(this, new DealStateDealsBlade(dealStateId), "Deals");
-                }, badge: dealCount.Value.ToString("N0"))
-            ));
-
         return new Fragment()
-               | (Layout.Vertical() | detailsCard | relatedCard)
+               | (Layout.Vertical() | detailsCard)
                | alertView;
     }
 
     private void Delete(DataContextFactory dbFactory)
     {
         using var db = dbFactory.CreateDbContext();
+
+        var connectedDealsCount = db.Deals.Count(e => e.DealStateId == dealStateId);
+        
+        if (connectedDealsCount > 0)
+        {
+            throw new InvalidOperationException($"Cannot delete deal state with {connectedDealsCount} connected deal(s).");
+        }
+
         var dealState = db.DealStates.FirstOrDefault(e => e.Id == dealStateId)!;
         db.DealStates.Remove(dealState);
         db.SaveChanges();
