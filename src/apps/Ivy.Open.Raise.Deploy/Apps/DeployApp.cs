@@ -198,7 +198,7 @@ public class DeployApp : ViewBase
             "8 vCPU (Dedicated) 35€/month"
         }.ToOptions();
 
-        return Layout.Vertical()
+        return Layout.Vertical().Padding(4)
             | new Card(
                 Layout.Vertical()
                 | Text.H2("Deploy Open-Raise To Sliplane")
