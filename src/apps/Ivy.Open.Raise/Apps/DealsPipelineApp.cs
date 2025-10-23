@@ -108,7 +108,9 @@ public class DealsPipelineApp : ViewBase
                     new Card()
                         .Title("No Deals")
                         .Description("Create your first deal to get started")
-                );
+                )
+                .Height(Size.Full())
+                .Width(Size.Fit());
     }
 
     private async Task<DealRecord[]> FetchDeals(DataContextFactory factory)
