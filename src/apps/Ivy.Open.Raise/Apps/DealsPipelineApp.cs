@@ -156,12 +156,6 @@ public class DealsPipelineApp : ViewBase
 
     private static string GetCustomColumnTitle(string stateName) => stateName switch
     {
-        "Lead" => "🔍 Leads",
-        "Qualified" => "✅ Qualified",
-        "Proposal" => "📋 Proposals",
-        "Negotiation" => "🤝 Negotiation",
-        "Closed Won" => "🎉 Won",
-        "Closed Lost" => "❌ Lost",
         _ => stateName
     };
 
