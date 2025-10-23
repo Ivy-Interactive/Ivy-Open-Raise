@@ -5,7 +5,7 @@ interface CardProps {
   children: React.ReactNode;
   className?: string;
   variant?: "default" | "hover" | "cta";
-  padding?: "small" | "medium" | "large";
+  padding?: "none" | "small" | "medium" | "large";
   onClick?: () => void;
 }
 
