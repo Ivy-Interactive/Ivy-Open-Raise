@@ -405,3 +405,9 @@ out/
 # Cursor IDE
 .cursor/
 *.cursor
+
+# MCP 
+.mcp.json
+
+# MACOS
+.DS_Store

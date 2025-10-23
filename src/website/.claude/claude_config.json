@@ -1,0 +1,169 @@
+{
+  "permissions": {
+    "allow": [
+      // Bash commands - Allow all shell commands
+      "Bash(*)",
+
+      // Git commands - Version control operations
+      "Bash(git:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git pull:*)",
+      "Bash(git checkout:*)",
+      "Bash(git branch:*)",
+      "Bash(git merge:*)",
+      "Bash(git status)",
+      "Bash(git log:*)",
+      "Bash(git diff:*)",
+      "Bash(git reset:*)",
+      "Bash(git rebase:*)",
+      "Bash(git stash:*)",
+      "Bash(git clone:*)",
+      "Bash(git fetch:*)",
+      "Bash(git remote:*)",
+      "Bash(git tag:*)",
+
+      // NPM commands - Package management
+      "Bash(npm:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run:*)",
+      "Bash(npm start)",
+      "Bash(npm test:*)",
+      "Bash(npm build)",
+      "Bash(npm dev)",
+      "Bash(npm ci)",
+      "Bash(npm update:*)",
+      "Bash(npm audit:*)",
+      "Bash(npm publish:*)",
+      "Bash(npm init:*)",
+      "Bash(npm config:*)",
+      "Bash(npm list:*)",
+      "Bash(npm outdated)",
+      "Bash(npm uninstall:*)",
+      "Bash(npm cache:*)",
+      "Bash(npm version:*)",
+
+      // Alternative package managers
+      "Bash(yarn:*)",
+      "Bash(pnpm:*)",
+      "Bash(bun:*)",
+
+      // MCP (Model Context Protocol) commands - All MCP tools
+      "mcp__*",
+
+      // Core Claude Code tools
+      "Read",
+      "Write",
+      "Edit",
+      "MultiEdit",
+      "Glob",
+      "Grep",
+      "LS",
+      "TodoRead",
+      "TodoWrite",
+      "WebFetch",
+      "WebSearch",
+      "NotebookRead",
+      "NotebookEdit",
+      "Task",
+      "exit_plan_mode",
+
+      // Common development commands
+      "Bash(ls:*)",
+      "Bash(cd:*)",
+      "Bash(mkdir:*)",
+      "Bash(rmdir:*)",
+      "Bash(rm:*)",
+      "Bash(cp:*)",
+      "Bash(mv:*)",
+      "Bash(cat:*)",
+      "Bash(grep:*)",
+      "Bash(find:*)",
+      "Bash(sed:*)",
+      "Bash(awk:*)",
+      "Bash(sort:*)",
+      "Bash(uniq:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(wc:*)",
+      "Bash(chmod:*)",
+      "Bash(chown:*)",
+
+      // Development tools
+      "Bash(python:*)",
+      "Bash(python3:*)",
+      "Bash(pip:*)",
+      "Bash(pip3:*)",
+      "Bash(node:*)",
+      "Bash(go:*)",
+      "Bash(cargo:*)",
+      "Bash(rustc:*)",
+      "Bash(javac:*)",
+      "Bash(java:*)",
+      "Bash(gcc:*)",
+      "Bash(g++:*)",
+      "Bash(make:*)",
+      "Bash(cmake:*)",
+
+      // Docker commands
+      "Bash(docker:*)",
+      "Bash(docker-compose:*)",
+
+      // Process management
+      "Bash(ps:*)",
+      "Bash(top)",
+      "Bash(htop)",
+      "Bash(kill:*)",
+      "Bash(killall:*)",
+
+      // Network tools
+      "Bash(curl:*)",
+      "Bash(wget:*)",
+      "Bash(ping:*)",
+      "Bash(ssh:*)",
+      "Bash(scp:*)",
+
+      // Text editors
+      "Bash(vim:*)",
+      "Bash(nano:*)",
+      "Bash(emacs:*)",
+      "Bash(code:*)",
+
+      // Archive tools
+      "Bash(tar:*)",
+      "Bash(zip:*)",
+      "Bash(unzip:*)",
+      "Bash(gzip:*)",
+      "Bash(gunzip:*)"
+    ],
+    "deny": [
+      // Security-sensitive operations - uncomment if you want to restrict these
+      // "Bash(sudo:*)",
+      // "Bash(su:*)",
+      // "Bash(passwd:*)",
+      // "Read(~/.ssh/**)",
+      // "Read(**/.env)",
+      // "Read(**/.env.*)",
+      // "Read(./secrets/**)",
+      // "Edit(**/.env)",
+      // "Edit(**/.env.*)",
+      // "Edit(./secrets/**)"
+    ]
+  },
+
+  // Optional: Environment variables
+  "env": {
+    "CLAUDE_CODE_ENABLE_TELEMETRY": "1"
+  },
+
+  // Optional: Sandbox configuration
+  "sandbox": {
+    "enabled": false,
+    "autoAllowBashIfSandboxed": true,
+    "excludedCommands": [],
+    "network": {
+      "allowLocalBinding": true
+    }
+  }
+}
