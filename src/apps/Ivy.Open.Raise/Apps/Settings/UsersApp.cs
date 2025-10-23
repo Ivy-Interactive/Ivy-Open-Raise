@@ -1,8 +1,8 @@
-using Ivy.Open.Raise.Apps.Views;
+using Ivy.Open.Raise.Apps.Settings.Views;
 
-namespace Ivy.Open.Raise.Apps;
+namespace Ivy.Open.Raise.Apps.Settings;
 
-[App(icon: Icons.User, path: ["Apps"])]
+[App(icon: Icons.User, path: ["Apps", "Settings"])]
 public class UsersApp : ViewBase
 {
     public override object? Build()

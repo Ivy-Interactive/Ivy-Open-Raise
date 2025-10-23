@@ -1,4 +1,4 @@
-namespace Ivy.Open.Raise.Apps.Views;
+namespace Ivy.Open.Raise.Apps.Settings.Views;
 
 public class UserListBlade : ViewBase
 {

@@ -1,4 +1,6 @@
-namespace Ivy.Open.Raise.Apps.Views;
+using Ivy.Open.Raise.Apps.Views;
+
+namespace Ivy.Open.Raise.Apps.Settings.Views;
 
 public class UserDetailsBlade(Guid userId) : ViewBase
 {
@@ -14,7 +16,7 @@ public class UserDetailsBlade(Guid userId) : ViewBase
 
         UseEffect(async () =>
         {
-            using var db = factory.CreateDbContext();
+            await using var db = factory.CreateDbContext();
             user.Set(await db.Users.SingleOrDefaultAsync(e => e.Id == userId));
             dealCount.Set(await db.Deals.CountAsync(e => e.OwnerId == userId));
             interactionCount.Set(await db.Interactions.CountAsync(e => e.UserId == userId));
@@ -33,7 +35,7 @@ public class UserDetailsBlade(Guid userId) : ViewBase
                     Delete(factory);
                     blades.Pop(refresh: true);
                 }
-            }, "Delete User", AlertButtonSet.OkCancel);
+            }, "Delete User");
         };
 
         var dropDown = Icons.Ellipsis
@@ -64,20 +66,8 @@ public class UserDetailsBlade(Guid userId) : ViewBase
                     | editBtn
         ).Title("User Details");
 
-        var relatedCard = new Card(
-            new List(
-                new ListItem("Deals", onClick: _ =>
-                {
-                    blades.Push(this, new UserDealsBlade(userId), "Deals");
-                }, badge: dealCount.Value.ToString("N0")),
-                new ListItem("Interactions", onClick: _ =>
-                {
-                    blades.Push(this, new UserInteractionsBlade(userId), "Interactions");
-                }, badge: interactionCount.Value.ToString("N0"))
-            ));
-
         return new Fragment()
-               | (Layout.Vertical() | detailsCard | relatedCard)
+               | (Layout.Vertical() | detailsCard)
                | alertView;
     }
 
