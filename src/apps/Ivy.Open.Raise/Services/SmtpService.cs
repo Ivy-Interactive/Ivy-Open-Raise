@@ -8,7 +8,6 @@ public interface ISmtpService
     Task SendAsync(MimeMessage mail);
 }
 
-
 public class SmtpService(string host, int port, string user, string password) : ISmtpService
 {
     public async Task SendAsync(MimeMessage mail)
