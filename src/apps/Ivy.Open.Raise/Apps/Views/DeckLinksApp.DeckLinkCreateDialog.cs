@@ -1,0 +1,106 @@
+namespace Ivy.Open.Raise.Apps.Views;
+
+public class DeckLinkCreateDialog(IState<bool> isOpen, RefreshToken refreshToken) : ViewBase
+{
+    private record DeckLinkCreateRequest
+    {
+        [Required]
+        public string LinkUrl { get; init; } = "";
+
+        [Required]
+        public Guid DeckId { get; init; }
+
+        public Guid? ContactId { get; init; }
+    }
+
+    public override object? Build()
+    {
+        var factory = UseService<DataContextFactory>();
+        var deckLink = UseState(() => new DeckLinkCreateRequest());
+
+        UseEffect(() =>
+        {
+            var deckLinkId = CreateDeckLink(factory, deckLink.Value);
+            refreshToken.Refresh(deckLinkId);
+        }, [deckLink]);
+
+        return deckLink
+            .ToForm()
+            .Builder(e => e.DeckId, e => e.ToAsyncSelectInput(QueryDecks(factory), LookupDeck(factory), placeholder: "Select Deck"))
+            .Builder(e => e.ContactId, e => e.ToAsyncSelectInput(QueryContacts(factory), LookupContact(factory), placeholder: "Select Contact"))
+            .Builder(e => e.LinkUrl, e => e.ToUrlInput())
+            .ToDialog(isOpen, title: "Create Deck Link", submitTitle: "Create");
+    }
+
+    private Guid CreateDeckLink(DataContextFactory factory, DeckLinkCreateRequest request)
+    {
+        using var db = factory.CreateDbContext();
+
+        var deckLink = new DeckLink()
+        {
+            LinkUrl = request.LinkUrl,
+            DeckId = request.DeckId,
+            ContactId = request.ContactId,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
+
+        db.DeckLinks.Add(deckLink);
+        db.SaveChanges();
+
+        return deckLink.Id;
+    }
+
+    private static AsyncSelectQueryDelegate<Guid> QueryDecks(DataContextFactory factory)
+    {
+        return async query =>
+        {
+            await using var db = factory.CreateDbContext();
+            return (await db.Decks
+                    .Where(e => e.Title.Contains(query))
+                    .Select(e => new { e.Id, e.Title })
+                    .Take(50)
+                    .ToArrayAsync())
+                .Select(e => new Option<Guid>(e.Title, e.Id))
+                .ToArray();
+        };
+    }
+
+    private static AsyncSelectLookupDelegate<Guid> LookupDeck(DataContextFactory factory)
+    {
+        return async id =>
+        {
+            await using var db = factory.CreateDbContext();
+            var deck = await db.Decks.FirstOrDefaultAsync(e => e.Id == id);
+            if (deck == null) return null;
+            return new Option<Guid>(deck.Title, deck.Id);
+        };
+    }
+
+    private static AsyncSelectQueryDelegate<Guid?> QueryContacts(DataContextFactory factory)
+    {
+        return async query =>
+        {
+            await using var db = factory.CreateDbContext();
+            return (await db.Contacts
+                    .Where(e => e.FirstName.Contains(query) || e.LastName.Contains(query))
+                    .Select(e => new { e.Id, Name = e.FirstName + " " + e.LastName })
+                    .Take(50)
+                    .ToArrayAsync())
+                .Select(e => new Option<Guid?>(e.Name, e.Id))
+                .ToArray();
+        };
+    }
+
+    private static AsyncSelectLookupDelegate<Guid?> LookupContact(DataContextFactory factory)
+    {
+        return async id =>
+        {
+            if (id == null) return null;
+            await using var db = factory.CreateDbContext();
+            var contact = await db.Contacts.FirstOrDefaultAsync(e => e.Id == id);
+            if (contact == null) return null;
+            return new Option<Guid?>(contact.FirstName + " " + contact.LastName, contact.Id);
+        };
+    }
+}
