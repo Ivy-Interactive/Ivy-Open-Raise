@@ -5,29 +5,51 @@ namespace Ivy.Open.Raise.Deploy.Apps;
 [App(icon: Icons.Rocket, title: "Deploy Open-Raise")]
 public class DeployApp : ViewBase
 {
-    public record DeploymentModel(
-        string ProjectName,
-        string ServerLocation,
-        string ServerType,
-        string LlmEndpoint,
-        string LlmApiKey,
-        string? EmailHost,
-        string? EmailUser,
-        string? EmailPassword
-    );
+    public class DeploymentModel
+    {
+        [Required(ErrorMessage = "Project name is required")]
+        [MinLength(3, ErrorMessage = "Project name must be at least 3 characters")]
+        [MaxLength(50, ErrorMessage = "Project name cannot exceed 50 characters")]
+        [RegularExpression(@"^[a-zA-Z0-9-_]+$", ErrorMessage = "Project name can only contain letters, numbers, hyphens, and underscores")]
+        public string ProjectName { get; set; } = "";
+
+        [Required(ErrorMessage = "Server location is required")]
+        public string ServerLocation { get; set; } = "";
+
+        [Required(ErrorMessage = "Server type is required")]
+        public string ServerType { get; set; } = "";
+
+        [Required(ErrorMessage = "LLM endpoint is required")]
+        [Url(ErrorMessage = "LLM endpoint must be a valid URL")]
+        public string LlmEndpoint { get; set; } = "";
+
+        [Required(ErrorMessage = "LLM API key is required")]
+        [MinLength(10, ErrorMessage = "API key must be at least 10 characters")]
+        public string LlmApiKey { get; set; } = "";
+
+        [Url(ErrorMessage = "Email host must be a valid URL")]
+        public string? EmailHost { get; set; }
+
+        [EmailAddress(ErrorMessage = "Email user must be a valid email address")]
+        public string? EmailUser { get; set; }
+
+        [MinLength(6, ErrorMessage = "Email password must be at least 6 characters")]
+        public string? EmailPassword { get; set; }
+    }
 
     public override object? Build()
     {
-        var deployment = UseState(() => new DeploymentModel(
-            "open-raise",
-            "Frankfurt",
-            "2 vCPU (Shared) 9€/month",
-            "",
-            "",
-            null,
-            null,
-            null
-        ));
+        var deployment = UseState(() => new DeploymentModel
+        {
+            ProjectName = "open-raise",
+            ServerLocation = "Frankfurt",
+            ServerType = "2 vCPU (Shared) 9€/month",
+            LlmEndpoint = "",
+            LlmApiKey = "",
+            EmailHost = null,
+            EmailUser = null,
+            EmailPassword = null
+        });
 
         var client = UseService<IClientProvider>();
 
@@ -65,8 +87,6 @@ public class DeployApp : ViewBase
                 Layout.Vertical().Gap(8).Padding(4)
                 | Text.H2("Deploy Open-Raise To Sliplane")
                 | Text.Block("Configure your new deployment")
-
-                // Single comprehensive form with grouping
                 | deployment.ToForm("Create Account")
                     .Group("Project Details", m => m.ProjectName, m => m.ServerLocation, m => m.ServerType)
                     .Group("LLM Provider", m => m.LlmEndpoint, m => m.LlmApiKey)
@@ -83,7 +103,7 @@ public class DeployApp : ViewBase
                     .Label(m => m.EmailHost, "Host")
                     .Label(m => m.EmailUser, "User")
                     .Label(m => m.EmailPassword, "Password")
-                    .Required(m => m.ProjectName, m => m.ServerLocation, m => m.ServerType, m => m.LlmEndpoint, m => m.LlmApiKey)
+                    // Required fields are automatically detected from DataAnnotations
             )
             .Width(Size.Units(120).Max(600));
     }
