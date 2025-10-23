@@ -1,7 +1,5 @@
-@use "../../styles/colors.scss" as colors;
-
 .hero {
-  background-color: colors.$color-bg-hero;
+  background-color: var(--color-bg-hero);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -39,7 +37,7 @@
 }
 
 .byText {
-  color: colors.$color-text-white;
+  color: var(--color-text-white);
   font-family: "Inter", sans-serif;
   font-size: 28px;
   font-weight: 500;
@@ -48,7 +46,7 @@
 }
 
 .brandName {
-  color: colors.$color-text-white;
+  color: var(--color-text-white);
   font-family: "Inter", sans-serif;
   font-size: 32px;
   font-weight: 700;
@@ -109,7 +107,7 @@
 }
 
 .heroTitle {
-  color: colors.$color-text-white;
+  color: var(--color-text-white);
   font-family: "Inter", sans-serif;
   font-size: 65px;
   font-weight: 700;
@@ -130,7 +128,7 @@
 }
 
 .description {
-  color: colors.$color-text-white;
+  color: var(--color-text-white);
   font-family: "Inter", sans-serif;
   font-size: 18px;
   font-weight: 400;
@@ -191,7 +189,7 @@
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 6px;
   padding: 4px;
-  color: colors.$color-text-white;
+  color: var(--color-text-white);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -247,8 +245,8 @@
 }
 
 .primaryButton {
-  background-color: colors.$color-bg-light-gray;
-  color: colors.$color-text-dark;
+  background-color: var(--color-bg-light-gray);
+  color: var(--color-text-dark);
   border-radius: 8px;
   padding: 8px 16px;
   min-height: 36px;
@@ -266,7 +264,7 @@
   flex: 1;
 
   &:hover {
-    background-color: colors.$color-bg-light-gray-hover;
+    background-color: var(--color-bg-light-gray-hover);
   }
 
   svg {
@@ -277,7 +275,7 @@
 
 .secondaryButton {
   background-color: transparent;
-  color: colors.$color-text-white;
+  color: var(--color-text-white);
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 8px;
   padding: 8px 16px;
@@ -303,6 +301,6 @@
 .compatibilityText {
   font-size: 12px;
   font-weight: 400;
-  color: colors.$color-gray-500;
+  color: var(--color-gray-500);
   text-align: left;
 }

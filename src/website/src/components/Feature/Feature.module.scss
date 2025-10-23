@@ -1,7 +1,5 @@
-@use "../../styles/colors.scss" as colors;
-
 .feature {
-  background-color: colors.$color-bg-hero;
+  background-color: var(--color-bg-hero);
   padding: 80px 200px;
 
   @media (max-width: 1440px) {
@@ -29,7 +27,7 @@
 }
 
 .sectionTitle {
-  color: colors.$color-text-white;
+  color: var(--color-text-white);
   font-family: "Inter", sans-serif;
   font-size: 48px;
   font-weight: 700;
@@ -44,7 +42,7 @@
 }
 
 .sectionSubtitle {
-  color: colors.$color-gray-400;
+  color: var(--color-gray-400);
   font-family: "Inter", sans-serif;
   font-size: 18px;
   font-weight: 400;
@@ -91,7 +89,7 @@
 .iconWrapper {
   width: 80px;
   height: 80px;
-  background: colors.$color-primary-teal;
+  background: var(--color-primary-teal);
   border-radius: 16px;
   display: flex;
   align-items: center;
@@ -104,13 +102,13 @@
     position: absolute;
     inset: 0;
     border-radius: 16px;
-    background: colors.$color-primary-teal;
+    background: var(--color-primary-teal);
     opacity: 0.2;
     filter: blur(20px);
   }
 
   svg {
-    color: colors.$color-bg-hero;
+    color: var(--color-bg-hero);
     position: relative;
     z-index: 1;
   }

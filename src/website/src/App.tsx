@@ -1,5 +1,6 @@
 import Hero from "./components/Hero/Hero";
 import Feature from "./components/Feature/Feature";
+import Footer from "./components/Footer/Footer";
 
 import "./App.css";
 
@@ -20,6 +21,13 @@ function App() {
         ctaMediaAlt="Success Story"
       />
       <Feature />
+      <Footer
+        socialLinks={{
+          twitter: "https://twitter.com/openraise",
+          linkedin: "https://linkedin.com/company/openraise",
+          github: "https://github.com/openraise",
+        }}
+      />
     </div>
   );
 }
