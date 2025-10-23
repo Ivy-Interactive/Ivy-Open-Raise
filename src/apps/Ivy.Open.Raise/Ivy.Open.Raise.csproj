@@ -18,6 +18,7 @@
   
   <ItemGroup>
     <PackageReference Include="Ivy" Version="1.0.125.0" />
+    <PackageReference Include="MailKit" Version="4.14.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.10" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.10">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -25,10 +26,11 @@
     </PackageReference>
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
   </ItemGroup>
-  
 
+  
+  
   <ItemGroup>
-    <Folder Include="Connections" />
+    <Folder Include="Services\" />
   </ItemGroup>
 
 </Project>
