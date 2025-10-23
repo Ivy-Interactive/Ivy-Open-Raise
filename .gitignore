@@ -411,8 +411,3 @@ out/
 
 # MACOS
 .DS_Store
-
-# Website
-src/website/node_modules/
-src/website/dist/
-src/website/build/
