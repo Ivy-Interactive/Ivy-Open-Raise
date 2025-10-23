@@ -37,13 +37,7 @@ public class DealsPipelineApp : ViewBase
             // Handle create deal logic here
         }).Outline().Tooltip("Create Deal").ToTrigger((isOpen) => new DealCreateDialog(isOpen, refreshToken));
 
-        return Layout.Vertical(
-            Layout.Horizontal(
-                Text.H3("Deal Pipeline"),
-                createBtn
-            ),
-            
-            deals.Value
+        return deals.Value
                 .ToKanban(
                     groupBySelector: deal => deal.DealStateName,
                     idSelector: deal => deal.Id.ToString(),
@@ -68,9 +62,9 @@ public class DealsPipelineApp : ViewBase
                         Priority = 1,
                         OwnerName = "Current User"
                     };
-                    
+
                     deals.Set(deals.Value.Append(newDeal).ToArray());
-                    
+
                     // Here you would typically save to database
                     // For now, we'll just update the local state
                 })
@@ -97,7 +91,7 @@ public class DealsPipelineApp : ViewBase
                     ).ToArray();
 
                     deals.Set(updatedDeals);
-                    
+
                     // Here you would typically save the updated deal to database
                 })
                 .HandleDelete(cardId =>
@@ -107,15 +101,14 @@ public class DealsPipelineApp : ViewBase
 
                     var updatedDeals = deals.Value.Where(deal => deal.Id.ToString() != dealId).ToArray();
                     deals.Set(updatedDeals);
-                    
+
                     // Here you would typically delete from database
                 })
                 .Empty(
                     new Card()
                         .Title("No Deals")
                         .Description("Create your first deal to get started")
-                )
-        );
+                );
     }
 
     private async Task<DealRecord[]> FetchDeals(DataContextFactory factory)
