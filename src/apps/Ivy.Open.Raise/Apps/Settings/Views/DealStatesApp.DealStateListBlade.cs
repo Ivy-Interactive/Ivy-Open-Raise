@@ -2,7 +2,7 @@ namespace Ivy.Open.Raise.Apps.Settings.Views;
 
 public class DealStateListBlade : ViewBase
 {
-    private record DealStateListRecord(int Id, string Name);
+    private record DealStateListRecord(int Id, string Name, int Order);
 
     public override object? Build()
     {
@@ -26,7 +26,7 @@ public class DealStateListBlade : ViewBase
         });
 
         ListItem CreateItem(DealStateListRecord record) =>
-            new(title: record.Name, subtitle: null, onClick: onItemClicked, tag: record);
+            new(title: record.Name, subtitle: record.Order.ToString(), onClick: onItemClicked, tag: record);
 
         var createBtn = Icons.Plus.ToButton(_ =>
         {
@@ -57,9 +57,9 @@ public class DealStateListBlade : ViewBase
         }
 
         return await linq
-            .OrderBy(e => e.Name)
+            .OrderBy(e => e.Order)
             .Take(50)
-            .Select(e => new DealStateListRecord(e.Id, e.Name))
+            .Select(e => new DealStateListRecord(e.Id, e.Name, e.Order))
             .ToArrayAsync();
     }
 }

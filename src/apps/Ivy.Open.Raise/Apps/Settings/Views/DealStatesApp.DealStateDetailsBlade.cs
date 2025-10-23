@@ -50,6 +50,7 @@ public class DealStateDetailsBlade(int dealStateId) : ViewBase
             content: new
             {
                 dealStateValue.Name,
+                dealStateValue.Order,
                 Deals = dealCount
             }.ToDetails(),
             footer: Layout.Horizontal().Width(Size.Full()).Gap(1).Align(Align.Right)

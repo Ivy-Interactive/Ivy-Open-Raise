@@ -15,6 +15,9 @@ public partial class DealState
 
     [Column("name")]
     public string Name { get; set; } = null!;
+    
+    [Column("order")]
+    public int Order { get; set; }
 
     [InverseProperty("DealState")]
     public virtual ICollection<Deal> Deals { get; set; } = new List<Deal>();
