@@ -2,7 +2,6 @@ using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
-
 namespace Ivy.Open.Raise.Connections.Data;
 
 public class DataContextFactory(ServerArgs args) : IDbContextFactory<DataContext>

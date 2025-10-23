@@ -22,7 +22,6 @@ public class DealEditSheet(IState<bool> isOpen, RefreshToken refreshToken, Guid 
             .Builder(e => e.AmountTo, e => e.ToMoneyInput().Currency("USD"))
             .Builder(e => e.Priority, e => e.ToFeedbackInput())
             .Builder(e => e.Notes, e => e.ToTextAreaInput())
-            .Builder(e => e.NextAction, e => e.ToTextAreaInput())
             .Builder(e => e.NextActionNotes, e => e.ToTextAreaInput())
             .Remove(e => e.Id, e => e.CreatedAt, e => e.UpdatedAt, e => e.DeletedAt)
             .ToSheet(isOpen, "Edit Deal");

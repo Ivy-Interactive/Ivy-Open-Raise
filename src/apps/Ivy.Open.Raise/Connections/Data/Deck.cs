@@ -25,12 +25,6 @@ public partial class Deck
     [Column("file_name")]
     public string FileName { get; set; } = null!;
 
-    [Column("storage_write_url")]
-    public string StorageWriteUrl { get; set; } = null!;
-
-    [Column("storage_read_url")]
-    public string StorageReadUrl { get; set; } = null!;
-
     [Column("created_at")]
     public DateTime CreatedAt { get; set; }
 
