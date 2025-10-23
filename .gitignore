@@ -411,3 +411,6 @@ out/
 
 # MACOS
 .DS_Store
+
+# Website
+src/website/dist/
