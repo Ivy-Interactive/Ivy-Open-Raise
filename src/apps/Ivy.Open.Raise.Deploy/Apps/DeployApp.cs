@@ -1,5 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-
 namespace Ivy.Open.Raise.Deploy.Apps;
 
 [App(icon: Icons.Rocket, title: "Deploy Open-Raise")]
@@ -7,57 +5,190 @@ public class DeployApp : ViewBase
 {
     public class DeploymentModel
     {
-        [Required(ErrorMessage = "Project name is required")]
-        [MinLength(3, ErrorMessage = "Project name must be at least 3 characters")]
-        [MaxLength(50, ErrorMessage = "Project name cannot exceed 50 characters")]
-        [RegularExpression(@"^[a-zA-Z0-9-_]+$", ErrorMessage = "Project name can only contain letters, numbers, hyphens, and underscores")]
-        public string ProjectName { get; set; } = "";
-
-        [Required(ErrorMessage = "Server location is required")]
-        public string ServerLocation { get; set; } = "";
-
-        [Required(ErrorMessage = "Server type is required")]
-        public string ServerType { get; set; } = "";
-
-        [Required(ErrorMessage = "LLM endpoint is required")]
-        [Url(ErrorMessage = "LLM endpoint must be a valid URL")]
+        public string ProjectName { get; set; } = "open-raise";
+        public string ServerLocation { get; set; } = "Frankfurt";
+        public string ServerType { get; set; } = "2 vCPU (Shared) 9€/month";
         public string LlmEndpoint { get; set; } = "";
-
-        [Required(ErrorMessage = "LLM API key is required")]
-        [MinLength(10, ErrorMessage = "API key must be at least 10 characters")]
         public string LlmApiKey { get; set; } = "";
-
         public string? EmailHost { get; set; }
-
         public string? EmailUser { get; set; }
-
-        [MinLength(6, ErrorMessage = "Email password must be at least 6 characters")]
         public string? EmailPassword { get; set; }
     }
 
     public override object? Build()
     {
-        // Individual state variables for each field
-        var projectName = UseState("open-raise");
-        var serverLocation = UseState("Frankfurt");
-        var serverType = UseState("2 vCPU (Shared) 9€/month");
-        var llmEndpoint = UseState("");
-        var llmApiKey = UseState("");
-        var emailHost = UseState("");
-        var emailUser = UseState("");
-        var emailPassword = UseState("");
+        // Single model state
+        var deployment = UseState(() => new DeploymentModel());
+
+        // Individual field states for form binding
+        var projectName = UseState(() => deployment.Value.ProjectName);
+        var serverLocation = UseState(() => deployment.Value.ServerLocation);
+        var serverType = UseState(() => deployment.Value.ServerType);
+        var llmEndpoint = UseState(() => deployment.Value.LlmEndpoint);
+        var llmApiKey = UseState(() => deployment.Value.LlmApiKey);
+        var emailHost = UseState(() => deployment.Value.EmailHost ?? "");
+        var emailUser = UseState(() => deployment.Value.EmailUser ?? "");
+        var emailPassword = UseState(() => deployment.Value.EmailPassword ?? "");
+
+        // Sync individual states with model
+        UseEffect(() =>
+        {
+            deployment.Set(new DeploymentModel
+            {
+                ProjectName = projectName.Value,
+                ServerLocation = serverLocation.Value,
+                ServerType = serverType.Value,
+                LlmEndpoint = llmEndpoint.Value,
+                LlmApiKey = llmApiKey.Value,
+                EmailHost = string.IsNullOrEmpty(emailHost.Value) ? null : emailHost.Value,
+                EmailUser = string.IsNullOrEmpty(emailUser.Value) ? null : emailUser.Value,
+                EmailPassword = string.IsNullOrEmpty(emailPassword.Value) ? null : emailPassword.Value
+            });
+        }, projectName, serverLocation, serverType, llmEndpoint, llmApiKey, emailHost, emailUser, emailPassword);
+
+        // Form validation state
+        var formErrors = UseState<Dictionary<string, string>>(() => []);
+        var isSubmitting = UseState(false);
+
+        // Validate fields when they change (for real-time validation)
+        UseEffect(() => ValidateField("projectName"), projectName);
+        UseEffect(() => ValidateField("serverLocation"), serverLocation);
+        UseEffect(() => ValidateField("serverType"), serverType);
+        UseEffect(() => ValidateField("llmEndpoint"), llmEndpoint);
+        UseEffect(() => ValidateField("llmApiKey"), llmApiKey);
+        UseEffect(() => ValidateField("emailPassword"), emailPassword);
 
         var client = UseService<IClientProvider>();
 
-        // Handle form submission
-        UseEffect(() =>
+        // Validation function
+        bool ValidateForm()
         {
-            if (!string.IsNullOrEmpty(llmEndpoint.Value) &&
-                !string.IsNullOrEmpty(llmApiKey.Value))
+            var errors = new Dictionary<string, string>();
+
+            // Project name validation
+            if (string.IsNullOrWhiteSpace(deployment.Value.ProjectName))
+                errors["projectName"] = "Please enter a project name";
+            else if (deployment.Value.ProjectName.Length < 3)
+                errors["projectName"] = "Project name must be at least 3 characters long";
+            else if (deployment.Value.ProjectName.Length > 50)
+                errors["projectName"] = "Project name cannot be longer than 50 characters";
+            else if (!System.Text.RegularExpressions.Regex.IsMatch(deployment.Value.ProjectName, @"^[a-zA-Z0-9-_]+$"))
+                errors["projectName"] = "Project name can only contain letters, numbers, hyphens (-), and underscores (_)";
+
+            // Server location validation
+            if (string.IsNullOrWhiteSpace(deployment.Value.ServerLocation))
+                errors["serverLocation"] = "Please select a server location";
+
+            // Server type validation
+            if (string.IsNullOrWhiteSpace(deployment.Value.ServerType))
+                errors["serverType"] = "Please select a server type";
+
+            // LLM endpoint validation
+            if (string.IsNullOrWhiteSpace(deployment.Value.LlmEndpoint))
+                errors["llmEndpoint"] = "Please enter your LLM endpoint URL";
+            else if (!Uri.TryCreate(deployment.Value.LlmEndpoint, UriKind.Absolute, out _))
+                errors["llmEndpoint"] = "Please enter a valid URL (e.g., https://api.openai.com/v1)";
+
+            // LLM API key validation
+            if (string.IsNullOrWhiteSpace(deployment.Value.LlmApiKey))
+                errors["llmApiKey"] = "Please enter your API key";
+            else if (deployment.Value.LlmApiKey.Length < 10)
+                errors["llmApiKey"] = "API key must be at least 10 characters long";
+
+            // Email password validation (if provided)
+            if (!string.IsNullOrWhiteSpace(deployment.Value.EmailPassword) && deployment.Value.EmailPassword.Length < 6)
+                errors["emailPassword"] = "Email password must be at least 6 characters long";
+
+            formErrors.Set(errors);
+            return errors.Count == 0;
+        }
+
+        // Validate individual field
+        void ValidateField(string fieldName)
+        {
+            var errors = new Dictionary<string, string>(formErrors.Value);
+            errors.Remove(fieldName); // Remove existing error for this field
+
+            switch (fieldName)
             {
-                client.Toast($"Deployment created for {projectName.Value}!");
+                case "projectName":
+                    if (string.IsNullOrWhiteSpace(deployment.Value.ProjectName))
+                        errors["projectName"] = "Please enter a project name";
+                    else if (deployment.Value.ProjectName.Length < 3)
+                        errors["projectName"] = "Project name must be at least 3 characters long";
+                    else if (deployment.Value.ProjectName.Length > 50)
+                        errors["projectName"] = "Project name cannot be longer than 50 characters";
+                    else if (!System.Text.RegularExpressions.Regex.IsMatch(deployment.Value.ProjectName, @"^[a-zA-Z0-9-_]+$"))
+                        errors["projectName"] = "Project name can only contain letters, numbers, hyphens (-), and underscores (_)";
+                    break;
+
+                case "serverLocation":
+                    if (string.IsNullOrWhiteSpace(deployment.Value.ServerLocation))
+                        errors["serverLocation"] = "Please select a server location";
+                    break;
+
+                case "serverType":
+                    if (string.IsNullOrWhiteSpace(deployment.Value.ServerType))
+                        errors["serverType"] = "Please select a server type";
+                    break;
+
+                case "llmEndpoint":
+                    if (string.IsNullOrWhiteSpace(deployment.Value.LlmEndpoint))
+                        errors["llmEndpoint"] = "Please enter your LLM endpoint URL";
+                    else if (!Uri.TryCreate(deployment.Value.LlmEndpoint, UriKind.Absolute, out _))
+                        errors["llmEndpoint"] = "Please enter a valid URL (e.g., https://api.openai.com/v1)";
+                    break;
+
+                case "llmApiKey":
+                    if (string.IsNullOrWhiteSpace(deployment.Value.LlmApiKey))
+                        errors["llmApiKey"] = "Please enter your API key";
+                    else if (deployment.Value.LlmApiKey.Length < 10)
+                        errors["llmApiKey"] = "API key must be at least 10 characters long";
+                    break;
+
+                case "emailPassword":
+                    if (!string.IsNullOrWhiteSpace(deployment.Value.EmailPassword) && deployment.Value.EmailPassword.Length < 6)
+                        errors["emailPassword"] = "Email password must be at least 6 characters long";
+                    break;
             }
-        }, llmEndpoint, llmApiKey);
+
+            formErrors.Set(errors);
+        }
+
+        // Handle form submission
+        void HandleSubmit()
+        {
+            if (isSubmitting.Value) return;
+
+            if (!ValidateForm())
+            {
+                client.Toast("Please fix the validation errors before submitting.");
+                return;
+            }
+
+            isSubmitting.Set(true);
+
+            try
+            {
+                // Simulate form submission
+                client.Toast($"Deployment created for {projectName.Value}!");
+
+                // Reset form
+                projectName.Set("open-raise");
+                serverLocation.Set("Frankfurt");
+                serverType.Set("2 vCPU (Shared) 9€/month");
+                llmEndpoint.Set("");
+                llmApiKey.Set("");
+                emailHost.Set("");
+                emailUser.Set("");
+                emailPassword.Set("");
+                formErrors.Set(new Dictionary<string, string>());
+            }
+            finally
+            {
+                isSubmitting.Set(false);
+            }
+        }
 
         // Server location options
         var locationOptions = new[]
@@ -78,17 +209,18 @@ public class DeployApp : ViewBase
             "8 vCPU (Dedicated) 35€/month"
         }.ToOptions();
 
-        return Layout.Vertical().Gap(6).Padding(4)
+        return Layout.Vertical()
             | new Card(
-                Layout.Vertical().Gap(8).Padding(6)
+                Layout.Vertical()
                 | Text.H2("Deploy Open-Raise To Sliplane")
-                | Text.Markdown("*Configure your new deployment*")
+                | Text.Block("Configure your new deployment")
 
                 // Project Details Section
                 | Text.H3("Project Details")
                 | new Field(
                     projectName.ToTextInput()
                         .Placeholder("Enter project name")
+                        .Invalid(formErrors.Value.ContainsKey("projectName") ? formErrors.Value["projectName"] : null)
                 )
                 .Label("Project Name")
                 .Required()
@@ -96,6 +228,7 @@ public class DeployApp : ViewBase
                 | new Field(
                     serverLocation.ToSelectInput(locationOptions)
                         .Placeholder("Select server location")
+                        .Invalid(formErrors.Value.ContainsKey("serverLocation") ? formErrors.Value["serverLocation"] : null)
                 )
                 .Label("Server Location")
                 .Required()
@@ -103,6 +236,7 @@ public class DeployApp : ViewBase
                 | new Field(
                     serverType.ToSelectInput(serverOptions)
                         .Placeholder("Select server type")
+                        .Invalid(formErrors.Value.ContainsKey("serverType") ? formErrors.Value["serverType"] : null)
                 )
                 .Label("Server")
                 .Required()
@@ -128,11 +262,12 @@ public class DeployApp : ViewBase
                 | new Separator()
                 | Text.H3("Settings")
                 | Text.H4("LLM Provider")
-                | Text.Markdown("*Use an OpenAI compatible endpoint.*")
+                | Text.Block("Use an OpenAI compatible endpoint.")
 
                 | new Field(
                     llmEndpoint.ToTextInput()
                         .Placeholder("https://api.openai.com/v1")
+                        .Invalid(formErrors.Value.ContainsKey("llmEndpoint") ? formErrors.Value["llmEndpoint"] : null)
                 )
                 .Label("Endpoint")
                 .Required()
@@ -140,16 +275,14 @@ public class DeployApp : ViewBase
                 | new Field(
                     llmApiKey.ToPasswordInput()
                         .Placeholder("Enter your API key")
+                        .Invalid(formErrors.Value.ContainsKey("llmApiKey") ? formErrors.Value["llmApiKey"] : null)
                 )
                 .Label("API Key")
                 .Required()
 
-                | new Button("Validate", _ => client.Toast("LLM endpoint validated!"))
-                    .Variant(ButtonVariant.Link)
-
                 // Email Provider Section
                 | Text.H4("Email Provider (Optional)")
-                | Text.Markdown("*How can we send email. Must be SMTP compatible. We recommend [Resend](https://resend.com).*")
+                | Text.Block("How can we send email. Must be SMTP compatible. We recommend Resend.")
 
                 | new Field(
                     emailHost.ToTextInput()
@@ -166,21 +299,16 @@ public class DeployApp : ViewBase
                 | new Field(
                     emailPassword.ToPasswordInput()
                         .Placeholder("Enter email password")
+                        .Invalid(formErrors.Value.ContainsKey("emailPassword") ? formErrors.Value["emailPassword"] : null)
                 )
                 .Label("Password")
 
-                | new Button("Validate", _ => client.Toast("Email provider validated!"))
-                    .Variant(ButtonVariant.Link)
-
                 // Submit Button
                 | new Separator()
-                | new Button("Create Account >", _ =>
-                {
-                    // Form submission is handled by UseEffect
-                    client.Toast("Deployment created successfully!");
-                })
-                .Variant(ButtonVariant.Primary)
-                .Large()
+                | new Button("Create Account >", HandleSubmit)
+                    .Variant(ButtonVariant.Primary)
+                    .Large()
+                    .Disabled(isSubmitting.Value)
             )
             .Width(Size.Units(140).Max(600));
     }
