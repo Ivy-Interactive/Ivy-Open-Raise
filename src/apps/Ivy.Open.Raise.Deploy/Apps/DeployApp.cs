@@ -5,9 +5,9 @@ public class DeployApp : ViewBase
 {
     public class DeploymentModel
     {
-        public string ProjectName { get; set; } = "open-raise";
-        public string ServerLocation { get; set; } = "Frankfurt";
-        public string ServerType { get; set; } = "2 vCPU (Shared) 9€/month";
+        public string ProjectName { get; set; } = "";
+        public string ServerLocation { get; set; } = "";
+        public string ServerType { get; set; } = "";
         public string LlmEndpoint { get; set; } = "";
         public string LlmApiKey { get; set; } = "";
         public string? EmailHost { get; set; }
@@ -172,17 +172,6 @@ public class DeployApp : ViewBase
             {
                 // Simulate form submission
                 client.Toast($"Deployment created for {projectName.Value}!");
-
-                // Reset form
-                projectName.Set("open-raise");
-                serverLocation.Set("Frankfurt");
-                serverType.Set("2 vCPU (Shared) 9€/month");
-                llmEndpoint.Set("");
-                llmApiKey.Set("");
-                emailHost.Set("");
-                emailUser.Set("");
-                emailPassword.Set("");
-                formErrors.Set(new Dictionary<string, string>());
             }
             finally
             {
