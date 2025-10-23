@@ -1,0 +1,145 @@
+// ==========================================
+// Ivy Open Raise - Color System
+// ==========================================
+// Centralized color variables for consistent theming
+// All colors should be referenced from this file
+
+// ==========================================
+// Brand Colors
+// ==========================================
+$color-primary-teal: #00cc92; // Bright teal/turquoise - Logo accent
+$color-primary-dark-blue: #1e293b; // Derived from HSL(222.2 47.4% 11.2%)
+
+// ==========================================
+// Background Colors
+// ==========================================
+$color-bg-hero: #041209; // Very dark green-black - Hero section
+$color-bg-dark: #202221; // Dark charcoal gray - CTA sections
+$color-bg-white: #ffffff; // Pure white
+$color-bg-light-gray: #f5f5f5; // Light gray - Button backgrounds
+$color-bg-light-gray-hover: #e5e5e5; // Medium light gray - Button hover
+
+// ==========================================
+// Text Colors
+// ==========================================
+$color-text-white: #ffffff; // White text on dark backgrounds
+$color-text-dark: #202221; // Dark text on light backgrounds
+$color-text-foreground: #0c0f0d; // Very dark blue-gray - Derived from HSL(222.2 84% 4.9%)
+$color-text-muted: #71717a; // Medium gray - Derived from HSL(215.4 16.3% 46.9%)
+
+// ==========================================
+// Semantic Colors (Design System)
+// ==========================================
+// Primary
+$color-primary: #1e293b; // HSL(222.2 47.4% 11.2%)
+$color-primary-foreground: #f8fafc; // HSL(210 40% 98%)
+
+// Secondary
+$color-secondary: #f1f5f9; // HSL(210 40% 96.1%)
+$color-secondary-foreground: #1e293b; // HSL(222.2 47.4% 11.2%)
+
+// Accent
+$color-accent: #f1f5f9; // HSL(210 40% 96.1%)
+$color-accent-foreground: #1e293b; // HSL(222.2 47.4% 11.2%)
+
+// Destructive/Error
+$color-destructive: #ef4444; // HSL(0 84.2% 60.2%)
+$color-destructive-foreground: #f8fafc; // HSL(210 40% 98%)
+
+// Muted
+$color-muted: #f1f5f9; // HSL(210 40% 96.1%)
+$color-muted-foreground: #71717a; // HSL(215.4 16.3% 46.9%)
+
+// ==========================================
+// UI Elements
+// ==========================================
+$color-border: #e2e8f0; // HSL(214.3 31.8% 91.4%)
+$color-input: #e2e8f0; // HSL(214.3 31.8% 91.4%)
+$color-ring: #0c0f0d; // HSL(222.2 84% 4.9%) - Focus ring
+
+// ==========================================
+// State Colors
+// ==========================================
+$color-success: #10b981; // Green for success states
+$color-warning: #f59e0b; // Orange for warning states
+$color-info: #3b82f6; // Blue for informational states
+
+// ==========================================
+// Neutral Palette
+// ==========================================
+$color-gray-50: #f9fafb;
+$color-gray-100: #f3f4f6;
+$color-gray-200: #e5e7eb;
+$color-gray-300: #d1d5db;
+$color-gray-400: #9ca3af;
+$color-gray-500: #6b7280;
+$color-gray-600: #4b5563;
+$color-gray-700: #374151;
+$color-gray-800: #1f2937;
+$color-gray-900: #111827;
+
+// ==========================================
+// SCSS Mixins for Color Application
+// ==========================================
+@mixin dark-background {
+  background-color: $color-bg-dark;
+  color: $color-text-white;
+}
+
+@mixin hero-background {
+  background-color: $color-bg-hero;
+  color: $color-text-white;
+}
+
+@mixin light-button {
+  background-color: $color-bg-light-gray;
+  color: $color-text-dark;
+
+  &:hover {
+    background-color: $color-bg-light-gray-hover;
+  }
+}
+
+// ==========================================
+// Export for CSS Variables (Optional)
+// ==========================================
+:root {
+  // Brand
+  --color-primary-teal: #{$color-primary-teal};
+  --color-primary-dark-blue: #{$color-primary-dark-blue};
+
+  // Backgrounds
+  --color-bg-hero: #{$color-bg-hero};
+  --color-bg-dark: #{$color-bg-dark};
+  --color-bg-white: #{$color-bg-white};
+  --color-bg-light-gray: #{$color-bg-light-gray};
+  --color-bg-light-gray-hover: #{$color-bg-light-gray-hover};
+
+  // Text
+  --color-text-white: #{$color-text-white};
+  --color-text-dark: #{$color-text-dark};
+  --color-text-foreground: #{$color-text-foreground};
+  --color-text-muted: #{$color-text-muted};
+
+  // Semantic
+  --color-primary: #{$color-primary};
+  --color-primary-foreground: #{$color-primary-foreground};
+  --color-secondary: #{$color-secondary};
+  --color-secondary-foreground: #{$color-secondary-foreground};
+  --color-accent: #{$color-accent};
+  --color-accent-foreground: #{$color-accent-foreground};
+  --color-destructive: #{$color-destructive};
+  --color-destructive-foreground: #{$color-destructive-foreground};
+  --color-muted: #{$color-muted};
+  --color-muted-foreground: #{$color-muted-foreground};
+
+  // UI Elements
+  --color-border: #{$color-border};
+  --color-input: #{$color-input};
+  --color-ring: #{$color-ring};
+
+  // State Colors
+  --color-success: #{$color-success};
+  --color-warning: #{$color-warning};
+  --color-info: #{$color-info};
+}

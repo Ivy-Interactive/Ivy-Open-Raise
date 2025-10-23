@@ -11,7 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ivy.Open.Raise", "src\apps\
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Ivy.Open.Raise.Deploy", "Ivy.Open.Raise.Deploy", "{41B05405-1480-4660-9275-EEB261BE3785}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ivy.Open.Raise.Deploy", "src\apps\Ivy.Open.Raise.Deploy\Ivy.Open.Raise.Deploy\Ivy.Open.Raise.Deploy.csproj", "{3DF1DAF9-43D9-45C6-8446-4A1F0288B1AA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ivy.Open.Raise.Deploy", "src\apps\Ivy.Open.Raise.Deploy\Ivy.Open.Raise.Deploy.csproj", "{3DF1DAF9-43D9-45C6-8446-4A1F0288B1AA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
