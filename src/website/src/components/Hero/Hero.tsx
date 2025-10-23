@@ -1,12 +1,14 @@
 import React from "react";
 import styles from "./Hero.module.scss";
-import { Search } from "lucide-react";
+import Card from "../Card/Card";
+import { SquareArrowOutUpRight } from "lucide-react";
 import { Button } from "../ui/button";
 import logoSvg from "@/assets/logo/open-raise-logo-white.svg";
 
 interface HeroProps {
   title?: string;
   description?: string;
+  h2Title?: string;
   smallTitle?: string;
   ctaText?: string;
   onCtaClick?: () => void;
@@ -15,6 +17,7 @@ interface HeroProps {
 const Hero: React.FC<HeroProps> = ({
   title = "Hero title",
   description = "Description",
+  h2Title = "Success Stories",
   smallTitle = "Small title",
   ctaText = "Search",
   onCtaClick,
@@ -30,18 +33,21 @@ const Hero: React.FC<HeroProps> = ({
           <h1 className={styles.heroTitle}>{title}</h1>
           <p className={styles.description}>{description}</p>
 
-          <div className={styles.ctaSection}>
-            <p className={styles.smallTitle}>{smallTitle}</p>
+          <Card variant="cta" padding="medium" className={styles.ctaSection}>
+            <div className={styles.h2TitleContainer}>
+              <h2 className={styles.h2Title}>{h2Title}</h2>
+              <p className={styles.smallTitle}>{smallTitle}</p>
+            </div>
             <Button
-              variant="secondary"
+              variant="default"
               size="default"
               className={styles.searchButton}
               onClick={onCtaClick}
             >
-              <Search />
+              <SquareArrowOutUpRight />
               {ctaText}
             </Button>
-          </div>
+          </Card>
         </div>
       </div>
     </div>
