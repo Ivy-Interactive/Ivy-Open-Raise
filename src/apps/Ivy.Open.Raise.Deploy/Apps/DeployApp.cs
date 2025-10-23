@@ -113,18 +113,18 @@ public class DeployApp : ViewBase
                 // Services Section
                 | new Separator()
                 | Text.H3("Services Included in This Deployment")
-                | Layout.Horizontal().Gap(8).Align(Align.Center)
-                    | Layout.Vertical().Align(Align.Center)
+                | (Layout.Horizontal().Gap(8).Align(Align.Center)
+                    | (Layout.Vertical().Align(Align.Center)
                         | new Icon(Icons.Container, Colors.Blue)
-                        | Text.Small("Open-Raise Container")
-                    | Layout.Vertical().Align(Align.Center)
+                        | Text.Small("Open-Raise Container"))
+                    | (Layout.Vertical().Align(Align.Center)
                         | new Icon(Icons.Database, Colors.Gray)
-                        | Text.Small("Postgres Database")
-                    | Layout.Vertical().Align(Align.Center)
+                        | Text.Small("Postgres Database"))
+                    | (Layout.Vertical().Align(Align.Center)
                         | new Icon(Icons.Circle, Colors.Red)
-                        | Text.Small("Redis")
+                        | Text.Small("Redis")))
 
-                // LLM Provider Section
+                // LLM Provider Section 
                 | new Separator()
                 | Text.H3("Settings")
                 | Text.H4("LLM Provider")
@@ -182,6 +182,6 @@ public class DeployApp : ViewBase
                 .Variant(ButtonVariant.Primary)
                 .Large()
             )
-            .Width(Size.Units(120).Max(600));
+            .Width(Size.Units(140).Max(600));
     }
 }
