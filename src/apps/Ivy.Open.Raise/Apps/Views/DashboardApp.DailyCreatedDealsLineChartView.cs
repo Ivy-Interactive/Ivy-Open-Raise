@@ -1,7 +1,3 @@
-/*
-Tracks the number of deals created each day.
-SELECT DATE(CreatedAt) AS Date, COUNT(*) AS DealCount FROM Deal WHERE CreatedAt BETWEEN @StartDate AND @EndDate GROUP BY DATE(CreatedAt) ORDER BY DATE(CreatedAt)
-*/
 namespace Ivy.Open.Raise.Apps.Views;
 
 public class DailyCreatedDealsLineChartView(DateTime startDate, DateTime endDate) : ViewBase

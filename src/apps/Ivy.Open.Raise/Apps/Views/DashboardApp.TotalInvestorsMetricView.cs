@@ -1,7 +1,3 @@
-/*
-The total number of investors recorded in the database.
-SELECT COUNT(*) FROM Investor
-*/
 namespace Ivy.Open.Raise.Apps.Views;
 
 public class TotalInvestorsMetricView(DateTime fromDate, DateTime toDate) : ViewBase

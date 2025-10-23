@@ -1,7 +1,3 @@
-/*
-The number of contacts with interactions within the selected date range.
-SELECT COUNT(DISTINCT ContactId) FROM Interaction WHERE OccurredAt BETWEEN StartDate AND EndDate
-*/
 namespace Ivy.Open.Raise.Apps.Views;
 
 public class ActiveContactsMetricView(DateTime fromDate, DateTime toDate) : ViewBase

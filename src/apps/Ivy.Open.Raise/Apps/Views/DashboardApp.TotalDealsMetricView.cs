@@ -1,7 +1,3 @@
-/*
-The total number of deals created within the selected date range.
-SELECT COUNT(*) FROM Deal WHERE CreatedAt BETWEEN StartDate AND EndDate
-*/
 namespace Ivy.Open.Raise.Apps.Views;
 
 public class TotalDealsMetricView(DateTime fromDate, DateTime toDate) : ViewBase

@@ -1,7 +1,3 @@
-/*
-The total number of interactions recorded within the selected date range.
-SELECT COUNT(*) FROM Interaction WHERE OccurredAt BETWEEN StartDate AND EndDate
-*/
 namespace Ivy.Open.Raise.Apps.Views;
 
 public class TotalInteractionsMetricView(DateTime fromDate, DateTime toDate) : ViewBase

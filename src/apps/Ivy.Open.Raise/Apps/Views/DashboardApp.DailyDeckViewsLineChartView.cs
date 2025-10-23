@@ -1,7 +1,3 @@
-/*
-Tracks the number of views on deck links each day.
-SELECT DATE(ViewedAt) AS Date, COUNT(*) AS ViewCount FROM DeckLinkView WHERE ViewedAt BETWEEN @StartDate AND @EndDate GROUP BY DATE(ViewedAt) ORDER BY DATE(ViewedAt)
-*/
 namespace Ivy.Open.Raise.Apps.Views;
 
 public class DailyDeckViewsLineChartView(DateTime startDate, DateTime endDate) : ViewBase

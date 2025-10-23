@@ -1,7 +1,3 @@
-/*
-Shows the distribution of deals across different states.
-SELECT DealState.Name AS State, COUNT(Deal.Id) AS DealCount FROM Deal INNER JOIN DealState ON Deal.DealStateId = DealState.Id WHERE Deal.CreatedAt BETWEEN @StartDate AND @EndDate GROUP BY DealState.Name
-*/
 namespace Ivy.Open.Raise.Apps.Views;
 
 public class DealsByStatePieChartView(DateTime fromDate, DateTime toDate) : ViewBase

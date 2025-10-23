@@ -1,7 +1,3 @@
-/*
-Displays the distribution of investors by type.
-SELECT InvestorType.Name AS Type, COUNT(Investor.Id) AS InvestorCount FROM Investor INNER JOIN InvestorType ON Investor.InvestorTypeId = InvestorType.Id WHERE Investor.CreatedAt BETWEEN @StartDate AND @EndDate GROUP BY InvestorType.Name
-*/
 namespace Ivy.Open.Raise.Apps.Views;
 
 public class InvestorTypesDistributionPieChartView(DateTime fromDate, DateTime toDate) : ViewBase
@@ -9,8 +5,8 @@ public class InvestorTypesDistributionPieChartView(DateTime fromDate, DateTime t
     public override object? Build()
     {
         var factory = UseService<DataContextFactory>();
-        var chart = UseState<object?>((object?)null!);
-        var exception = UseState<Exception?>((Exception?)null!);
+        var chart = UseState<object?>();
+        var exception = UseState<Exception?>();
 
         this.UseEffect(async () =>
         {

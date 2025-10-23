@@ -1,7 +1,3 @@
-/*
-The number of deals currently in progress based on their state.
-SELECT COUNT(*) FROM Deal WHERE DealState.Name = 'In Progress' AND CreatedAt BETWEEN StartDate AND EndDate
-*/
 namespace Ivy.Open.Raise.Apps.Views;
 
 public class DealsInProgressMetricView(DateTime fromDate, DateTime toDate) : ViewBase

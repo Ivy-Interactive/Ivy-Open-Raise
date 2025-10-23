@@ -1,7 +1,3 @@
-/*
-The total number of views recorded for all deck links within the selected date range.
-SELECT COUNT(*) FROM DeckLinkView WHERE ViewedAt BETWEEN StartDate AND EndDate
-*/
 namespace Ivy.Open.Raise.Apps.Views;
 
 public class TotalDeckViewsMetricView(DateTime fromDate, DateTime toDate) : ViewBase

@@ -1,7 +1,3 @@
-/*
-Tracks the number of interactions logged each day.
-SELECT DATE(OccurredAt) AS Date, COUNT(*) AS InteractionCount FROM Interaction WHERE OccurredAt BETWEEN @StartDate AND @EndDate GROUP BY DATE(OccurredAt) ORDER BY DATE(OccurredAt)
-*/
 namespace Ivy.Open.Raise.Apps.Views;
 
 public class DailyInteractionsLineChartView(DateTime startDate, DateTime endDate) : ViewBase

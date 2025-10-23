@@ -1,7 +1,3 @@
-/*
-The total number of deck links created within the selected date range, representing the core value delivered to customers.
-SELECT COUNT(*) FROM DeckLink WHERE CreatedAt BETWEEN StartDate AND EndDate
-*/
 namespace Ivy.Open.Raise.Apps.Views;
 
 public class TotalDeckLinksCreatedMetricView(DateTime fromDate, DateTime toDate) : ViewBase

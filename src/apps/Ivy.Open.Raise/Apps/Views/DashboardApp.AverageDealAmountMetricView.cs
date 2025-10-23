@@ -1,7 +1,3 @@
-/*
-The average amount of deals created within the selected date range.
-SELECT AVG((AmountFrom + AmountTo) / 2) FROM Deal WHERE CreatedAt BETWEEN StartDate AND EndDate
-*/
 namespace Ivy.Open.Raise.Apps.Views;
 
 public class AverageDealAmountMetricView(DateTime fromDate, DateTime toDate) : ViewBase

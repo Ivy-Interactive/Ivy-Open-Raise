@@ -1,7 +1,3 @@
-/*
-Shows the distribution of interactions by type.
-SELECT InteractionType.Name AS Type, COUNT(Interaction.Id) AS InteractionCount FROM Interaction INNER JOIN InteractionType ON Interaction.InteractionType = InteractionType.Id WHERE Interaction.OccurredAt BETWEEN @StartDate AND @EndDate GROUP BY InteractionType.Name
-*/
 namespace Ivy.Open.Raise.Apps.Views;
 
 public class InteractionsByTypePieChartView(DateTime fromDate, DateTime toDate) : ViewBase
