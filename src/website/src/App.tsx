@@ -1,4 +1,5 @@
 import Hero from "./components/Hero/Hero";
+import "./App.css";
 
 function App() {
   const handleCtaClick = () => {
@@ -7,7 +8,7 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="App">
       <Hero
         title="Raise Capital with Confidence"
         description="Connect with top-tier venture capital firms and accelerate your startup's growth. Our platform streamlines the fundraising process from pitch to close."
