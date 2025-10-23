@@ -19,9 +19,6 @@ public class InvestorContactsEditSheet(IState<bool> isOpen, RefreshToken refresh
         return contact
             .ToForm()
             .Builder(e => e.Email, e => e.ToEmailInput())
-            .Builder(e => e.FirstName, e => e.ToTextAreaInput())
-            .Builder(e => e.LastName, e => e.ToTextAreaInput())
-            .Builder(e => e.Title, e => e.ToTextAreaInput())
             .Builder(e => e.LinkedinUrl, e => e.ToUrlInput())
             .Builder(e => e.XUrl, e => e.ToUrlInput())
             .Place(e => e.FirstName, e => e.LastName)

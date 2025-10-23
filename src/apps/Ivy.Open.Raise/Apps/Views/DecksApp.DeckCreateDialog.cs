@@ -17,12 +17,6 @@ public class DeckCreateDialog(IState<bool> isOpen, RefreshToken refreshToken) : 
         public string FileName { get; init; } = "";
 
         [Required]
-        public string StorageWriteUrl { get; init; } = "";
-
-        [Required]
-        public string StorageReadUrl { get; init; } = "";
-
-        [Required]
         public bool IsPrimary { get; init; } = false;
     }
 
@@ -53,8 +47,6 @@ public class DeckCreateDialog(IState<bool> isOpen, RefreshToken refreshToken) : 
             FileSize = request.FileSize!.Value,
             FileType = request.FileType,
             FileName = request.FileName,
-            StorageWriteUrl = request.StorageWriteUrl,
-            StorageReadUrl = request.StorageReadUrl,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
             IsPrimary = request.IsPrimary
