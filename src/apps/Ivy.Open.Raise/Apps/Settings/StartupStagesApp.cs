@@ -2,7 +2,7 @@ using Ivy.Open.Raise.Apps.Settings.Views;
 
 namespace Ivy.Open.Raise.Apps.Settings;
 
-[App(icon: Icons.Milestone)]
+[App(icon: Icons.Milestone, path:["Apps", "Settings"])]
 public class StartupStagesApp : ViewBase
 {
     public override object? Build()

@@ -2,7 +2,7 @@ using Ivy.Open.Raise.Apps.Settings.Views;
 
 namespace Ivy.Open.Raise.Apps.Settings;
 
-[App(icon: Icons.Database)]
+[App(icon: Icons.Database, path:["Apps", "Settings"])]
 public class DealStatesApp : ViewBase
 {
     public override object? Build()
