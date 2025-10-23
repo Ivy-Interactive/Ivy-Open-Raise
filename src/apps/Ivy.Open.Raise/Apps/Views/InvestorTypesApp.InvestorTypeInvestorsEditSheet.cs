@@ -6,22 +6,14 @@ public class InvestorTypeInvestorsEditSheet(IState<bool> isOpen, RefreshToken re
     {
         var factory = UseService<DataContextFactory>();
         var investor = UseState(() => factory.CreateDbContext().Investors.FirstOrDefault(e => e.Id == investorId)!);
-        var client = UseService<IClientProvider>();
 
         UseEffect(() =>
         {
-            try
-            {
-                using var db = factory.CreateDbContext();
-                investor.Value.UpdatedAt = DateTime.UtcNow;
-                db.Investors.Update(investor.Value);
-                db.SaveChanges();
-                refreshToken.Refresh();
-            }
-            catch (Exception ex)
-            {
-                client.Toast(ex);
-            }
+            using var db = factory.CreateDbContext();
+            investor.Value.UpdatedAt = DateTime.UtcNow;
+            db.Investors.Update(investor.Value);
+            db.SaveChanges();
+            refreshToken.Refresh();
         }, [investor]);
 
         return investor

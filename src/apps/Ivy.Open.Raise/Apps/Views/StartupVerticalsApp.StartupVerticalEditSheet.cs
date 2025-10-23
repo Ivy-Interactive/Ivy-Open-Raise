@@ -6,21 +6,13 @@ public class StartupVerticalEditSheet(IState<bool> isOpen, RefreshToken refreshT
     {
         var factory = UseService<DataContextFactory>();
         var startupVertical = UseState(() => factory.CreateDbContext().StartupVerticals.FirstOrDefault(e => e.Id == startupVerticalId)!);
-        var client = UseService<IClientProvider>();
 
         UseEffect(() =>
         {
-            try
-            {
-                using var db = factory.CreateDbContext();
-                db.StartupVerticals.Update(startupVertical.Value);
-                db.SaveChanges();
-                refreshToken.Refresh();
-            }
-            catch (Exception ex)
-            {
-                client.Toast(ex);
-            }
+            using var db = factory.CreateDbContext();
+            db.StartupVerticals.Update(startupVertical.Value);
+            db.SaveChanges();
+            refreshToken.Refresh();
         }, [startupVertical]);
 
         return startupVertical

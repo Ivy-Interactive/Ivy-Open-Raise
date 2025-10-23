@@ -48,10 +48,10 @@ public class StartupStageDetailsBlade(int startupStageId) : ViewBase
 
         var detailsCard = new Card(
             content: new
-                {
-                    startupStageValue.Id,
-                    startupStageValue.Name
-                }.ToDetails()
+            {
+                startupStageValue.Id,
+                startupStageValue.Name
+            }.ToDetails()
                 .RemoveEmpty()
                 .Builder(e => e.Id, e => e.CopyToClipboard()),
             footer: Layout.Horizontal().Width(Size.Full()).Gap(1).Align(Align.Right)

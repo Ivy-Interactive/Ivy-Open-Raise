@@ -25,19 +25,11 @@ public class InteractionCreateDialog(IState<bool> isOpen, RefreshToken refreshTo
     {
         var factory = UseService<DataContextFactory>();
         var interaction = UseState(() => new InteractionCreateRequest());
-        var client = UseService<IClientProvider>();
 
         UseEffect(() =>
         {
-            try
-            {
-                var interactionId = CreateInteraction(factory, interaction.Value);
-                refreshToken.Refresh(interactionId);
-            }
-            catch (Exception ex)
-            {
-                client.Toast(ex);
-            }
+            var interactionId = CreateInteraction(factory, interaction.Value);
+            refreshToken.Refresh(interactionId);
         }, [interaction]);
 
         return interaction

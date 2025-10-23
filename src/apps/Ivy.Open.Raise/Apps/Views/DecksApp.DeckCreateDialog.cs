@@ -30,19 +30,11 @@ public class DeckCreateDialog(IState<bool> isOpen, RefreshToken refreshToken) : 
     {
         var factory = UseService<DataContextFactory>();
         var deckState = UseState(() => new DeckCreateRequest());
-        var client = UseService<IClientProvider>();
 
         UseEffect(() =>
         {
-            try
-            {
-                var deckId = CreateDeck(factory, deckState.Value);
-                refreshToken.Refresh(deckId);
-            }
-            catch (Exception ex)
-            {
-                client.Toast(ex);
-            }
+            var deckId = CreateDeck(factory, deckState.Value);
+            refreshToken.Refresh(deckId);
         }, [deckState]);
 
         return deckState

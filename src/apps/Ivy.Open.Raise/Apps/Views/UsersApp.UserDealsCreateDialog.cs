@@ -29,19 +29,11 @@ public class UserDealsCreateDialog(IState<bool> isOpen, RefreshToken refreshToke
     {
         var factory = UseService<DataContextFactory>();
         var dealRequest = UseState(() => new DealCreateRequest());
-        var client = UseService<IClientProvider>();
 
         UseEffect(() =>
         {
-            try
-            {
-                CreateDeal(factory, dealRequest.Value);
-                refreshToken.Refresh();
-            }
-            catch (Exception ex)
-            {
-                client.Toast(ex);
-            }
+            CreateDeal(factory, dealRequest.Value);
+            refreshToken.Refresh();
         }, [dealRequest]);
 
         return dealRequest

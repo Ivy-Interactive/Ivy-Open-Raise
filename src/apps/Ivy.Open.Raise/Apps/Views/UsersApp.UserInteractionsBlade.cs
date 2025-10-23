@@ -17,7 +17,7 @@ public class UserInteractionsBlade(Guid userId) : ViewBase
                 .Include(i => i.InteractionTypeNavigation)
                 .Where(i => i.UserId == userId)
                 .ToArrayAsync());
-        }, [ EffectTrigger.AfterInit(), refreshToken ]);
+        }, [EffectTrigger.AfterInit(), refreshToken]);
 
         Action OnDelete(Guid id)
         {
@@ -37,13 +37,13 @@ public class UserInteractionsBlade(Guid userId) : ViewBase
         if (interactions.Value == null) return null;
 
         var table = interactions.Value.Select(i => new
-            {
-                ContactName = $"{i.Contact.FirstName} {i.Contact.LastName}",
-                InteractionType = i.InteractionTypeNavigation.Name,
-                Subject = i.Subject,
-                Notes = i.Notes,
-                OccurredAt = i.OccurredAt,
-                _ = Layout.Horizontal().Gap(1)
+        {
+            ContactName = $"{i.Contact.FirstName} {i.Contact.LastName}",
+            InteractionType = i.InteractionTypeNavigation.Name,
+            Subject = i.Subject,
+            Notes = i.Notes,
+            OccurredAt = i.OccurredAt,
+            _ = Layout.Horizontal().Gap(1)
                     | Icons.Ellipsis
                         .ToButton()
                         .Ghost()
@@ -53,7 +53,7 @@ public class UserInteractionsBlade(Guid userId) : ViewBase
                         .Outline()
                         .Tooltip("Edit")
                         .ToTrigger((isOpen) => new UserInteractionsEditSheet(isOpen, refreshToken, i.Id))
-            })
+        })
             .ToTable()
             .RemoveEmptyColumns();
 

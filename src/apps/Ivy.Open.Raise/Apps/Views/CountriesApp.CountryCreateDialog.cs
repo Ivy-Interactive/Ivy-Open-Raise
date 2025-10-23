@@ -16,19 +16,11 @@ public class CountryCreateDialog(IState<bool> isOpen, RefreshToken refreshToken)
     {
         var factory = UseService<DataContextFactory>();
         var countryState = UseState(() => new CountryCreateRequest());
-        var client = UseService<IClientProvider>();
 
         UseEffect(() =>
         {
-            try
-            {
-                var countryId = CreateCountry(factory, countryState.Value);
-                refreshToken.Refresh(countryId);
-            }
-            catch (Exception ex)
-            {
-                client.Toast(ex);
-            }
+            var countryId = CreateCountry(factory, countryState.Value);
+            refreshToken.Refresh(countryId);
         }, [countryState]);
 
         return countryState

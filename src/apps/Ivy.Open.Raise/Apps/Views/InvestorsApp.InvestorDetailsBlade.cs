@@ -48,20 +48,20 @@ public class InvestorDetailsBlade(Guid investorId) : ViewBase
 
         var detailsCard = new Card(
             content: new
-                {
-                    investorValue.Id,
-                    investorValue.Name,
-                    InvestorType = investorValue.InvestorType.Name,
-                    investorValue.WebsiteUrl,
-                    investorValue.LinkedinUrl,
-                    investorValue.XUrl,
-                    investorValue.AddressStreet,
-                    investorValue.AddressZip,
-                    investorValue.AddressCity,
-                    AddressCountry = investorValue.AddressCountry?.Name,
-                    investorValue.Thesis,
-                    CheckSizeRange = $"{investorValue.CheckSizeMin} - {investorValue.CheckSizeMax}"
-                }.ToDetails()
+            {
+                investorValue.Id,
+                investorValue.Name,
+                InvestorType = investorValue.InvestorType.Name,
+                investorValue.WebsiteUrl,
+                investorValue.LinkedinUrl,
+                investorValue.XUrl,
+                investorValue.AddressStreet,
+                investorValue.AddressZip,
+                investorValue.AddressCity,
+                AddressCountry = investorValue.AddressCountry?.Name,
+                investorValue.Thesis,
+                CheckSizeRange = $"{investorValue.CheckSizeMin} - {investorValue.CheckSizeMax}"
+            }.ToDetails()
                 .RemoveEmpty()
                 .Builder(e => e.Id, e => e.CopyToClipboard()),
             footer: Layout.Horizontal().Width(Size.Full()).Gap(1).Align(Align.Right)

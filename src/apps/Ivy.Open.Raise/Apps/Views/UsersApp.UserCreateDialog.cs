@@ -14,13 +14,13 @@ public class UserCreateDialog(IState<bool> isOpen, RefreshToken refreshToken) : 
         public string LastName { get; init; } = "";
 
         public string? Title { get; init; }
-        
+
         public string? CalendarUrl { get; init; }
-        
+
         public string? ProfilePictureUrl { get; init; }
-        
+
         public string? LinkedinUrl { get; init; }
-        
+
         public string? XUrl { get; init; }
     }
 
@@ -28,19 +28,11 @@ public class UserCreateDialog(IState<bool> isOpen, RefreshToken refreshToken) : 
     {
         var factory = UseService<DataContextFactory>();
         var user = UseState(() => new UserCreateRequest());
-        var client = UseService<IClientProvider>();
 
         UseEffect(() =>
         {
-            try
-            {
-                var userId = CreateUser(factory, user.Value);
-                refreshToken.Refresh(userId);
-            }
-            catch (Exception ex)
-            {
-                client.Toast(ex);
-            }
+            var userId = CreateUser(factory, user.Value);
+            refreshToken.Refresh(userId);
         }, [user]);
 
         return user

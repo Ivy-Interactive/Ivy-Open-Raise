@@ -45,19 +45,11 @@ public class CurrencyOrganizationSettingsCreateDialog(IState<bool> isOpen, Refre
     {
         var factory = UseService<DataContextFactory>();
         var organizationSettings = UseState(() => new OrganizationSettingsCreateRequest());
-        var client = UseService<IClientProvider>();
 
         UseEffect(() =>
         {
-            try
-            {
-                CreateOrganizationSettings(factory, organizationSettings.Value);
-                refreshToken.Refresh();
-            }
-            catch (Exception ex)
-            {
-                client.Toast(ex);
-            }
+            CreateOrganizationSettings(factory, organizationSettings.Value);
+            refreshToken.Refresh();
         }, [organizationSettings]);
 
         return organizationSettings

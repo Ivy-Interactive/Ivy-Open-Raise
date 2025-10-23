@@ -12,19 +12,11 @@ public class InvestorTypeCreateDialog(IState<bool> isOpen, RefreshToken refreshT
     {
         var factory = UseService<DataContextFactory>();
         var investorTypeState = UseState(() => new InvestorTypeCreateRequest());
-        var client = UseService<IClientProvider>();
 
         UseEffect(() =>
         {
-            try
-            {
-                var investorTypeId = CreateInvestorType(factory, investorTypeState.Value);
-                refreshToken.Refresh(investorTypeId);
-            }
-            catch (Exception ex)
-            {
-                client.Toast(ex);
-            }
+            var investorTypeId = CreateInvestorType(factory, investorTypeState.Value);
+            refreshToken.Refresh(investorTypeId);
         }, [investorTypeState]);
 
         return investorTypeState

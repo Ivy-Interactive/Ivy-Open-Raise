@@ -6,22 +6,14 @@ public class CurrencyOrganizationSettingsEditSheet(IState<bool> isOpen, RefreshT
     {
         var factory = UseService<DataContextFactory>();
         var organizationSetting = UseState(() => factory.CreateDbContext().OrganizationSettings.FirstOrDefault(e => e.Id == organizationSettingId)!);
-        var client = UseService<IClientProvider>();
 
         UseEffect(() =>
         {
-            try
-            {
-                using var db = factory.CreateDbContext();
-                organizationSetting.Value.UpdatedAt = DateTime.UtcNow;
-                db.OrganizationSettings.Update(organizationSetting.Value);
-                db.SaveChanges();
-                refreshToken.Refresh();
-            }
-            catch (Exception ex)
-            {
-                client.Toast(ex);
-            }
+            using var db = factory.CreateDbContext();
+            organizationSetting.Value.UpdatedAt = DateTime.UtcNow;
+            db.OrganizationSettings.Update(organizationSetting.Value);
+            db.SaveChanges();
+            refreshToken.Refresh();
         }, [organizationSetting]);
 
         return organizationSetting

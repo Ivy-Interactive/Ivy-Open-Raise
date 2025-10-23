@@ -16,7 +16,7 @@ public class ContactDeckLinksBlade(Guid? contactId) : ViewBase
                 .Include(dl => dl.Deck)
                 .Where(dl => dl.ContactId == contactId)
                 .ToArrayAsync());
-        }, [ EffectTrigger.AfterInit(), refreshToken ]);
+        }, [EffectTrigger.AfterInit(), refreshToken]);
 
         Action OnDelete(Guid id)
         {
@@ -36,12 +36,12 @@ public class ContactDeckLinksBlade(Guid? contactId) : ViewBase
         if (deckLinks.Value == null) return null;
 
         var table = deckLinks.Value.Select(dl => new
-            {
-                DeckTitle = dl.Deck.Title,
-                FileType = dl.Deck.FileType,
-                FileSize = dl.Deck.FileSize,
-                LinkUrl = dl.LinkUrl,
-                _ = Layout.Horizontal().Gap(1)
+        {
+            DeckTitle = dl.Deck.Title,
+            FileType = dl.Deck.FileType,
+            FileSize = dl.Deck.FileSize,
+            LinkUrl = dl.LinkUrl,
+            _ = Layout.Horizontal().Gap(1)
                     | Icons.Ellipsis
                         .ToButton()
                         .Ghost()
@@ -51,7 +51,7 @@ public class ContactDeckLinksBlade(Guid? contactId) : ViewBase
                         .Outline()
                         .Tooltip("Edit")
                         .ToTrigger((isOpen) => new ContactDeckLinksEditSheet(isOpen, refreshToken, dl.Id))
-            })
+        })
             .ToTable()
             .RemoveEmptyColumns();
 

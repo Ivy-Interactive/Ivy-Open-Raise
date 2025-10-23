@@ -25,19 +25,11 @@ public class CountryInvestorsCreateDialog(IState<bool> isOpen, RefreshToken refr
     {
         var factory = UseService<DataContextFactory>();
         var investor = UseState(() => new InvestorCreateRequest());
-        var client = UseService<IClientProvider>();
 
         UseEffect(() =>
         {
-            try
-            {
-                var investorId = CreateInvestor(factory, investor.Value);
-                refreshToken.Refresh(investorId);
-            }
-            catch (Exception ex)
-            {
-                client.Toast(ex);
-            }
+            var investorId = CreateInvestor(factory, investor.Value);
+            refreshToken.Refresh(investorId);
         }, [investor]);
 
         return investor

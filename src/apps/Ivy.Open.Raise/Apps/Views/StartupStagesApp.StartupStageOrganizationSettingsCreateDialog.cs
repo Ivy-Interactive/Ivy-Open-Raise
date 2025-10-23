@@ -29,19 +29,11 @@ public class StartupStageOrganizationSettingsCreateDialog(IState<bool> isOpen, R
     {
         var factory = UseService<DataContextFactory>();
         var organizationSettings = UseState(() => new OrganizationSettingsCreateRequest());
-        var client = UseService<IClientProvider>();
 
         UseEffect(() =>
         {
-            try
-            {
-                var organizationSettingsId = CreateOrganizationSettings(factory, organizationSettings.Value);
-                refreshToken.Refresh(organizationSettingsId);
-            }
-            catch (Exception ex)
-            {
-                client.Toast(ex);
-            }
+            var organizationSettingsId = CreateOrganizationSettings(factory, organizationSettings.Value);
+            refreshToken.Refresh(organizationSettingsId);
         }, [organizationSettings]);
 
         return organizationSettings

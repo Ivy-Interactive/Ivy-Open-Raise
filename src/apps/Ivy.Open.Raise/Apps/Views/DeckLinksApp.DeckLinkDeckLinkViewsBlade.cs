@@ -13,9 +13,9 @@ public class DeckLinkDeckLinkViewsBlade(Guid deckLinkId) : ViewBase
         {
             await using var db = factory.CreateDbContext();
             deckLinkViews.Set(await db.DeckLinkViews.Where(e => e.DeckLinkId == deckLinkId).ToArrayAsync());
-        }, [ EffectTrigger.AfterInit(), refreshToken ]);
-        
-        Action OnDelete(Guid id)  
+        }, [EffectTrigger.AfterInit(), refreshToken]);
+
+        Action OnDelete(Guid id)
         {
             return () =>
             {
@@ -29,15 +29,15 @@ public class DeckLinkDeckLinkViewsBlade(Guid deckLinkId) : ViewBase
                 }, "Delete View", AlertButtonSet.OkCancel);
             };
         };
-        
+
         if (deckLinkViews.Value == null) return null;
-        
+
         var table = deckLinkViews.Value.Select(e => new
-            {
-                e.ViewedAt,
-                e.IpAddress,
-                e.UserAgent,
-                _ = Layout.Horizontal().Gap(1)
+        {
+            e.ViewedAt,
+            e.IpAddress,
+            e.UserAgent,
+            _ = Layout.Horizontal().Gap(1)
                     | Icons.Ellipsis
                         .ToButton()
                         .Ghost()
@@ -47,7 +47,7 @@ public class DeckLinkDeckLinkViewsBlade(Guid deckLinkId) : ViewBase
                         .Outline()
                         .Tooltip("Edit")
                         .ToTrigger((isOpen) => new DeckLinkDeckLinkViewsEditSheet(isOpen, refreshToken, e.Id))
-            })
+        })
             .ToTable()
             .RemoveEmptyColumns()
         ;

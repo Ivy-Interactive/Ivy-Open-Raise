@@ -6,21 +6,13 @@ public class InteractionTypeEditSheet(IState<bool> isOpen, RefreshToken refreshT
     {
         var factory = UseService<DataContextFactory>();
         var interactionType = UseState(() => factory.CreateDbContext().InteractionTypes.FirstOrDefault(e => e.Id == interactionTypeId)!);
-        var client = UseService<IClientProvider>();
 
         UseEffect(() =>
         {
-            try
-            {
-                using var db = factory.CreateDbContext();
-                db.InteractionTypes.Update(interactionType.Value);
-                db.SaveChanges();
-                refreshToken.Refresh();
-            }
-            catch (Exception ex)
-            {
-                client.Toast(ex);
-            }
+            using var db = factory.CreateDbContext();
+            db.InteractionTypes.Update(interactionType.Value);
+            db.SaveChanges();
+            refreshToken.Refresh();
         }, [interactionType]);
 
         return interactionType

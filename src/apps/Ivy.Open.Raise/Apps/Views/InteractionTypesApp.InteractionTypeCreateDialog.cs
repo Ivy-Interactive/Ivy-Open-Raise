@@ -12,19 +12,11 @@ public class InteractionTypeCreateDialog(IState<bool> isOpen, RefreshToken refre
     {
         var factory = UseService<DataContextFactory>();
         var interactionType = UseState(() => new InteractionTypeCreateRequest());
-        var client = UseService<IClientProvider>();
 
         UseEffect(() =>
         {
-            try
-            {
-                var interactionTypeId = CreateInteractionType(factory, interactionType.Value);
-                refreshToken.Refresh(interactionTypeId);
-            }
-            catch (Exception ex)
-            {
-                client.Toast(ex);
-            }
+            var interactionTypeId = CreateInteractionType(factory, interactionType.Value);
+            refreshToken.Refresh(interactionTypeId);
         }, [interactionType]);
 
         return interactionType

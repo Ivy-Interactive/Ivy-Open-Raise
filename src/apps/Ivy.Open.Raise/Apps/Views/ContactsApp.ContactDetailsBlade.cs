@@ -52,13 +52,13 @@ public class ContactDetailsBlade(Guid contactId) : ViewBase
 
         var detailsCard = new Card(
             content: new
-                {
-                    FullName = $"{contactValue.FirstName} {contactValue.LastName}",
-                    contactValue.Email,
-                    contactValue.Title,
-                    contactValue.LinkedinUrl,
-                    contactValue.XUrl
-                }.ToDetails()
+            {
+                FullName = $"{contactValue.FirstName} {contactValue.LastName}",
+                contactValue.Email,
+                contactValue.Title,
+                contactValue.LinkedinUrl,
+                contactValue.XUrl
+            }.ToDetails()
                 .RemoveEmpty()
                 .Builder(e => e.Email, e => e.CopyToClipboard()),
             footer: Layout.Horizontal().Width(Size.Full()).Gap(1).Align(Align.Right)

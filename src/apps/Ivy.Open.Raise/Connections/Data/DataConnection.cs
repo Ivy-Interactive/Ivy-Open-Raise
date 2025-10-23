@@ -37,11 +37,11 @@ public class DataConnection : IConnection, IHaveSecrets
         services.AddSingleton<DataContextFactory>();
     }
 
-   public Secret[] GetSecrets()
-   {
-       return
-       [
-           new("ConnectionStrings:Data")
-       ];
-   }
+    public Secret[] GetSecrets()
+    {
+        return
+        [
+            new("ConnectionStrings:Data")
+        ];
+    }
 }

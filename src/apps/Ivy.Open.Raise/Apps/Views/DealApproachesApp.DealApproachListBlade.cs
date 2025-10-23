@@ -3,13 +3,13 @@ namespace Ivy.Open.Raise.Apps.Views;
 public class DealApproachListBlade : ViewBase
 {
     private record DealApproachListRecord(int Id, string Name);
-    
+
     public override object? Build()
     {
         var blades = UseContext<IBladeController>();
         var factory = UseService<DataContextFactory>();
         var refreshToken = this.UseRefreshToken();
-        
+
         UseEffect(() =>
         {
             if (refreshToken.ReturnValue is int dealApproachId)
@@ -18,25 +18,25 @@ public class DealApproachListBlade : ViewBase
                 blades.Push(this, new DealApproachDetailsBlade(dealApproachId));
             }
         }, [refreshToken]);
-        
+
         var onItemClicked = new Action<Event<ListItem>>(e =>
         {
             var dealApproach = (DealApproachListRecord)e.Sender.Tag!;
             blades.Push(this, new DealApproachDetailsBlade(dealApproach.Id), dealApproach.Name);
         });
-        
-        ListItem CreateItem(DealApproachListRecord record) => 
+
+        ListItem CreateItem(DealApproachListRecord record) =>
             new(title: record.Name, onClick: onItemClicked, tag: record);
-        
+
         var createBtn = Icons.Plus.ToButton(_ =>
         {
             blades.Pop(this);
         }).Outline().Tooltip("Create Deal Approach").ToTrigger((isOpen) => new DealApproachCreateDialog(isOpen, refreshToken));
-        
+
         return new FilteredListView<DealApproachListRecord>(
-            fetchRecords: (filter) => FetchDealApproaches(factory, filter), 
-            createItem: CreateItem, 
-            toolButtons: createBtn, 
+            fetchRecords: (filter) => FetchDealApproaches(factory, filter),
+            createItem: CreateItem,
+            toolButtons: createBtn,
             onFilterChanged: _ =>
             {
                 blades.Pop(this);
@@ -47,9 +47,9 @@ public class DealApproachListBlade : ViewBase
     private async Task<DealApproachListRecord[]> FetchDealApproaches(DataContextFactory factory, string filter)
     {
         await using var db = factory.CreateDbContext();
-        
+
         var linq = db.DealApproaches.AsQueryable();
-        
+
         if (!string.IsNullOrWhiteSpace(filter))
         {
             filter = filter.Trim();

@@ -29,19 +29,11 @@ public class CountryOrganizationSettingsCreateDialog(IState<bool> isOpen, Refres
     {
         var factory = UseService<DataContextFactory>();
         var settings = UseState(() => new OrganizationSettingsCreateRequest());
-        var client = UseService<IClientProvider>();
 
         UseEffect(() =>
         {
-            try
-            {
-                CreateOrganizationSettings(factory, settings.Value);
-                refreshToken.Refresh();
-            }
-            catch (Exception ex)
-            {
-                client.Toast(ex);
-            }
+            CreateOrganizationSettings(factory, settings.Value);
+            refreshToken.Refresh();
         }, [settings]);
 
         return settings

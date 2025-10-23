@@ -48,10 +48,10 @@ public class InvestorTypeDetailsBlade(int investorTypeId) : ViewBase
 
         var detailsCard = new Card(
             content: new
-                {
-                    investorTypeValue.Id,
-                    investorTypeValue.Name
-                }.ToDetails()
+            {
+                investorTypeValue.Id,
+                investorTypeValue.Name
+            }.ToDetails()
                 .RemoveEmpty()
                 .Builder(e => e.Id, e => e.CopyToClipboard()),
             footer: Layout.Horizontal().Width(Size.Full()).Gap(1).Align(Align.Right)

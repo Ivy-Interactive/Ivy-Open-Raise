@@ -13,7 +13,7 @@ public class DeckDeckLinksBlade(Guid deckId) : ViewBase
         {
             await using var db = factory.CreateDbContext();
             deckLinks.Set(await db.DeckLinks.Include(dl => dl.Contact).Where(dl => dl.DeckId == deckId).ToArrayAsync());
-        }, [ EffectTrigger.AfterInit(), refreshToken ]);
+        }, [EffectTrigger.AfterInit(), refreshToken]);
 
         Action OnDelete(Guid id)
         {
@@ -33,12 +33,12 @@ public class DeckDeckLinksBlade(Guid deckId) : ViewBase
         if (deckLinks.Value == null) return null;
 
         var table = deckLinks.Value.Select(dl => new
-            {
-                ContactName = dl.Contact != null ? $"{dl.Contact.FirstName} {dl.Contact.LastName}" : "No Contact",
-                LinkUrl = dl.LinkUrl,
-                CreatedDate = dl.CreatedAt.ToString("yyyy-MM-dd"),
-                UpdatedDate = dl.UpdatedAt.ToString("yyyy-MM-dd"),
-                _ = Layout.Horizontal().Gap(1)
+        {
+            ContactName = dl.Contact != null ? $"{dl.Contact.FirstName} {dl.Contact.LastName}" : "No Contact",
+            LinkUrl = dl.LinkUrl,
+            CreatedDate = dl.CreatedAt.ToString("yyyy-MM-dd"),
+            UpdatedDate = dl.UpdatedAt.ToString("yyyy-MM-dd"),
+            _ = Layout.Horizontal().Gap(1)
                     | Icons.Ellipsis
                         .ToButton()
                         .Ghost()
@@ -48,7 +48,7 @@ public class DeckDeckLinksBlade(Guid deckId) : ViewBase
                         .Outline()
                         .Tooltip("Edit")
                         .ToTrigger((isOpen) => new DeckDeckLinksEditSheet(isOpen, refreshToken, dl.Id))
-            })
+        })
             .ToTable()
             .RemoveEmptyColumns();
 

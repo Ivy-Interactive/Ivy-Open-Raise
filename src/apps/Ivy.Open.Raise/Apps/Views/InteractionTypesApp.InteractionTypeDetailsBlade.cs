@@ -48,10 +48,10 @@ public class InteractionTypeDetailsBlade(int interactionTypeId) : ViewBase
 
         var detailsCard = new Card(
             content: new
-                {
-                    interactionTypeValue.Id,
-                    interactionTypeValue.Name
-                }.ToDetails()
+            {
+                interactionTypeValue.Id,
+                interactionTypeValue.Name
+            }.ToDetails()
                 .RemoveEmpty()
                 .Builder(e => e.Id, e => e.CopyToClipboard()),
             footer: Layout.Horizontal().Width(Size.Full()).Gap(1).Align(Align.Right)

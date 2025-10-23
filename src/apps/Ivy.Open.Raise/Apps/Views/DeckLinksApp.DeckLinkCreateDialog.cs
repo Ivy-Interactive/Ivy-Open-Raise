@@ -9,7 +9,7 @@ public class DeckLinkCreateDialog(IState<bool> isOpen, RefreshToken refreshToken
 
         [Required]
         public Guid DeckId { get; init; }
-        
+
         public Guid? ContactId { get; init; }
     }
 
@@ -17,19 +17,11 @@ public class DeckLinkCreateDialog(IState<bool> isOpen, RefreshToken refreshToken
     {
         var factory = UseService<DataContextFactory>();
         var deckLink = UseState(() => new DeckLinkCreateRequest());
-        var client = UseService<IClientProvider>();
 
         UseEffect(() =>
         {
-            try
-            {
-                var deckLinkId = CreateDeckLink(factory, deckLink.Value);
-                refreshToken.Refresh(deckLinkId);
-            }
-            catch (Exception ex)
-            {
-                client.Toast(ex);
-            }
+            var deckLinkId = CreateDeckLink(factory, deckLink.Value);
+            refreshToken.Refresh(deckLinkId);
         }, [deckLink]);
 
         return deckLink

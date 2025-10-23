@@ -31,19 +31,11 @@ public class ContactDealsCreateDialog(IState<bool> isOpen, RefreshToken refreshT
     {
         var factory = UseService<DataContextFactory>();
         var deal = UseState(() => new DealCreateRequest());
-        var client = UseService<IClientProvider>();
 
         UseEffect(() =>
         {
-            try
-            {
-                var dealId = CreateDeal(factory, deal.Value);
-                refreshToken.Refresh(dealId);
-            }
-            catch (Exception ex)
-            {
-                client.Toast(ex);
-            }
+            var dealId = CreateDeal(factory, deal.Value);
+            refreshToken.Refresh(dealId);
         }, [deal]);
 
         return deal

@@ -40,13 +40,13 @@ public class CountryInvestorsBlade(int? addressCountryId) : ViewBase
         if (investors.Value == null) return null;
 
         var table = investors.Value.Select(i => new
-            {
-                Name = i.Name,
-                InvestorType = i.InvestorType.Name,
-                Website = i.WebsiteUrl,
-                City = i.AddressCity,
-                Country = i.AddressCountry?.Name,
-                _ = Layout.Horizontal().Gap(1)
+        {
+            Name = i.Name,
+            InvestorType = i.InvestorType.Name,
+            Website = i.WebsiteUrl,
+            City = i.AddressCity,
+            Country = i.AddressCountry?.Name,
+            _ = Layout.Horizontal().Gap(1)
                     | Icons.Ellipsis
                         .ToButton()
                         .Ghost()
@@ -56,7 +56,7 @@ public class CountryInvestorsBlade(int? addressCountryId) : ViewBase
                         .Outline()
                         .Tooltip("Edit")
                         .ToTrigger((isOpen) => new CountryInvestorsEditSheet(isOpen, refreshToken, i.Id))
-            })
+        })
             .ToTable()
             .RemoveEmptyColumns();
 

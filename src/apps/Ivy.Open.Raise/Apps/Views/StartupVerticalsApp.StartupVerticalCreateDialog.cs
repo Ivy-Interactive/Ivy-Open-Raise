@@ -12,19 +12,11 @@ public class StartupVerticalCreateDialog(IState<bool> isOpen, RefreshToken refre
     {
         var factory = UseService<DataContextFactory>();
         var startupVertical = UseState(() => new StartupVerticalCreateRequest());
-        var client = UseService<IClientProvider>();
 
         UseEffect(() =>
         {
-            try
-            {
-                CreateStartupVertical(factory, startupVertical.Value);
-                refreshToken.Refresh();
-            }
-            catch (Exception ex)
-            {
-                client.Toast(ex);
-            }
+            CreateStartupVertical(factory, startupVertical.Value);
+            refreshToken.Refresh();
         }, [startupVertical]);
 
         return startupVertical

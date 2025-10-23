@@ -16,19 +16,11 @@ public class DeckLinkDeckLinkViewsCreateDialog(IState<bool> isOpen, RefreshToken
     {
         var factory = UseService<DataContextFactory>();
         var deckLinkViewRequest = UseState(() => new DeckLinkViewCreateRequest());
-        var client = UseService<IClientProvider>();
 
         UseEffect(() =>
         {
-            try
-            {
-                CreateDeckLinkView(factory, deckLinkViewRequest.Value);
-                refreshToken.Refresh(deckLinkId);
-            }
-            catch (Exception ex)
-            {
-                client.Toast(ex);
-            }
+            CreateDeckLinkView(factory, deckLinkViewRequest.Value);
+            refreshToken.Refresh(deckLinkId);
         }, [deckLinkViewRequest]);
 
         return deckLinkViewRequest

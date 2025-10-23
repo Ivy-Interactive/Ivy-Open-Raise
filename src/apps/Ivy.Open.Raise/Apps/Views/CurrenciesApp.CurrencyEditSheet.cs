@@ -6,21 +6,13 @@ public class CurrencyEditSheet(IState<bool> isOpen, RefreshToken refreshToken, s
     {
         var factory = UseService<DataContextFactory>();
         var currency = UseState(() => factory.CreateDbContext().Currencies.FirstOrDefault(e => e.Id == currencyId)!);
-        var client = UseService<IClientProvider>();
 
         UseEffect(() =>
         {
-            try
-            {
-                using var db = factory.CreateDbContext();
-                db.Currencies.Update(currency.Value);
-                db.SaveChanges();
-                refreshToken.Refresh();
-            }
-            catch (Exception ex)
-            {
-                client.Toast(ex);
-            }
+            using var db = factory.CreateDbContext();
+            db.Currencies.Update(currency.Value);
+            db.SaveChanges();
+            refreshToken.Refresh();
         }, [currency]);
 
         return currency

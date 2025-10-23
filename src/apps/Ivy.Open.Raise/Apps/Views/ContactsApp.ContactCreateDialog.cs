@@ -27,19 +27,11 @@ public class ContactCreateDialog(IState<bool> isOpen, RefreshToken refreshToken)
     {
         var factory = UseService<DataContextFactory>();
         var contact = UseState(() => new ContactCreateRequest());
-        var client = UseService<IClientProvider>();
 
         UseEffect(() =>
         {
-            try
-            {
-                var contactId = CreateContact(factory, contact.Value);
-                refreshToken.Refresh(contactId);
-            }
-            catch (Exception ex)
-            {
-                client.Toast(ex);
-            }
+            var contactId = CreateContact(factory, contact.Value);
+            refreshToken.Refresh(contactId);
         }, [contact]);
 
         return contact

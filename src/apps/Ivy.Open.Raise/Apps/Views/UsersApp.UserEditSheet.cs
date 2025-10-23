@@ -6,22 +6,14 @@ public class UserEditSheet(IState<bool> isOpen, RefreshToken refreshToken, Guid 
     {
         var factory = UseService<DataContextFactory>();
         var user = UseState(() => factory.CreateDbContext().Users.FirstOrDefault(e => e.Id == userId)!);
-        var client = UseService<IClientProvider>();
 
         UseEffect(() =>
         {
-            try
-            {
-                using var db = factory.CreateDbContext();
-                user.Value.UpdatedAt = DateTime.UtcNow;
-                db.Users.Update(user.Value);
-                db.SaveChanges();
-                refreshToken.Refresh();
-            }
-            catch (Exception ex)
-            {
-                client.Toast(ex);
-            }
+            using var db = factory.CreateDbContext();
+            user.Value.UpdatedAt = DateTime.UtcNow;
+            db.Users.Update(user.Value);
+            db.SaveChanges();
+            refreshToken.Refresh();
         }, [user]);
 
         return user

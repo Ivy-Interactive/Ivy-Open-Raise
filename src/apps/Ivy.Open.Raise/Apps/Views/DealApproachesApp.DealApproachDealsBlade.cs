@@ -13,9 +13,9 @@ public class DealApproachDealsBlade(int? dealApproachId) : ViewBase
         {
             await using var db = factory.CreateDbContext();
             deals.Set(await db.Deals.Where(e => e.DealApproachId == dealApproachId).ToArrayAsync());
-        }, [ EffectTrigger.AfterInit(), refreshToken ]);
-        
-        Action OnDelete(Guid id)  
+        }, [EffectTrigger.AfterInit(), refreshToken]);
+
+        Action OnDelete(Guid id)
         {
             return () =>
             {
@@ -29,17 +29,17 @@ public class DealApproachDealsBlade(int? dealApproachId) : ViewBase
                 }, "Delete Deal", AlertButtonSet.OkCancel);
             };
         };
-        
+
         if (deals.Value == null) return null;
-        
+
         var table = deals.Value.Select(e => new
-            {
-                ContactId = e.ContactId,
-                DealState = e.DealState.Name,
-                AmountFrom = e.AmountFrom,
-                AmountTo = e.AmountTo,
-                Priority = e.Priority,
-                _ = Layout.Horizontal().Gap(1)
+        {
+            ContactId = e.ContactId,
+            DealState = e.DealState.Name,
+            AmountFrom = e.AmountFrom,
+            AmountTo = e.AmountTo,
+            Priority = e.Priority,
+            _ = Layout.Horizontal().Gap(1)
                     | Icons.Ellipsis
                         .ToButton()
                         .Ghost()
@@ -49,7 +49,7 @@ public class DealApproachDealsBlade(int? dealApproachId) : ViewBase
                         .Outline()
                         .Tooltip("Edit")
                         .ToTrigger((isOpen) => new DealApproachDealsEditSheet(isOpen, refreshToken, e.Id))
-            })
+        })
             .ToTable()
             .RemoveEmptyColumns()
         ;

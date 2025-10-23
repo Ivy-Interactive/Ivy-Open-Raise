@@ -19,19 +19,11 @@ public class CurrencyCreateDialog(IState<bool> isOpen, RefreshToken refreshToken
     {
         var factory = UseService<DataContextFactory>();
         var currencyState = UseState(() => new CurrencyCreateRequest());
-        var client = UseService<IClientProvider>();
 
         UseEffect(() =>
         {
-            try
-            {
-                CreateCurrency(factory, currencyState.Value);
-                refreshToken.Refresh();
-            }
-            catch (Exception ex)
-            {
-                client.Toast(ex);
-            }
+            CreateCurrency(factory, currencyState.Value);
+            refreshToken.Refresh();
         }, [currencyState]);
 
         return currencyState

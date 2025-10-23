@@ -48,11 +48,11 @@ public class DeckLinkDetailsBlade(Guid deckLinkId) : ViewBase
 
         var detailsCard = new Card(
             content: new
-                {
-                    deckLinkValue.Id,
-                    LinkUrl = deckLinkValue.LinkUrl,
-                    DeckTitle = deckLinkValue.Deck.Title
-                }.ToDetails()
+            {
+                deckLinkValue.Id,
+                LinkUrl = deckLinkValue.LinkUrl,
+                DeckTitle = deckLinkValue.Deck.Title
+            }.ToDetails()
                 .RemoveEmpty()
                 .Builder(e => e.Id, e => e.CopyToClipboard()),
             footer: Layout.Horizontal().Width(Size.Full()).Gap(1).Align(Align.Right)

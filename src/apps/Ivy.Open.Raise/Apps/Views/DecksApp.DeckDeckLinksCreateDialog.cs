@@ -6,7 +6,7 @@ public class DeckDeckLinksCreateDialog(IState<bool> isOpen, RefreshToken refresh
     {
         [Required]
         public string LinkUrl { get; init; } = "";
-        
+
         public Guid? ContactId { get; init; } = null;
     }
 
@@ -14,19 +14,11 @@ public class DeckDeckLinksCreateDialog(IState<bool> isOpen, RefreshToken refresh
     {
         var factory = UseService<DataContextFactory>();
         var deckLinkRequest = UseState(() => new DeckLinkCreateRequest());
-        var client = UseService<IClientProvider>();
 
         UseEffect(() =>
         {
-            try
-            {
-                CreateDeckLink(factory, deckLinkRequest.Value);
-                refreshToken.Refresh(deckId);
-            }
-            catch (Exception ex)
-            {
-                client.Toast(ex);
-            }
+            CreateDeckLink(factory, deckLinkRequest.Value);
+            refreshToken.Refresh(deckId);
         }, [deckLinkRequest]);
 
         return deckLinkRequest

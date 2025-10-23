@@ -6,21 +6,13 @@ public class StartupStageEditSheet(IState<bool> isOpen, RefreshToken refreshToke
     {
         var factory = UseService<DataContextFactory>();
         var startupStage = UseState(() => factory.CreateDbContext().StartupStages.FirstOrDefault(e => e.Id == startupStageId)!);
-        var client = UseService<IClientProvider>();
 
         UseEffect(() =>
         {
-            try
-            {
-                using var db = factory.CreateDbContext();
-                db.StartupStages.Update(startupStage.Value);
-                db.SaveChanges();
-                refreshToken.Refresh();
-            }
-            catch (Exception ex)
-            {
-                client.Toast(ex);
-            }
+            using var db = factory.CreateDbContext();
+            db.StartupStages.Update(startupStage.Value);
+            db.SaveChanges();
+            refreshToken.Refresh();
         }, [startupStage]);
 
         return startupStage

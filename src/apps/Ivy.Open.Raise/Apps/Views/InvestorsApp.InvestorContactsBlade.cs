@@ -13,7 +13,7 @@ public class InvestorContactsBlade(Guid investorId) : ViewBase
         {
             await using var db = factory.CreateDbContext();
             contacts.Set(await db.Contacts.Where(c => c.InvestorId == investorId).ToArrayAsync());
-        }, [ EffectTrigger.AfterInit(), refreshToken ]);
+        }, [EffectTrigger.AfterInit(), refreshToken]);
 
         Action OnDelete(Guid id)
         {
@@ -33,14 +33,14 @@ public class InvestorContactsBlade(Guid investorId) : ViewBase
         if (contacts.Value == null) return null;
 
         var table = contacts.Value.Select(c => new
-            {
-                c.FirstName,
-                c.LastName,
-                c.Email,
-                Title = c.Title ?? string.Empty,
-                LinkedinUrl = c.LinkedinUrl ?? string.Empty,
-                XUrl = c.XUrl ?? string.Empty,
-                _ = Layout.Horizontal().Gap(1)
+        {
+            c.FirstName,
+            c.LastName,
+            c.Email,
+            Title = c.Title ?? string.Empty,
+            LinkedinUrl = c.LinkedinUrl ?? string.Empty,
+            XUrl = c.XUrl ?? string.Empty,
+            _ = Layout.Horizontal().Gap(1)
                     | Icons.Ellipsis
                         .ToButton()
                         .Ghost()
@@ -50,7 +50,7 @@ public class InvestorContactsBlade(Guid investorId) : ViewBase
                         .Outline()
                         .Tooltip("Edit")
                         .ToTrigger((isOpen) => new InvestorContactsEditSheet(isOpen, refreshToken, c.Id))
-            })
+        })
             .ToTable()
             .RemoveEmptyColumns();
 

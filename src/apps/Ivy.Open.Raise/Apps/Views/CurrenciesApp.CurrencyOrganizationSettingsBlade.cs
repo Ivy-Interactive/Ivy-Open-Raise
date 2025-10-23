@@ -17,7 +17,7 @@ public class CurrencyOrganizationSettingsBlade(string currencyId) : ViewBase
                 .Include(e => e.StartupStageNavigation)
                 .Where(e => e.CurrencyId == currencyId)
                 .ToArrayAsync());
-        }, [ EffectTrigger.AfterInit(), refreshToken ]);
+        }, [EffectTrigger.AfterInit(), refreshToken]);
 
         Action OnDelete(int id)
         {
@@ -37,15 +37,15 @@ public class CurrencyOrganizationSettingsBlade(string currencyId) : ViewBase
         if (organizationSettings.Value == null) return null;
 
         var table = organizationSettings.Value.Select(e => new
-            {
-                Country = e.Country.Name,
-                StartupStage = e.StartupStageNavigation.Name,
-                ElevatorPitch = e.ElevatorPitch,
-                Cofounders = e.Cofounders,
-                RaiseTargetMin = e.RaiseTargetMin,
-                RaiseTargetMax = e.RaiseTargetMax,
-                RaiseTicketSize = e.RaiseTicketSize,
-                _ = Layout.Horizontal().Gap(1)
+        {
+            Country = e.Country.Name,
+            StartupStage = e.StartupStageNavigation.Name,
+            ElevatorPitch = e.ElevatorPitch,
+            Cofounders = e.Cofounders,
+            RaiseTargetMin = e.RaiseTargetMin,
+            RaiseTargetMax = e.RaiseTargetMax,
+            RaiseTicketSize = e.RaiseTicketSize,
+            _ = Layout.Horizontal().Gap(1)
                     | Icons.Ellipsis
                         .ToButton()
                         .Ghost()
@@ -55,7 +55,7 @@ public class CurrencyOrganizationSettingsBlade(string currencyId) : ViewBase
                         .Outline()
                         .Tooltip("Edit")
                         .ToTrigger((isOpen) => new CurrencyOrganizationSettingsEditSheet(isOpen, refreshToken, e.Id))
-            })
+        })
             .ToTable()
             .RemoveEmptyColumns();
 

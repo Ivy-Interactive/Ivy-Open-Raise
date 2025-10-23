@@ -6,22 +6,14 @@ public class ContactEditSheet(IState<bool> isOpen, RefreshToken refreshToken, Gu
     {
         var factory = UseService<DataContextFactory>();
         var contact = UseState(() => factory.CreateDbContext().Contacts.FirstOrDefault(e => e.Id == contactId)!);
-        var client = UseService<IClientProvider>();
 
         UseEffect(() =>
         {
-            try
-            {
-                using var db = factory.CreateDbContext();
-                contact.Value.UpdatedAt = DateTime.UtcNow;
-                db.Contacts.Update(contact.Value);
-                db.SaveChanges();
-                refreshToken.Refresh();
-            }
-            catch (Exception ex)
-            {
-                client.Toast(ex);
-            }
+            using var db = factory.CreateDbContext();
+            contact.Value.UpdatedAt = DateTime.UtcNow;
+            db.Contacts.Update(contact.Value);
+            db.SaveChanges();
+            refreshToken.Refresh();
         }, [contact]);
 
         return contact

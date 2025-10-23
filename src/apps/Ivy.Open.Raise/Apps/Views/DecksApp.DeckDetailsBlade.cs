@@ -6,9 +6,9 @@ public class DeckDetailsBlade(Guid deckId) : ViewBase
     {
         var factory = this.UseService<DataContextFactory>();
         var blades = this.UseContext<IBladeController>();
-        var refreshToken = this.UseRefreshToken(); 
+        var refreshToken = this.UseRefreshToken();
         var deck = this.UseState<Deck?>();
-        var deckLinksCount = this.UseState<int>(); 
+        var deckLinksCount = this.UseState<int>();
         var (alertView, showAlert) = this.UseAlert();
 
         this.UseEffect(async () =>
@@ -40,7 +40,7 @@ public class DeckDetailsBlade(Guid deckId) : ViewBase
             .WithDropDown(
                 MenuItem.Default("Delete").Icon(Icons.Trash).HandleSelect(OnDelete)
             );
-        
+
         var editBtn = new Button("Edit")
             .Variant(ButtonVariant.Outline)
             .Icon(Icons.Pencil)
@@ -48,21 +48,21 @@ public class DeckDetailsBlade(Guid deckId) : ViewBase
 
         var detailsCard = new Card(
             content: new
-                {
-                    deckValue.Id,
-                    deckValue.Title,
-                    deckValue.FileName,
-                    deckValue.FileType,
-                    deckValue.FileSize,
-                    deckValue.IsPrimary
-                }.ToDetails()
+            {
+                deckValue.Id,
+                deckValue.Title,
+                deckValue.FileName,
+                deckValue.FileType,
+                deckValue.FileSize,
+                deckValue.IsPrimary
+            }.ToDetails()
                 .RemoveEmpty()
                 .Builder(e => e.Id, e => e.CopyToClipboard()),
             footer: Layout.Horizontal().Width(Size.Full()).Gap(1).Align(Align.Right)
                     | dropDown
                     | editBtn
         ).Title("Deck Details");
-        
+
         var relatedCard = new Card(
             new List(
                 new ListItem("Deck Links", onClick: _ =>
@@ -71,9 +71,9 @@ public class DeckDetailsBlade(Guid deckId) : ViewBase
                 }, badge: deckLinksCount.Value.ToString("N0"))
             ));
 
-        return new Fragment() 
+        return new Fragment()
                | (Layout.Vertical() | detailsCard | relatedCard)
-               | alertView 
+               | alertView
                ;
     }
 

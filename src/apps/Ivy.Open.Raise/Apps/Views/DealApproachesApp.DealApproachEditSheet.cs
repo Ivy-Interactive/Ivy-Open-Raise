@@ -6,21 +6,13 @@ public class DealApproachEditSheet(IState<bool> isOpen, RefreshToken refreshToke
     {
         var factory = UseService<DataContextFactory>();
         var dealApproach = UseState(() => factory.CreateDbContext().DealApproaches.FirstOrDefault(e => e.Id == dealApproachId)!);
-        var client = UseService<IClientProvider>();
 
         UseEffect(() =>
         {
-            try
-            {
-                using var db = factory.CreateDbContext();
-                db.DealApproaches.Update(dealApproach.Value);
-                db.SaveChanges();
-                refreshToken.Refresh();
-            }
-            catch (Exception ex)
-            {
-                client.Toast(ex);
-            }
+            using var db = factory.CreateDbContext();
+            db.DealApproaches.Update(dealApproach.Value);
+            db.SaveChanges();
+            refreshToken.Refresh();
         }, [dealApproach]);
 
         return dealApproach

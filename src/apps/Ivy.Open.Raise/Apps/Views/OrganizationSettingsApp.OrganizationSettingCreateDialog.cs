@@ -31,19 +31,11 @@ public class OrganizationSettingCreateDialog(IState<bool> isOpen, RefreshToken r
     {
         var factory = UseService<DataContextFactory>();
         var organizationSetting = UseState(() => new OrganizationSettingCreateRequest());
-        var client = UseService<IClientProvider>();
 
         UseEffect(() =>
         {
-            try
-            {
-                var organizationSettingId = CreateOrganizationSetting(factory, organizationSetting.Value);
-                refreshToken.Refresh(organizationSettingId);
-            }
-            catch (Exception ex)
-            {
-                client.Toast(ex);
-            }
+            var organizationSettingId = CreateOrganizationSetting(factory, organizationSetting.Value);
+            refreshToken.Refresh(organizationSettingId);
         }, [organizationSetting]);
 
         return organizationSetting

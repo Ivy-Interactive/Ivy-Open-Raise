@@ -16,7 +16,7 @@ public class InvestorTypeInvestorsBlade(int investorTypeId) : ViewBase
                 .Where(i => i.InvestorTypeId == investorTypeId)
                 .Include(i => i.AddressCountry)
                 .ToArrayAsync());
-        }, [ EffectTrigger.AfterInit(), refreshToken ]);
+        }, [EffectTrigger.AfterInit(), refreshToken]);
 
         Action OnDelete(Guid id)
         {
@@ -36,13 +36,13 @@ public class InvestorTypeInvestorsBlade(int investorTypeId) : ViewBase
         if (investors.Value == null) return null;
 
         var table = investors.Value.Select(i => new
-            {
-                Name = i.Name,
-                Website = i.WebsiteUrl,
-                Address = $"{i.AddressStreet}, {i.AddressCity}, {i.AddressCountry?.Name}",
-                Thesis = i.Thesis,
-                CheckSize = $"{i.CheckSizeMin} - {i.CheckSizeMax}",
-                _ = Layout.Horizontal().Gap(1)
+        {
+            Name = i.Name,
+            Website = i.WebsiteUrl,
+            Address = $"{i.AddressStreet}, {i.AddressCity}, {i.AddressCountry?.Name}",
+            Thesis = i.Thesis,
+            CheckSize = $"{i.CheckSizeMin} - {i.CheckSizeMax}",
+            _ = Layout.Horizontal().Gap(1)
                     | Icons.Ellipsis
                         .ToButton()
                         .Ghost()
@@ -52,7 +52,7 @@ public class InvestorTypeInvestorsBlade(int investorTypeId) : ViewBase
                         .Outline()
                         .Tooltip("Edit")
                         .ToTrigger((isOpen) => new InvestorTypeInvestorsEditSheet(isOpen, refreshToken, i.Id))
-            })
+        })
             .ToTable()
             .RemoveEmptyColumns();
 

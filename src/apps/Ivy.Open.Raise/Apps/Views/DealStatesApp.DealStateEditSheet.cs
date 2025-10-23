@@ -6,21 +6,13 @@ public class DealStateEditSheet(IState<bool> isOpen, RefreshToken refreshToken, 
     {
         var factory = UseService<DataContextFactory>();
         var dealState = UseState(() => factory.CreateDbContext().DealStates.FirstOrDefault(e => e.Id == dealStateId)!);
-        var client = UseService<IClientProvider>();
 
         UseEffect(() =>
         {
-            try
-            {
-                using var db = factory.CreateDbContext();
-                db.DealStates.Update(dealState.Value);
-                db.SaveChanges();
-                refreshToken.Refresh();
-            }
-            catch (Exception ex)
-            {
-                client.Toast(ex);
-            }
+            using var db = factory.CreateDbContext();
+            db.DealStates.Update(dealState.Value);
+            db.SaveChanges();
+            refreshToken.Refresh();
         }, [dealState]);
 
         return dealState

@@ -48,11 +48,11 @@ public class CurrencyDetailsBlade(string currencyId) : ViewBase
 
         var detailsCard = new Card(
             content: new
-                {
-                    currencyValue.Id,
-                    currencyValue.Name,
-                    currencyValue.Symbol
-                }.ToDetails()
+            {
+                currencyValue.Id,
+                currencyValue.Name,
+                currencyValue.Symbol
+            }.ToDetails()
                 .RemoveEmpty()
                 .Builder(e => e.Id, e => e.CopyToClipboard()),
             footer: Layout.Horizontal().Width(Size.Full()).Gap(1).Align(Align.Right)

@@ -6,22 +6,14 @@ public class DeckDeckLinksEditSheet(IState<bool> isOpen, RefreshToken refreshTok
     {
         var factory = UseService<DataContextFactory>();
         var deckLink = UseState(() => factory.CreateDbContext().DeckLinks.FirstOrDefault(e => e.Id == deckLinkId)!);
-        var client = UseService<IClientProvider>();
 
         UseEffect(() =>
         {
-            try
-            {
-                using var db = factory.CreateDbContext();
-                deckLink.Value.UpdatedAt = DateTime.UtcNow;
-                db.DeckLinks.Update(deckLink.Value);
-                db.SaveChanges();
-                refreshToken.Refresh();
-            }
-            catch (Exception ex)
-            {
-                client.Toast(ex);
-            }
+            using var db = factory.CreateDbContext();
+            deckLink.Value.UpdatedAt = DateTime.UtcNow;
+            db.DeckLinks.Update(deckLink.Value);
+            db.SaveChanges();
+            refreshToken.Refresh();
         }, [deckLink]);
 
         return deckLink

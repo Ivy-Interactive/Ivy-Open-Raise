@@ -17,7 +17,7 @@ public class StartupStageOrganizationSettingsBlade(int startup_stage) : ViewBase
                 .Include(e => e.Currency)
                 .Where(e => e.StartupStage == startup_stage)
                 .ToArrayAsync());
-        }, [ EffectTrigger.AfterInit(), refreshToken ]);
+        }, [EffectTrigger.AfterInit(), refreshToken]);
 
         Action OnDelete(int id)
         {
@@ -37,16 +37,16 @@ public class StartupStageOrganizationSettingsBlade(int startup_stage) : ViewBase
         if (settings.Value == null) return null;
 
         var table = settings.Value.Select(e => new
-            {
-                Country = e.Country.Name,
-                Currency = e.Currency.Name,
-                ElevatorPitch = e.ElevatorPitch,
-                Cofounders = e.Cofounders,
-                RaiseTargetMin = e.RaiseTargetMin,
-                RaiseTargetMax = e.RaiseTargetMax,
-                RaiseTicketSize = e.RaiseTicketSize,
-                StartupWebsite = e.StartupWebsite,
-                _ = Layout.Horizontal().Gap(1)
+        {
+            Country = e.Country.Name,
+            Currency = e.Currency.Name,
+            ElevatorPitch = e.ElevatorPitch,
+            Cofounders = e.Cofounders,
+            RaiseTargetMin = e.RaiseTargetMin,
+            RaiseTargetMax = e.RaiseTargetMax,
+            RaiseTicketSize = e.RaiseTicketSize,
+            StartupWebsite = e.StartupWebsite,
+            _ = Layout.Horizontal().Gap(1)
                     | Icons.Ellipsis
                         .ToButton()
                         .Ghost()
@@ -56,7 +56,7 @@ public class StartupStageOrganizationSettingsBlade(int startup_stage) : ViewBase
                         .Outline()
                         .Tooltip("Edit")
                         .ToTrigger((isOpen) => new StartupStageOrganizationSettingsEditSheet(isOpen, refreshToken, e.Id))
-            })
+        })
             .ToTable()
             .RemoveEmptyColumns();
 

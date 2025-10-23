@@ -13,9 +13,9 @@ public class UserDealsBlade(Guid ownerId) : ViewBase
         {
             await using var db = factory.CreateDbContext();
             deals.Set(await db.Deals.Where(e => e.OwnerId == ownerId).ToArrayAsync());
-        }, [ EffectTrigger.AfterInit(), refreshToken ]);
-        
-        Action OnDelete(Guid id)  
+        }, [EffectTrigger.AfterInit(), refreshToken]);
+
+        Action OnDelete(Guid id)
         {
             return () =>
             {
@@ -29,17 +29,17 @@ public class UserDealsBlade(Guid ownerId) : ViewBase
                 }, "Delete Deal", AlertButtonSet.OkCancel);
             };
         };
-        
+
         if (deals.Value == null) return null;
-        
+
         var table = deals.Value.Select(e => new
-            {
-                ContactId = e.ContactId,
-                DealState = e.DealState.Name,
-                AmountFrom = e.AmountFrom,
-                AmountTo = e.AmountTo,
-                e.Priority,
-                _ = Layout.Horizontal().Gap(1)
+        {
+            ContactId = e.ContactId,
+            DealState = e.DealState.Name,
+            AmountFrom = e.AmountFrom,
+            AmountTo = e.AmountTo,
+            e.Priority,
+            _ = Layout.Horizontal().Gap(1)
                     | Icons.Ellipsis
                         .ToButton()
                         .Ghost()
@@ -49,7 +49,7 @@ public class UserDealsBlade(Guid ownerId) : ViewBase
                         .Outline()
                         .Tooltip("Edit")
                         .ToTrigger((isOpen) => new UserDealsEditSheet(isOpen, refreshToken, e.Id))
-            })
+        })
             .ToTable()
             .RemoveEmptyColumns()
         ;

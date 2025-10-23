@@ -6,22 +6,14 @@ public class CountryOrganizationSettingsEditSheet(IState<bool> isOpen, RefreshTo
     {
         var factory = UseService<DataContextFactory>();
         var organizationSettings = UseState(() => factory.CreateDbContext().OrganizationSettings.FirstOrDefault(e => e.Id == organizationSettingsId)!);
-        var client = UseService<IClientProvider>();
 
         UseEffect(() =>
         {
-            try
-            {
-                using var db = factory.CreateDbContext();
-                organizationSettings.Value.UpdatedAt = DateTime.UtcNow;
-                db.OrganizationSettings.Update(organizationSettings.Value);
-                db.SaveChanges();
-                refreshToken.Refresh();
-            }
-            catch (Exception ex)
-            {
-                client.Toast(ex);
-            }
+            using var db = factory.CreateDbContext();
+            organizationSettings.Value.UpdatedAt = DateTime.UtcNow;
+            db.OrganizationSettings.Update(organizationSettings.Value);
+            db.SaveChanges();
+            refreshToken.Refresh();
         }, [organizationSettings]);
 
         return organizationSettings

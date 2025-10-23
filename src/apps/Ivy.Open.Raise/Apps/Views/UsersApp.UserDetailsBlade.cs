@@ -50,13 +50,13 @@ public class UserDetailsBlade(Guid userId) : ViewBase
 
         var detailsCard = new Card(
             content: new
-                {
-                    FullName = $"{userValue.FirstName} {userValue.LastName}",
-                    userValue.Email,
-                    userValue.Title,
-                    userValue.LinkedinUrl,
-                    userValue.XUrl
-                }.ToDetails()
+            {
+                FullName = $"{userValue.FirstName} {userValue.LastName}",
+                userValue.Email,
+                userValue.Title,
+                userValue.LinkedinUrl,
+                userValue.XUrl
+            }.ToDetails()
                 .RemoveEmpty()
                 .Builder(e => e.Email, e => e.CopyToClipboard()),
             footer: Layout.Horizontal().Width(Size.Full()).Gap(1).Align(Align.Right)

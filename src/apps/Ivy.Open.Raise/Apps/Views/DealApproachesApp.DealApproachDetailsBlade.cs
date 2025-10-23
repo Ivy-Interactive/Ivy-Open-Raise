@@ -48,10 +48,10 @@ public class DealApproachDetailsBlade(int dealApproachId) : ViewBase
 
         var detailsCard = new Card(
             content: new
-                {
-                    dealApproachValue.Id,
-                    dealApproachValue.Name
-                }.ToDetails()
+            {
+                dealApproachValue.Id,
+                dealApproachValue.Name
+            }.ToDetails()
                 .RemoveEmpty()
                 .Builder(e => e.Id, e => e.CopyToClipboard()),
             footer: Layout.Horizontal().Width(Size.Full()).Gap(1).Align(Align.Right)

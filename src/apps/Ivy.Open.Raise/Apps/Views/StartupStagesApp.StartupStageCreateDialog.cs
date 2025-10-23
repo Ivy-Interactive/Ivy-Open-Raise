@@ -12,19 +12,11 @@ public class StartupStageCreateDialog(IState<bool> isOpen, RefreshToken refreshT
     {
         var factory = UseService<DataContextFactory>();
         var startupStage = UseState(() => new StartupStageCreateRequest());
-        var client = UseService<IClientProvider>();
 
         UseEffect(() =>
         {
-            try
-            {
-                var startupStageId = CreateStartupStage(factory, startupStage.Value);
-                refreshToken.Refresh(startupStageId);
-            }
-            catch (Exception ex)
-            {
-                client.Toast(ex);
-            }
+            var startupStageId = CreateStartupStage(factory, startupStage.Value);
+            refreshToken.Refresh(startupStageId);
         }, [startupStage]);
 
         return startupStage

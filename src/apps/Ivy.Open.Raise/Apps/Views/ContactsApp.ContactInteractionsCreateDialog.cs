@@ -22,19 +22,11 @@ public class ContactInteractionsCreateDialog(IState<bool> isOpen, RefreshToken r
     {
         var factory = UseService<DataContextFactory>();
         var interaction = UseState(() => new InteractionCreateRequest());
-        var client = UseService<IClientProvider>();
 
         UseEffect(() =>
         {
-            try
-            {
-                CreateInteraction(factory, interaction.Value);
-                refreshToken.Refresh();
-            }
-            catch (Exception ex)
-            {
-                client.Toast(ex);
-            }
+            CreateInteraction(factory, interaction.Value);
+            refreshToken.Refresh();
         }, [interaction]);
 
         return interaction

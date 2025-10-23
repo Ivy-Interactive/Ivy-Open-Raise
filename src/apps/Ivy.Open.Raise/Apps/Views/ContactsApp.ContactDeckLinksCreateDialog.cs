@@ -15,19 +15,11 @@ public class ContactDeckLinksCreateDialog(IState<bool> isOpen, RefreshToken refr
     {
         var factory = UseService<DataContextFactory>();
         var deckLink = UseState(() => new DeckLinkCreateRequest());
-        var client = UseService<IClientProvider>();
 
         UseEffect(() =>
         {
-            try
-            {
-                var deckLinkId = CreateDeckLink(factory, deckLink.Value);
-                refreshToken.Refresh(deckLinkId);
-            }
-            catch (Exception ex)
-            {
-                client.Toast(ex);
-            }
+            var deckLinkId = CreateDeckLink(factory, deckLink.Value);
+            refreshToken.Refresh(deckLinkId);
         }, [deckLink]);
 
         return deckLink

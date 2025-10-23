@@ -17,7 +17,7 @@ public class CountryOrganizationSettingsBlade(int countryId) : ViewBase
                 .Include(e => e.StartupStageNavigation)
                 .Where(e => e.CountryId == countryId)
                 .ToArrayAsync());
-        }, [ EffectTrigger.AfterInit(), refreshToken ]);
+        }, [EffectTrigger.AfterInit(), refreshToken]);
 
         Action OnDelete(int id)
         {
@@ -37,15 +37,15 @@ public class CountryOrganizationSettingsBlade(int countryId) : ViewBase
         if (organizationSettings.Value == null) return null;
 
         var table = organizationSettings.Value.Select(e => new
-            {
-                Currency = e.Currency.Name,
-                StartupStage = e.StartupStageNavigation.Name,
-                ElevatorPitch = e.ElevatorPitch,
-                Cofounders = e.Cofounders,
-                RaiseTargetMin = e.RaiseTargetMin,
-                RaiseTargetMax = e.RaiseTargetMax,
-                RaiseTicketSize = e.RaiseTicketSize,
-                _ = Layout.Horizontal().Gap(1)
+        {
+            Currency = e.Currency.Name,
+            StartupStage = e.StartupStageNavigation.Name,
+            ElevatorPitch = e.ElevatorPitch,
+            Cofounders = e.Cofounders,
+            RaiseTargetMin = e.RaiseTargetMin,
+            RaiseTargetMax = e.RaiseTargetMax,
+            RaiseTicketSize = e.RaiseTicketSize,
+            _ = Layout.Horizontal().Gap(1)
                     | Icons.Ellipsis
                         .ToButton()
                         .Ghost()
@@ -55,7 +55,7 @@ public class CountryOrganizationSettingsBlade(int countryId) : ViewBase
                         .Outline()
                         .Tooltip("Edit")
                         .ToTrigger((isOpen) => new CountryOrganizationSettingsEditSheet(isOpen, refreshToken, e.Id))
-            })
+        })
             .ToTable()
             .RemoveEmptyColumns();
 

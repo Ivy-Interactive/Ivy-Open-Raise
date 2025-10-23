@@ -17,7 +17,7 @@ public class DealStateDealsBlade(int dealStateId) : ViewBase
                 .Include(d => d.Owner)
                 .Where(d => d.DealStateId == dealStateId)
                 .ToArrayAsync());
-        }, [ EffectTrigger.AfterInit(), refreshToken ]);
+        }, [EffectTrigger.AfterInit(), refreshToken]);
 
         Action OnDelete(Guid id)
         {
@@ -37,14 +37,14 @@ public class DealStateDealsBlade(int dealStateId) : ViewBase
         if (deals.Value == null) return null;
 
         var table = deals.Value.Select(d => new
-            {
-                ContactName = $"{d.Contact.FirstName} {d.Contact.LastName}",
-                OwnerName = $"{d.Owner.FirstName} {d.Owner.LastName}",
-                AmountRange = $"{d.AmountFrom?.ToString() ?? "N/A"} - {d.AmountTo?.ToString() ?? "N/A"}",
-                Priority = d.Priority?.ToString() ?? "N/A",
-                Notes = d.Notes,
-                NextAction = d.NextAction?.ToString("yyyy-MM-dd") ?? "N/A",
-                _ = Layout.Horizontal().Gap(1)
+        {
+            ContactName = $"{d.Contact.FirstName} {d.Contact.LastName}",
+            OwnerName = $"{d.Owner.FirstName} {d.Owner.LastName}",
+            AmountRange = $"{d.AmountFrom?.ToString() ?? "N/A"} - {d.AmountTo?.ToString() ?? "N/A"}",
+            Priority = d.Priority?.ToString() ?? "N/A",
+            Notes = d.Notes,
+            NextAction = d.NextAction?.ToString("yyyy-MM-dd") ?? "N/A",
+            _ = Layout.Horizontal().Gap(1)
                     | Icons.Ellipsis
                         .ToButton()
                         .Ghost()
@@ -54,7 +54,7 @@ public class DealStateDealsBlade(int dealStateId) : ViewBase
                         .Outline()
                         .Tooltip("Edit")
                         .ToTrigger((isOpen) => new DealStateDealsEditSheet(isOpen, refreshToken, d.Id))
-            })
+        })
             .ToTable()
             .RemoveEmptyColumns();
 
