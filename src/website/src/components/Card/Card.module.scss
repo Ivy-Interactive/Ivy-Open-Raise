@@ -1,8 +1,5 @@
-@use "../../styles/colors.scss" as colors;
-@use "sass:color";
-
 .card {
-  background-color: colors.$color-bg-dark;
+  background-color: var(--color-bg-dark);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
   transition: all 0.3s ease;
@@ -10,7 +7,7 @@
 
   // Font styles for consistent text within cards
   font-family: "Inter", sans-serif;
-  color: colors.$color-text-white;
+  color: var(--color-text-white);
 
   // Hover variant (for interactive cards like features)
   &--hover {
@@ -19,14 +16,14 @@
     &:hover {
       transform: translateY(-4px);
       box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
-      border-color: colors.$color-primary-teal;
-      background-color: color.adjust(colors.$color-bg-dark, $lightness: 5%);
+      border-color: var(--color-primary-teal);
+      background-color: #1a1d29;
     }
   }
 
   // CTA variant (for call-to-action sections)
   &--cta {
-    background-color: colors.$color-bg-dark;
+    background-color: var(--color-bg-dark);
     border-radius: 8px;
     max-width: 600px;
   }
@@ -71,7 +68,7 @@
   h4,
   h5,
   h6 {
-    color: colors.$color-text-white;
+    color: var(--color-text-white);
     font-family: "Inter", sans-serif;
     font-weight: 600;
     margin-top: 0;
@@ -79,7 +76,7 @@
 
   // Common paragraph styles
   p {
-    color: colors.$color-gray-400;
+    color: var(--color-gray-400);
     font-family: "Inter", sans-serif;
     line-height: 1.6;
     margin: 0;
@@ -87,7 +84,7 @@
 
   // Common styles for small text
   small {
-    color: colors.$color-gray-500;
+    color: var(--color-gray-500);
     font-family: "Inter", sans-serif;
     font-size: 14px;
   }
