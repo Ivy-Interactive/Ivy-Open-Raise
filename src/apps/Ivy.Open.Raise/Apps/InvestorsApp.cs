@@ -86,16 +86,16 @@ public class InvestorsApp : ViewBase
                 .Hidden([i => i.Id])
                 
                 // Add icons to column headers
-                .Icon(i => i.Name, Icons.User)
-                .Icon(i => i.InvestorType, Icons.Building)
-                .Icon(i => i.Country, Icons.MapPin)
-                .Icon(i => i.WebsiteUrl, Icons.Globe)
-                .Icon(i => i.LinkedinUrl, Icons.Linkedin)
-                .Icon(i => i.XUrl, Icons.Twitter)
-                .Icon(i => i.CheckSizeRange, Icons.DollarSign)
-                .Icon(i => i.ContactsCount, Icons.Users)
-                .Icon(i => i.CreatedAt, Icons.Calendar)
-                .Icon(i => i.UpdatedAt, Icons.Clock)
+                // .Icon(i => i.Name, Icons.User)
+                // .Icon(i => i.InvestorType, Icons.Building)
+                // .Icon(i => i.Country, Icons.MapPin)
+                // .Icon(i => i.WebsiteUrl, Icons.Globe)
+                // .Icon(i => i.LinkedinUrl, Icons.Linkedin)
+                // .Icon(i => i.XUrl, Icons.Twitter)
+                // .Icon(i => i.CheckSizeRange, Icons.DollarSign)
+                // .Icon(i => i.ContactsCount, Icons.Users)
+                // .Icon(i => i.CreatedAt, Icons.Calendar)
+                // .Icon(i => i.UpdatedAt, Icons.Clock)
                 
                 // Group columns
                 .Group(i => i.Name, "Basic Info")
