@@ -19,17 +19,11 @@ public class InvestorsApp : ViewBase
             investors.Set(fetchedInvestors);
         }, []);
 
-        UseEffect(() =>
+        UseEffect(async () =>
         {
-            if (refreshToken.ReturnValue is Guid investorId)
-            {
-                // Refresh the investors list when a new investor is created
-                UseEffect(async () =>
-                {
-                    var fetchedInvestors = await FetchInvestors(factory);
-                    investors.Set(fetchedInvestors);
-                }, [refreshToken]);
-            }
+            // Refresh the investors list when refresh token changes
+            var fetchedInvestors = await FetchInvestors(factory);
+            investors.Set(fetchedInvestors);
         }, [refreshToken]);
 
         var createBtn = Icons.Plus.ToButton(_ =>
