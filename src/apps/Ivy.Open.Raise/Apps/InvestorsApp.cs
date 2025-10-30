@@ -24,14 +24,6 @@ public class InvestorsApp : ViewBase
     {
         var factory = UseService<DataContextFactory>();
         var refreshToken = this.UseRefreshToken();
-        var investors = UseState(Enumerable.Empty<InvestorRecord>().AsQueryable());
-
-        // Fetch investors on component mount and when refresh token changes
-        UseEffect(() =>
-        {
-            var fetchedInvestors = FetchInvestors(factory);
-            investors.Set(fetchedInvestors);
-        }, [EffectTrigger.AfterInit(), refreshToken]);
         
         var createBtn = Icons.Plus.ToButton(_ =>
         {
@@ -43,8 +35,7 @@ public class InvestorsApp : ViewBase
                 Text.H3("Investors"),
                 createBtn
             ),
-            
-            investors.Value.ToDataTable()
+            FetchInvestors(factory).ToDataTable()
                 .Header(i => i.Name, "Name")
                 .Header(i => i.InvestorType, "Type")
                 .Header(i => i.Country, "Country")
@@ -64,7 +55,7 @@ public class InvestorsApp : ViewBase
                 .Width(i => i.WebsiteUrl, Size.Px(150))
                 .Width(i => i.LinkedinUrl, Size.Px(150))
                 .Width(i => i.XUrl, Size.Px(150))
-                .Width(i => i.CheckSizeRange, Size.Px(120))
+                .Width(i => i.CheckSizeRange, Size.Px(160))
                 .Width(i => i.ContactsCount, Size.Px(100))
                 .Width(i => i.CreatedAt, Size.Px(150))
                 .Width(i => i.UpdatedAt, Size.Px(150))
