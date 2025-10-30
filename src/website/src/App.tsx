@@ -1,4 +1,5 @@
 import Hero from "./components/Hero/Hero";
+import TextSection from "./components/TextSection/TextSection";
 import Feature from "./components/Feature/Feature";
 import Footer from "./components/Footer/Footer";
 
@@ -20,6 +21,7 @@ function App() {
         ctaMediaSrc="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
         ctaMediaAlt="Success Story"
       />
+      <TextSection />
       <Feature />
       <Footer
         socialLinks={{

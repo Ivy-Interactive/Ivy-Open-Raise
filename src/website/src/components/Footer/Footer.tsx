@@ -31,37 +31,40 @@ const Footer: React.FC<FooterProps> = ({
     {
       title: "Product",
       links: [
-        { label: "Features", href: "#features" },
-        { label: "Pricing", href: "#pricing" },
-        { label: "Success Stories", href: "#success-stories" },
-        { label: "FAQ", href: "#faq" },
+        { label: "Home", href: "https://ivy.app/" },
+        { label: "Pricing", href: "https://ivy.app/pricing" },
+        { label: "FAQ", href: "https://ivy.app/faq" },
+        { label: "Contact", href: "https://ivy.app/contact" },
       ],
     },
     {
-      title: "Company",
+      title: "Careers",
       links: [
-        { label: "About", href: "#about" },
-        { label: "Blog", href: "#blog" },
-        { label: "Careers", href: "#careers" },
-        { label: "Contact", href: "#contact" },
+        { label: "Career Opportunities", href: "https://ivy.app/career" },
+        { label: "Engineering Manager", href: "https://ivy.app/career/founding-engineering-manager" },
+        { label: "AI Engineer", href: "https://ivy.app/career/founding-ai-engineer" },
+        { label: "Design Engineer", href: "https://ivy.app/career/founding-design-engineer-1" },
+        { label: "Community Manager", href: "https://ivy.app/career/open-source-community-manager" },
+        { label: "Growth Specialist", href: "https://ivy.app/career/product-led-growth-specialist" },
       ],
     },
     {
       title: "Resources",
       links: [
-        { label: "Documentation", href: "#docs" },
-        { label: "Help Center", href: "#help" },
-        { label: "Community", href: "#community" },
-        { label: "API", href: "#api" },
+        { label: "AI-First Framework for .NET", href: "https://ivy.app/blog/the-ai-first-framework-for-net-business-apps" },
+        { label: "AI in Dashboard Development", href: "https://ivy.app/blog/how-ai-is-disrupting-dashboard-development-in-net-with-ivy" },
+        { label: "Becoming AI-First", href: "https://ivy.app/blog/transforming-your-company-into-an-ai-first-company" },
+        { label: "Business Opportunities", href: "https://ivy.app/blog/the-ai-first-shift-business-opportunities-with-ivy-s-framework" },
+        { label: "Fortnox Integration", href: "https://ivy.app/partner/automate-your-fortnox-accounting-with-ivy" },
       ],
     },
     {
       title: "Legal",
       links: [
-        { label: "Privacy Policy", href: "#privacy" },
-        { label: "Terms of Service", href: "#terms" },
-        { label: "Cookie Policy", href: "#cookies" },
-        { label: "Security", href: "#security" },
+        { label: "Terms of Service", href: "https://ivy.app/legal/terms-of-service" },
+        { label: "Privacy Policy", href: "https://ivy.app/legal/privacy-policy" },
+        { label: "Cookie Policy", href: "https://ivy.app/legal/cookie-policy" },
+        { label: "Refund Policy", href: "https://ivy.app/legal/refund-policy" },
       ],
     },
   ];
@@ -87,7 +90,12 @@ const Footer: React.FC<FooterProps> = ({
                 <ul className={styles.linkList}>
                   {section.links.map((link, linkIndex) => (
                     <li key={linkIndex}>
-                      <a href={link.href} className={styles.link}>
+                      <a
+                        href={link.href}
+                        className={styles.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
                         {link.label}
                       </a>
                     </li>

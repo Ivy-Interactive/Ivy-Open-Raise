@@ -1,9 +1,8 @@
 .hero {
   background-color: var(--color-bg-hero);
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  padding: 60px 200px;
+  padding: 120px 200px;
   box-sizing: border-box;
   position: relative;
   overflow: hidden;
@@ -25,11 +24,11 @@
   }
 
   @media (max-width: 1440px) {
-    padding: 60px 100px;
+    padding: 100px 100px;
   }
 
   @media (max-width: 768px) {
-    padding: 60px 24px;
+    padding: 80px 24px;
   }
 }
 
@@ -38,8 +37,6 @@
   flex-direction: column;
   gap: 64px;
   width: 100%;
-  flex: 1;
-  justify-content: center;
   position: relative;
   z-index: 1;
 }
@@ -77,9 +74,7 @@
   display: flex;
   flex-direction: column;
   gap: 48px;
-  flex: 1;
   align-items: center;
-  justify-content: center;
 
   @media (max-width: 1024px) {
     flex-direction: column;
