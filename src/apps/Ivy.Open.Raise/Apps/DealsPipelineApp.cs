@@ -20,23 +20,19 @@ public class DealsPipelineApp : ViewBase
             deals.Set(fetchedDeals);
         }, []);
 
-        UseEffect(() =>
+        // Refresh deals when refresh token changes (for both create and update operations)
+        UseEffect(async () =>
         {
-            if (refreshToken.ReturnValue is Guid dealId)
-            {
-                // Refresh the deals list when a new deal is created
-                UseEffect(async () =>
-                {
-                    var fetchedDeals = await FetchDeals(factory);
-                    deals.Set(fetchedDeals);
-                }, [refreshToken]);
-            }
+            var fetchedDeals = await FetchDeals(factory);
+            deals.Set(fetchedDeals);
         }, [refreshToken]);
 
         var createBtn = Icons.Plus.ToButton(_ =>
         {
             // Handle create deal logic here
         }).Outline().Tooltip("Create Deal").ToTrigger((isOpen) => new DealCreateDialog(isOpen, refreshToken));
+
+        var isEditSheetOpen = UseState(false);
 
         var kanban = deals.Value
                 .ToKanban(
@@ -110,6 +106,7 @@ public class DealsPipelineApp : ViewBase
                     if (Guid.TryParse(cardId?.ToString(), out var dealId))
                     {
                         selectedDealId.Set(dealId);
+                        isEditSheetOpen.Set(true);
                     }
                 })
                 .Empty(
@@ -120,15 +117,15 @@ public class DealsPipelineApp : ViewBase
                 .Height(Size.Full())
                 .Width(Size.Fit());
 
-        var isEditSheetOpen = UseState(false);
-        
+        // Close the edit sheet when refresh token changes (deal was saved)
         UseEffect(() =>
         {
-            if (selectedDealId.Value.HasValue)
+            if (refreshToken.ReturnValue != null)
             {
-                isEditSheetOpen.Set(true);
+                isEditSheetOpen.Set(false);
+                selectedDealId.Set((Guid?)null);
             }
-        }, selectedDealId);
+        }, [refreshToken]);
         
         return Layout.Vertical(
             kanban,
