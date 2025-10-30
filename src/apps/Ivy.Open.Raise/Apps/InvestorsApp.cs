@@ -3,7 +3,7 @@ using Ivy.Open.Raise.Apps.Views;
 
 namespace Ivy.Open.Raise.Apps;
 
-[App(icon: Icons.User, path: ["Apps"], order:1)]
+[App(icon: Icons.User, path: ["Apps"], order: 1)]
 public class InvestorsApp : ViewBase
 {
     private record InvestorRecord(
@@ -24,17 +24,13 @@ public class InvestorsApp : ViewBase
     {
         var factory = UseService<DataContextFactory>();
         var refreshToken = this.UseRefreshToken();
-        
-        var createBtn = Icons.Plus.ToButton(_ =>
-        {
-            // Handle create investor logic here
-        }).Outline().Tooltip("Create Investor").ToTrigger((isOpen) => new InvestorCreateDialog(isOpen, refreshToken));
 
-        return Layout.Vertical(
-            Layout.Horizontal(
-                Text.H3("Investors"),
-                createBtn
-            ),
+        var createBtn = Icons.Plus.ToButton(_ => { })
+                            .Outline()
+                            .Tooltip("Create Investor")
+                            .ToTrigger((isOpen) => new InvestorCreateDialog(isOpen, refreshToken));
+
+        return
             FetchInvestors(factory).ToDataTable()
                 .Header(i => i.Name, "Name")
                 .Header(i => i.InvestorType, "Type")
@@ -47,7 +43,7 @@ public class InvestorsApp : ViewBase
                 .Header(i => i.CreatedAt, "Created")
                 .Header(i => i.UpdatedAt, "Updated")
                 .Header(i => i.Id, "ID")
-                
+
                 // Set column widths
                 .Width(i => i.Name, Size.Px(200))
                 .Width(i => i.InvestorType, Size.Px(120))
@@ -60,7 +56,7 @@ public class InvestorsApp : ViewBase
                 .Width(i => i.CreatedAt, Size.Px(150))
                 .Width(i => i.UpdatedAt, Size.Px(150))
                 .Width(i => i.Id, Size.Px(100))
-                
+
                 // Set alignment
                 .Align(i => i.Name, Align.Left)
                 .Align(i => i.InvestorType, Align.Left)
@@ -73,10 +69,10 @@ public class InvestorsApp : ViewBase
                 .Align(i => i.CreatedAt, Align.Left)
                 .Align(i => i.UpdatedAt, Align.Left)
                 .Align(i => i.Id, Align.Left)
-                
+
                 // Hide ID column
                 .Hidden([i => i.Id])
-                
+
                 // Group columns
                 .Group(i => i.Name, "Basic Info")
                 .Group(i => i.InvestorType, "Basic Info")
@@ -88,7 +84,7 @@ public class InvestorsApp : ViewBase
                 .Group(i => i.ContactsCount, "Investment Info")
                 .Group(i => i.CreatedAt, "Timestamps")
                 .Group(i => i.UpdatedAt, "Timestamps")
-                
+
                 // Configure DataTable
                 .Config(config =>
                 {
@@ -102,11 +98,10 @@ public class InvestorsApp : ViewBase
                     config.ShowIndexColumn = true;
                     config.ShowGroups = true;
                     config.ShowColumnTypeIcons = false;
-                })
-        );
+                });
     }
 
-    private IQueryable<InvestorRecord> FetchInvestors(DataContextFactory factory)
+    private static IQueryable<InvestorRecord> FetchInvestors(DataContextFactory factory)
     {
         var db = factory.CreateDbContext();
 
@@ -124,11 +119,11 @@ public class InvestorsApp : ViewBase
                 i.WebsiteUrl,
                 i.LinkedinUrl,
                 i.XUrl,
-                i.CheckSizeMin.HasValue && i.CheckSizeMax.HasValue 
+                i.CheckSizeMin.HasValue && i.CheckSizeMax.HasValue
                     ? $"${i.CheckSizeMin:N0} - ${i.CheckSizeMax:N0}"
-                    : i.CheckSizeMin.HasValue 
+                    : i.CheckSizeMin.HasValue
                         ? $"${i.CheckSizeMin:N0}+"
-                        : i.CheckSizeMax.HasValue 
+                        : i.CheckSizeMax.HasValue
                             ? $"Up to ${i.CheckSizeMax:N0}"
                             : "Not specified",
                 i.Contacts.Count,
