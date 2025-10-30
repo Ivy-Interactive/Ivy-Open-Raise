@@ -11,6 +11,7 @@ public class DealsPipelineApp : ViewBase
         var factory = UseService<DataContextFactory>();
         var refreshToken = this.UseRefreshToken();
         var deals = UseState<DealRecord[]>([]);
+        var selectedDealId = UseState((Guid?)null);
 
         // Fetch deals on component mount and when refresh token changes
         UseEffect(async () =>
@@ -37,7 +38,7 @@ public class DealsPipelineApp : ViewBase
             // Handle create deal logic here
         }).Outline().Tooltip("Create Deal").ToTrigger((isOpen) => new DealCreateDialog(isOpen, refreshToken));
 
-        return deals.Value
+        var kanban = deals.Value
                 .ToKanban(
                     groupBySelector: deal => deal.DealStateName,
                     idSelector: deal => deal.Id.ToString(),
@@ -104,6 +105,13 @@ public class DealsPipelineApp : ViewBase
 
                     // Here you would typically delete from database
                 })
+                .HandleClick(cardId =>
+                {
+                    if (Guid.TryParse(cardId?.ToString(), out var dealId))
+                    {
+                        selectedDealId.Set(dealId);
+                    }
+                })
                 .Empty(
                     new Card()
                         .Title("No Deals")
@@ -111,6 +119,27 @@ public class DealsPipelineApp : ViewBase
                 )
                 .Height(Size.Full())
                 .Width(Size.Fit());
+
+        var isEditSheetOpen = UseState(false);
+        
+        UseEffect(() =>
+        {
+            if (selectedDealId.Value.HasValue)
+            {
+                isEditSheetOpen.Set(true);
+            }
+        }, selectedDealId);
+        
+        return Layout.Vertical(
+            kanban,
+            isEditSheetOpen.Value && selectedDealId.Value.HasValue
+                ? new DealEditSheet(
+                    isEditSheetOpen,
+                    refreshToken,
+                    selectedDealId.Value!.Value
+                )
+                : null
+        );
     }
 
     private async Task<DealRecord[]> FetchDeals(DataContextFactory factory)
