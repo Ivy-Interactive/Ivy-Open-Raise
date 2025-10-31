@@ -23,13 +23,7 @@ function App() {
       />
       <TextSection />
       <Feature />
-      <Footer
-        socialLinks={{
-          twitter: "https://twitter.com/openraise",
-          linkedin: "https://linkedin.com/company/openraise",
-          github: "https://github.com/openraise",
-        }}
-      />
+      <Footer />
     </div>
   );
 }
