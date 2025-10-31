@@ -31,7 +31,7 @@ public class DealListBlade : ViewBase
         var createBtn = Icons.Plus.ToButton(_ =>
         {
             blades.Pop(this);
-        }).Outline().Tooltip("Create Deal").ToTrigger((isOpen) => new DealCreateDialog(isOpen, refreshToken));
+        }).Ghost().Tooltip("Create Deal").ToTrigger((isOpen) => new DealCreateDialog(isOpen, refreshToken));
 
         return new FilteredListView<DealListRecord>(
             fetchRecords: (filter) => FetchDeals(factory, filter),

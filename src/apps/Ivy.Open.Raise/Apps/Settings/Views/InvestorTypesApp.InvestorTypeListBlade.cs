@@ -31,7 +31,7 @@ public class InvestorTypeListBlade : ViewBase
         var createBtn = Icons.Plus.ToButton(_ =>
         {
             blades.Pop(this);
-        }).Outline().Tooltip("Create Investor Type").ToTrigger((isOpen) => new InvestorTypeCreateDialog(isOpen, refreshToken));
+        }).Ghost().Tooltip("Create Investor Type").ToTrigger((isOpen) => new InvestorTypeCreateDialog(isOpen, refreshToken));
 
         return new FilteredListView<InvestorTypeListRecord>(
             fetchRecords: (filter) => FetchInvestorTypes(factory, filter),

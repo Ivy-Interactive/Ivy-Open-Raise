@@ -31,7 +31,7 @@ public class InteractionTypeListBlade : ViewBase
         var createBtn = Icons.Plus.ToButton(_ =>
         {
             blades.Pop(this);
-        }).Outline().Tooltip("Create Interaction Type").ToTrigger((isOpen) => new InteractionTypeCreateDialog(isOpen, refreshToken));
+        }).Ghost().Tooltip("Create Interaction Type").ToTrigger((isOpen) => new InteractionTypeCreateDialog(isOpen, refreshToken));
 
         return new FilteredListView<InteractionTypeListRecord>(
             fetchRecords: (filter) => FetchInteractionTypes(factory, filter),

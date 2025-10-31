@@ -14,13 +14,13 @@
     <EmbeddedResource Include="Assets/**/*" />
   </ItemGroup>
 
-  <PropertyGroup>
-    <IvyProjectPath Condition="'$(IVY_PROJECT_PATH)' != '' AND Exists('$(IVY_PROJECT_PATH)')">$(IVY_PROJECT_PATH)</IvyProjectPath>
-  </PropertyGroup>
+<!--  <PropertyGroup>-->
+<!--    <IvyProjectPath Condition="'$(IVY_PROJECT_PATH)' != '' AND Exists('$(IVY_PROJECT_PATH)')">$(IVY_PROJECT_PATH)</IvyProjectPath>-->
+<!--  </PropertyGroup>-->
 
   <ItemGroup>
     <PackageReference Include="AWSSDK.S3" Version="4.0.7.13" />
-    <PackageReference Include="Ivy" Version="1.0.125.0" Condition="'$(IvyProjectPath)' == ''" />
+<!--    <PackageReference Include="Ivy" Version="1.0.125.0" Condition="'$(IvyProjectPath)' == ''" />-->
     <PackageReference Include="MailKit" Version="4.14.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.10" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.10">
@@ -31,8 +31,12 @@
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(IvyProjectPath)' != ''">
-    <ProjectReference Include="$(IvyProjectPath)" />
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\Ivy-Framework\Ivy\Ivy.csproj" />
   </ItemGroup>
+
+<!--  <ItemGroup Condition="'$(IvyProjectPath)' != ''">-->
+<!--    <ProjectReference Include="$(IvyProjectPath)" />-->
+<!--  </ItemGroup>-->
 
 </Project>

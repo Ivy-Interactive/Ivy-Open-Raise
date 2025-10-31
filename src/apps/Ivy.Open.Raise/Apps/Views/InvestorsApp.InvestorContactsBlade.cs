@@ -54,7 +54,7 @@ public class InvestorContactsBlade(Guid investorId) : ViewBase
             .ToTable()
             .RemoveEmptyColumns();
 
-        var addBtn = new Button("Add Contact").Icon(Icons.Plus).Outline()
+        var addBtn = new Button("Add Contact").Icon(Icons.Plus).Ghost()
             .ToTrigger((isOpen) => new InvestorContactsCreateDialog(isOpen, refreshToken, investorId));
 
         return new Fragment()

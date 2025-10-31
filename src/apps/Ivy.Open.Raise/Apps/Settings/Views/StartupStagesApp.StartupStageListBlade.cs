@@ -31,7 +31,7 @@ public class StartupStageListBlade : ViewBase
         var createBtn = Icons.Plus.ToButton(_ =>
         {
             blades.Pop(this);
-        }).Outline().Tooltip("Create Startup Stage").ToTrigger((isOpen) => new StartupStageCreateDialog(isOpen, refreshToken));
+        }).Ghost().Tooltip("Create Startup Stage").ToTrigger((isOpen) => new StartupStageCreateDialog(isOpen, refreshToken));
 
         return new FilteredListView<StartupStageListRecord>(
             fetchRecords: (filter) => FetchStartupStages(factory, filter),

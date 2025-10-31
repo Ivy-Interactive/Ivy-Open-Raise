@@ -52,7 +52,7 @@ public class DeckDeckLinksBlade(Guid deckId) : ViewBase
             .ToTable()
             .RemoveEmptyColumns();
 
-        var addBtn = new Button("Add Deck Link").Icon(Icons.Plus).Outline()
+        var addBtn = new Button("Add Deck Link").Icon(Icons.Plus).Ghost()
             .ToTrigger((isOpen) => new DeckDeckLinksCreateDialog(isOpen, refreshToken, deckId));
 
         return new Fragment()

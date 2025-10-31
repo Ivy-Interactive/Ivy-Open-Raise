@@ -35,7 +35,7 @@ public class DealsPipelineApp : ViewBase
         var createBtn = Icons.Plus.ToButton(_ =>
         {
             // Handle create deal logic here
-        }).Outline().Tooltip("Create Deal").ToTrigger((isOpen) => new DealCreateDialog(isOpen, refreshToken));
+        }).Ghost().Tooltip("Create Deal").ToTrigger((isOpen) => new DealCreateDialog(isOpen, refreshToken));
 
         return deals.Value
                 .ToKanban(

@@ -17,7 +17,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Apps" />
-    <Folder Include="Connections" />
   </ItemGroup>
 
 </Project>

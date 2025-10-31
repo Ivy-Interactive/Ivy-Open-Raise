@@ -3,15 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{BAB392B8-7CD4-47A6-BB77-174677F8CF39}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "apps", "apps", "{FACA672D-9749-4FAC-95BF-C4A0B5010793}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ivy.Open.Raise", "src\apps\Ivy.Open.Raise\Ivy.Open.Raise.csproj", "{A0431B92-944C-4381-B8E8-5A72F53340AD}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Ivy.Open.Raise.Deploy", "Ivy.Open.Raise.Deploy", "{41B05405-1480-4660-9275-EEB261BE3785}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ivy.Open.Raise.Deploy", "src\apps\Ivy.Open.Raise.Deploy\Ivy.Open.Raise.Deploy.csproj", "{3DF1DAF9-43D9-45C6-8446-4A1F0288B1AA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ivy", "..\Ivy-Framework\Ivy\Ivy.csproj", "{7F20583D-6A39-45FB-83CA-73693FA86CB9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -30,11 +26,11 @@ Global
 		{3DF1DAF9-43D9-45C6-8446-4A1F0288B1AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3DF1DAF9-43D9-45C6-8446-4A1F0288B1AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3DF1DAF9-43D9-45C6-8446-4A1F0288B1AA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7F20583D-6A39-45FB-83CA-73693FA86CB9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7F20583D-6A39-45FB-83CA-73693FA86CB9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7F20583D-6A39-45FB-83CA-73693FA86CB9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7F20583D-6A39-45FB-83CA-73693FA86CB9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{FACA672D-9749-4FAC-95BF-C4A0B5010793} = {BAB392B8-7CD4-47A6-BB77-174677F8CF39}
-		{A0431B92-944C-4381-B8E8-5A72F53340AD} = {FACA672D-9749-4FAC-95BF-C4A0B5010793}
-		{41B05405-1480-4660-9275-EEB261BE3785} = {FACA672D-9749-4FAC-95BF-C4A0B5010793}
-		{3DF1DAF9-43D9-45C6-8446-4A1F0288B1AA} = {41B05405-1480-4660-9275-EEB261BE3785}
 	EndGlobalSection
 EndGlobal

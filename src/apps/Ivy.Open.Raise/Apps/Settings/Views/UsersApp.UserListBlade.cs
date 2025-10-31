@@ -31,7 +31,7 @@ public class UserListBlade : ViewBase
         var createBtn = Icons.Plus.ToButton(_ =>
         {
             blades.Pop(this);
-        }).Outline().Tooltip("Create User").ToTrigger((isOpen) => new UserCreateDialog(isOpen, refreshToken));
+        }).Ghost().Tooltip("Create User").ToTrigger((isOpen) => new UserCreateDialog(isOpen, refreshToken));
 
         return new FilteredListView<UserListRecord>(
             fetchRecords: (filter) => FetchUsers(factory, filter),

@@ -31,7 +31,7 @@ public class OrganizationSettingListBlade : ViewBase
         var createBtn = Icons.Plus.ToButton(_ =>
         {
             blades.Pop(this);
-        }).Outline().Tooltip("Create Organization Setting").ToTrigger((isOpen) => new OrganizationSettingCreateDialog(isOpen, refreshToken));
+        }).Ghost().Tooltip("Create Organization Setting").ToTrigger((isOpen) => new OrganizationSettingCreateDialog(isOpen, refreshToken));
 
         return new FilteredListView<OrganizationSettingListRecord>(
             fetchRecords: (filter) => FetchOrganizationSettings(factory, filter),
