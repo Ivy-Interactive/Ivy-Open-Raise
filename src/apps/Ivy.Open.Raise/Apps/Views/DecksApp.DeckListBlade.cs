@@ -2,7 +2,7 @@ namespace Ivy.Open.Raise.Apps.Views;
 
 public class DeckListBlade : ViewBase
 {
-    private record DeckListRecord(Guid Id, string Title, string FileType, long FileSize);
+    private record DeckListRecord(Guid Id, string Title);
 
     public override object? Build()
     {
@@ -26,7 +26,7 @@ public class DeckListBlade : ViewBase
         });
 
         ListItem CreateItem(DeckListRecord record) =>
-            new(title: record.Title, subtitle: record.FileType, onClick: onItemClicked, tag: record);
+            new(title: record.Title, subtitle: null, onClick: onItemClicked, tag: record);
 
         var createBtn = Icons.Plus.ToButton(_ =>
         {
@@ -53,13 +53,13 @@ public class DeckListBlade : ViewBase
         if (!string.IsNullOrWhiteSpace(filter))
         {
             filter = filter.Trim();
-            linq = linq.Where(e => e.Title.Contains(filter) || e.FileType.Contains(filter));
+            linq = linq.Where(e => e.Title.Contains(filter));
         }
 
         return await linq
             .OrderByDescending(e => e.CreatedAt)
             .Take(50)
-            .Select(e => new DeckListRecord(e.Id, e.Title, e.FileType, e.FileSize))
+            .Select(e => new DeckListRecord(e.Id, e.Title))
             .ToArrayAsync();
     }
 }

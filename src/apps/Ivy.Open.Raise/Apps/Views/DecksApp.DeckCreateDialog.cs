@@ -6,18 +6,9 @@ public class DeckCreateDialog(IState<bool> isOpen, RefreshToken refreshToken) : 
     {
         [Required]
         public string Title { get; init; } = "";
-
+        
         [Required]
-        public long? FileSize { get; init; } = null;
-
-        [Required]
-        public string FileType { get; init; } = "";
-
-        [Required]
-        public string FileName { get; init; } = "";
-
-        [Required]
-        public bool IsPrimary { get; init; } = false;
+        public FileUpload<BlobInfo> File { get; init; } = new();
     }
 
     public override object? Build()
@@ -44,15 +35,26 @@ public class DeckCreateDialog(IState<bool> isOpen, RefreshToken refreshToken) : 
         {
             Id = Guid.NewGuid(),
             Title = request.Title,
-            FileSize = request.FileSize!.Value,
-            FileType = request.FileType,
-            FileName = request.FileName,
-            CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
-            IsPrimary = request.IsPrimary
+            CreatedAt = DateTime.UtcNow
         };
-
         db.Decks.Add(deck);
+        
+        var deckVersion = new DeckVersion
+        {
+            Id = Guid.NewGuid(),
+            DeckId = deck.Id,
+            Name = "Version 1",
+            UpdatedAt = DateTime.UtcNow,
+            CreatedAt = DateTime.UtcNow,
+            IsPrimary = true,
+            BlobName = request.File.Content.BlobName,
+            ContentType = request.File.ContentType,
+            FileSize = request.File.Length,
+            FileName = request.File.FileName,
+        };
+        db.DeckVersions.Add(deckVersion);
+        
         db.SaveChanges();
 
         return deck.Id;

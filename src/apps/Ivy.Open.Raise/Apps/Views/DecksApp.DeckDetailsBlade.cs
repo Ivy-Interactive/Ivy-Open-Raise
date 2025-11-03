@@ -9,11 +9,12 @@ public class DeckDetailsBlade(Guid deckId) : ViewBase
         var refreshToken = this.UseRefreshToken();
         var deck = this.UseState<Deck?>();
         var deckLinksCount = this.UseState<int>();
+        var deckVersions = this.UseState<DeckVersion[]>();
         var (alertView, showAlert) = this.UseAlert();
 
         this.UseEffect(async () =>
         {
-            using var db = factory.CreateDbContext();
+            await using var db = factory.CreateDbContext();
             deck.Set(await db.Decks.SingleOrDefaultAsync(e => e.Id == deckId));
             deckLinksCount.Set(await db.DeckLinks.CountAsync(e => e.DeckId == deckId));
         }, [EffectTrigger.AfterInit(), refreshToken]);

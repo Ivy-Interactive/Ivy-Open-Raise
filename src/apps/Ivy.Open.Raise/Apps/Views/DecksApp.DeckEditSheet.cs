@@ -18,8 +18,6 @@ public class DeckEditSheet(IState<bool> isOpen, RefreshToken refreshToken, Guid 
 
         return deck
             .ToForm()
-            .Place(e => e.Title, e => e.FileName)
-            .Place(true, e => e.FileType, e => e.FileSize)
             .Remove(e => e.Id, e => e.CreatedAt, e => e.UpdatedAt, e => e.DeletedAt)
             .ToSheet(isOpen, "Edit Deck");
     }
