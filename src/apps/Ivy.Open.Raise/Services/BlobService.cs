@@ -37,7 +37,6 @@ public interface IBlobService
 
 public sealed record BlobInfo(string ContainerName, string BlobName, string ContentType, long Size, DateTime LastModified);
 
-
 public class BlobService : IBlobService
 {
     private readonly IAmazonS3 _s3Client;

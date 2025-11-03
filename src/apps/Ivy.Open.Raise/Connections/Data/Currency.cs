@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Ivy.Open.Raise.Connections.Data;
 
-[Table("currency")]
+[Table("currencies")]
 public partial class Currency
 {
     [Key]

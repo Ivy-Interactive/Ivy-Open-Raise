@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Ivy.Open.Raise.Connections.Data;
 
-[Table("interaction_type")]
+[Table("interaction_types")]
 public partial class InteractionType
 {
     [Key]

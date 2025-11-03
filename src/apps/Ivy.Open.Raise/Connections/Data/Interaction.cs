@@ -6,10 +6,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Ivy.Open.Raise.Connections.Data;
 
-[Table("interaction")]
-[Index("ContactId", Name = "IX_interaction_contact_id")]
-[Index("InteractionType", Name = "IX_interaction_interaction_type")]
-[Index("UserId", Name = "IX_interaction_user_id")]
+[Table("interactions")]
+[Index("ContactId", Name = "IX_interactions_contact_id")]
+[Index("InteractionType", Name = "IX_interactions_interaction_type")]
+[Index("UserId", Name = "IX_interactions_user_id")]
 public partial class Interaction
 {
     [Key]

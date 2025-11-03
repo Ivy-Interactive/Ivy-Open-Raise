@@ -6,11 +6,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Ivy.Open.Raise.Connections.Data;
 
-[Table("deal")]
-[Index("ContactId", Name = "IX_deal_contact_id")]
-[Index("DealApproachId", Name = "IX_deal_deal_approach_id")]
-[Index("DealStateId", Name = "IX_deal_deal_state_id")]
-[Index("OwnerId", Name = "IX_deal_owner_id")]
+[Table("deals")]
+[Index("ContactId", Name = "IX_deals_contact_id")]
+[Index("DealApproachId", Name = "IX_deals_deal_approach_id")]
+[Index("DealStateId", Name = "IX_deals_deal_state_id")]
+[Index("OwnerId", Name = "IX_deals_owner_id")]
 public partial class Deal
 {
     [Key]

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Ivy.Open.Raise.Connections.Data;
 
-[Table("startup_vertical")]
+[Table("startup_verticals")]
 public partial class StartupVertical
 {
     [Key]

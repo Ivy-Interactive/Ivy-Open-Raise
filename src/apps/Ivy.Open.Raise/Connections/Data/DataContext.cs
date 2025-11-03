@@ -25,6 +25,8 @@ public partial class DataContext : DbContext
 
     public virtual DbSet<Deck> Decks { get; set; }
 
+    public virtual DbSet<DeckVersion> DeckVersions { get; set; }
+
     public virtual DbSet<DeckLink> DeckLinks { get; set; }
 
     public virtual DbSet<DeckLinkView> DeckLinkViews { get; set; }
@@ -79,6 +81,11 @@ public partial class DataContext : DbContext
         });
 
         modelBuilder.Entity<Deck>(entity =>
+        {
+            entity.Property(e => e.Id).ValueGeneratedNever();
+        });
+
+        modelBuilder.Entity<DeckVersion>(entity =>
         {
             entity.Property(e => e.Id).ValueGeneratedNever();
         });

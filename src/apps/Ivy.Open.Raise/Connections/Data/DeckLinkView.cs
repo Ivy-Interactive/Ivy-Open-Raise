@@ -6,8 +6,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Ivy.Open.Raise.Connections.Data;
 
-[Table("deck_link_view")]
-[Index("DeckLinkId", Name = "IX_deck_link_view_deck_link_id")]
+[Table("deck_link_views")]
+[Index("DeckLinkId", Name = "IX_deck_link_views_deck_link_id")]
 public partial class DeckLinkView
 {
     [Key]
@@ -25,12 +25,6 @@ public partial class DeckLinkView
 
     [Column("user_agent")]
     public string? UserAgent { get; set; }
-
-    [Column("created_at")]
-    public DateTime CreatedAt { get; set; }
-
-    [Column("updated_at")]
-    public DateTime UpdatedAt { get; set; }
 
     [ForeignKey("DeckLinkId")]
     [InverseProperty("DeckLinkViews")]

@@ -6,9 +6,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Ivy.Open.Raise.Connections.Data;
 
-[Table("investor")]
-[Index("AddressCountryId", Name = "IX_investor_address_country_id")]
-[Index("InvestorTypeId", Name = "IX_investor_investor_type_id")]
+[Table("investors")]
+[Index("AddressCountryId", Name = "IX_investors_address_country_id")]
+[Index("InvestorTypeId", Name = "IX_investors_investor_type_id")]
 public partial class Investor
 {
     [Key]

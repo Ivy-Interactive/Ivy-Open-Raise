@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Ivy.Open.Raise.Connections.Data;
 
-[Table("deal_approach")]
+[Table("deal_approaches")]
 public partial class DealApproach
 {
     [Key]

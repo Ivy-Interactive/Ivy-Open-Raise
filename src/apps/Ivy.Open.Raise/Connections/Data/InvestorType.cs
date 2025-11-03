@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Ivy.Open.Raise.Connections.Data;
 
-[Table("investor_type")]
+[Table("investor_types")]
 public partial class InvestorType
 {
     [Key]

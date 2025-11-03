@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -6,23 +6,30 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Ivy.Open.Raise.Connections.Data;
 
-[Table("deck_links")]
-[Index("ContactId", Name = "IX_deck_links_contact_id")]
-[Index("DeckId", Name = "IX_deck_links_deck_id")]
-public partial class DeckLink
+[Table("deck_versions")]
+public partial class DeckVersion
 {
     [Key]
     [Column("id")]
     public Guid Id { get; set; }
 
-    [Column("link_url")]
-    public string LinkUrl { get; set; } = null!;
-
-    [Column("contact_id")]
-    public Guid? ContactId { get; set; }
+    [Column("name")]
+    public string Name { get; set; } = null!;
 
     [Column("deck_id")]
     public Guid DeckId { get; set; }
+
+    [Column("file_size")]
+    public long FileSize { get; set; }
+
+    [Column("content_type")]
+    public string ContentType { get; set; } = null!;
+
+    [Column("file_name")]
+    public string FileName { get; set; } = null!;
+
+    [Column("blob_name")]
+    public string BlobName { get; set; } = null!;
 
     [Column("created_at")]
     public DateTime CreatedAt { get; set; }
@@ -33,14 +40,10 @@ public partial class DeckLink
     [Column("deleted_at")]
     public DateTime? DeletedAt { get; set; }
 
-    [ForeignKey("ContactId")]
-    [InverseProperty("DeckLinks")]
-    public virtual Contact? Contact { get; set; }
+    [Column("is_primary")]
+    public bool IsPrimary { get; set; }
 
     [ForeignKey("DeckId")]
-    [InverseProperty("DeckLinks")]
+    [InverseProperty("DeckVersions")]
     public virtual Deck Deck { get; set; } = null!;
-
-    [InverseProperty("DeckLink")]
-    public virtual ICollection<DeckLinkView> DeckLinkViews { get; set; } = new List<DeckLinkView>();
 }
