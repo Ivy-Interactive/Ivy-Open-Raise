@@ -13,7 +13,10 @@ public class DealDetailsBlade(Guid dealId) : ViewBase
         UseEffect(async () =>
         {
             using var db = factory.CreateDbContext();
-            deal.Set(await db.Deals.SingleOrDefaultAsync(e => e.Id == dealId));
+            deal.Set(await db.Deals
+                .Include(e => e.Contact)
+                .Include(e => e.DealState)
+                .SingleOrDefaultAsync(e => e.Id == dealId));
         }, [EffectTrigger.AfterInit(), refreshToken]);
 
         if (deal.Value == null) return null;
@@ -60,10 +63,10 @@ public class DealDetailsBlade(Guid dealId) : ViewBase
             .ToDetails()
             .MultiLine(e => e.Notes)
             .RemoveEmpty(),
-            footer: Layout.Horizontal().Width(Size.Full()).Gap(1).Align(Align.Right)
+            footer: Layout.Horizontal().Gap(2).Align(Align.Right)
                     | dropDown
                     | editBtn
-        ).Title("Deal Details");
+        ).Title("Deal Details").Width(Size.Units(140));
 
         return new Fragment()
                | (Layout.Vertical() | detailsCard)

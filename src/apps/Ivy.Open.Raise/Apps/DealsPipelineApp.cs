@@ -11,6 +11,7 @@ public class DealsPipelineApp : ViewBase
         var factory = UseService<DataContextFactory>();
         var refreshToken = this.UseRefreshToken();
         var deals = UseState<DealRecord[]>([]);
+        var selectedDealId = UseState((Guid?)null);
 
         // Fetch deals on component mount and when refresh token changes
         UseEffect(async () =>
@@ -19,17 +20,11 @@ public class DealsPipelineApp : ViewBase
             deals.Set(fetchedDeals);
         }, []);
 
-        UseEffect(() =>
+        // Refresh deals when refresh token changes (for both create and update operations)
+        UseEffect(async () =>
         {
-            if (refreshToken.ReturnValue is Guid dealId)
-            {
-                // Refresh the deals list when a new deal is created
-                UseEffect(async () =>
-                {
-                    var fetchedDeals = await FetchDeals(factory);
-                    deals.Set(fetchedDeals);
-                }, [refreshToken]);
-            }
+            var fetchedDeals = await FetchDeals(factory);
+            deals.Set(fetchedDeals);
         }, [refreshToken]);
 
         var createBtn = Icons.Plus.ToButton(_ =>
@@ -37,7 +32,9 @@ public class DealsPipelineApp : ViewBase
             // Handle create deal logic here
         }).Ghost().Tooltip("Create Deal").ToTrigger((isOpen) => new DealCreateDialog(isOpen, refreshToken));
 
-        return deals.Value
+        var isEditSheetOpen = UseState(false);
+
+        var kanban = deals.Value
                 .ToKanban(
                     groupBySelector: deal => deal.DealStateName,
                     idSelector: deal => deal.Id.ToString(),
@@ -104,6 +101,14 @@ public class DealsPipelineApp : ViewBase
 
                     // Here you would typically delete from database
                 })
+                .HandleClick(cardId =>
+                {
+                    if (Guid.TryParse(cardId?.ToString(), out var dealId))
+                    {
+                        selectedDealId.Set(dealId);
+                        isEditSheetOpen.Set(true);
+                    }
+                })
                 .Empty(
                     new Card()
                         .Title("No Deals")
@@ -111,6 +116,27 @@ public class DealsPipelineApp : ViewBase
                 )
                 .Height(Size.Full())
                 .Width(Size.Fit());
+
+        // Close the edit sheet when refresh token changes (deal was saved)
+        UseEffect(() =>
+        {
+            if (refreshToken.ReturnValue != null)
+            {
+                isEditSheetOpen.Set(false);
+                selectedDealId.Set((Guid?)null);
+            }
+        }, [refreshToken]);
+        
+        return Layout.Vertical(
+            kanban,
+            isEditSheetOpen.Value && selectedDealId.Value.HasValue
+                ? new DealEditSheet(
+                    isEditSheetOpen,
+                    refreshToken,
+                    selectedDealId.Value!.Value
+                )
+                : null
+        );
     }
 
     private async Task<DealRecord[]> FetchDeals(DataContextFactory factory)

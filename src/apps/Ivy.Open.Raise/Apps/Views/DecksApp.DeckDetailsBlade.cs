@@ -59,10 +59,11 @@ public class DeckDetailsBlade(Guid deckId) : ViewBase
             }.ToDetails()
                 .RemoveEmpty()
                 .Builder(e => e.Id, e => e.CopyToClipboard()),
-            footer: Layout.Horizontal().Width(Size.Full()).Gap(1).Align(Align.Right)
+            footer: Layout.Horizontal().Gap(2).Align(Align.Right)
                     | dropDown
                     | editBtn
-        ).Title("Deck Details");
+        ).Title("Deck Details")
+         .Width(Size.Units(140));
 
         var relatedCard = new Card(
             new List(
