@@ -1,5 +1,3 @@
-using Ivy.Open.Raise.Apps.Views;
-
 namespace Ivy.Open.Raise.Apps.Settings.Views;
 
 public class UserDetailsBlade(Guid userId) : ViewBase

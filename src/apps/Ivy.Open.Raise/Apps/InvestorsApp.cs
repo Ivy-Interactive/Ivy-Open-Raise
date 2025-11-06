@@ -1,5 +1,5 @@
+using Ivy.Open.Raise.Apps.Investors;
 using Ivy.Open.Raise.Connections.Data;
-using Ivy.Open.Raise.Apps.Views;
 
 namespace Ivy.Open.Raise.Apps;
 

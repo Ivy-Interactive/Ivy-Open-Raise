@@ -1,4 +1,4 @@
-using Ivy.Open.Raise.Apps.Views;
+using Ivy.Open.Raise.Apps.Deals;
 
 namespace Ivy.Open.Raise.Apps;
 
