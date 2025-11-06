@@ -18,7 +18,6 @@ public class DealApproachEditSheet(IState<bool> isOpen, RefreshToken refreshToke
         return dealApproach
             .ToForm()
             .Remove(e => e.Id)
-            .Builder(e => e.Name, e => e.ToTextAreaInput())
             .ToSheet(isOpen, "Edit Deal Approach");
     }
 }
