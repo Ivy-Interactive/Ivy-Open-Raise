@@ -41,7 +41,6 @@ public class DealsPipelineApp : ViewBase
                     titleSelector: deal => deal.ContactName,
                     descriptionSelector: deal => deal.Description,
                     orderSelector: deal => deal.Order)
-                .Height(Size.Units(400))
                 .ColumnOrder(deal => GetDealStateOrder(deal.DealStateName))
                 .ColumnTitle(stateName => GetCustomColumnTitle(stateName))
                 .HandleAdd(columnKey =>
@@ -126,17 +125,20 @@ public class DealsPipelineApp : ViewBase
                 selectedDealId.Set((Guid?)null);
             }
         }, [refreshToken]);
-        
+
+        // Sheet is an overlay component - it manages its own visibility via isOpen state
+        var editSheet = selectedDealId.Value.HasValue
+            ? new DealEditSheet(
+                isEditSheetOpen,
+                refreshToken,
+                selectedDealId.Value!.Value
+            )
+            : null;
+
         return Layout.Vertical(
             kanban,
-            isEditSheetOpen.Value && selectedDealId.Value.HasValue
-                ? new DealEditSheet(
-                    isEditSheetOpen,
-                    refreshToken,
-                    selectedDealId.Value!.Value
-                )
-                : null
-        );
+            editSheet
+        ).Height(Size.Full());
     }
 
     private async Task<DealRecord[]> FetchDeals(DataContextFactory factory)
