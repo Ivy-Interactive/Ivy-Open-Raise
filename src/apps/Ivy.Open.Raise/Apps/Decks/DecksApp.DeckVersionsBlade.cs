@@ -12,7 +12,9 @@ public class DeckVersionsBlade(Guid deckId) : ViewBase
         this.UseEffect(async () =>
         {
             await using var db = factory.CreateDbContext();
-            deckVersions.Set(await db.DeckVersions.Where(dv => dv.DeckId == deckId && dv.DeletedAt == null).OrderByDescending(dv => dv.CreatedAt).ToArrayAsync());
+            deckVersions.Set(await db.DeckVersions
+                .Where(dv => dv.DeckId == deckId && dv.DeletedAt == null)
+                .OrderByDescending(dv => dv.UpdatedAt).ToArrayAsync());
         }, [EffectTrigger.AfterInit(), refreshToken]);
 
         Action OnDelete(Guid id)
@@ -34,10 +36,10 @@ public class DeckVersionsBlade(Guid deckId) : ViewBase
 
         var table = deckVersions.Value.Select(dv => new
         {
+            __ = dv.IsPrimary ? Icons.Star : Icons.None, //todo
             dv.Name,
-            Primary = dv.IsPrimary ? "Yes" : "No",
             dv.FileName,
-            Size = $"{dv.FileSize / 1024.0 / 1024.0:N2} MB",
+            Size = Ivy.Utils.FormatBytes(dv.FileSize),
             _ = Layout.Horizontal().Gap(1)
                     | Icons.Ellipsis
                         .ToButton()

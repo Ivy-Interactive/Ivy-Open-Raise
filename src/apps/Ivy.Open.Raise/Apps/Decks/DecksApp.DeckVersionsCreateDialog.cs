@@ -5,18 +5,28 @@ public class DeckVersionsCreateDialog(IState<bool> isOpen, RefreshToken refreshT
     private record DeckVersionCreateRequest
     {
         [Required]
-        public string Name { get; init; } = "";
+        public string Name { get; private init; } = "";
 
         [Required]
         public FileUpload<BlobInfo>? File { get; init; } = new();
 
-        public bool MakePrimary { get; init; } = false;
+        public bool MakePrimary { get; init; } = true;
+
+        public static DeckVersionCreateRequest Create(DataContextFactory factory, Guid deckId)
+        {
+            var db = factory.CreateDbContext();
+            var decks = db.DeckVersions.Count(e => e.DeckId == deckId);
+            return new DeckVersionCreateRequest
+            {
+                Name = $"Version {decks + 1}"
+            };
+        }
     }
 
     public override object? Build()
     {
         var factory = UseService<DataContextFactory>();
-        var versionRequest = UseState(() => new DeckVersionCreateRequest());
+        var versionRequest = UseState(() => DeckVersionCreateRequest.Create(factory, deckId));
 
         UseEffect(() =>
         {
