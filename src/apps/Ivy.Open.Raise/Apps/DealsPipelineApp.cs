@@ -39,9 +39,8 @@ public class DealsPipelineApp : ViewBase
                     groupBySelector: deal => deal.DealStateName,
                     idSelector: deal => deal.Id.ToString(),
                     titleSelector: deal => deal.ContactName,
-                    descriptionSelector: deal => deal.Description,
+                    descriptionSelector: deal => FormatDealDescription(deal),
                     orderSelector: deal => deal.Order)
-                .Height(Size.Units(400))
                 .ColumnOrder(deal => GetDealStateOrder(deal.DealStateName))
                 .ColumnTitle(stateName => GetCustomColumnTitle(stateName))
                 .HandleAdd(columnKey =>
@@ -57,7 +56,8 @@ public class DealsPipelineApp : ViewBase
                         AmountFrom = null,
                         AmountTo = null,
                         Priority = 1,
-                        OwnerName = "Current User"
+                        OwnerName = "Current User",
+                        NextAction = null
                     };
 
                     deals.Set(deals.Value.Append(newDeal).ToArray());
@@ -70,6 +70,38 @@ public class DealsPipelineApp : ViewBase
                     var dealId = moveData.CardId?.ToString();
                     if (string.IsNullOrEmpty(dealId)) return;
 
+                    // Get deals in the target column to calculate proper order
+                    var dealsInTargetColumn = deals.Value
+                        .Where(d => d.DealStateName == moveData.ToColumn)
+                        .OrderBy(d => d.Order)
+                        .ToList();
+
+                    // Calculate new order based on target index
+                    float newOrder;
+                    if (moveData.TargetIndex.HasValue && moveData.TargetIndex.Value < dealsInTargetColumn.Count)
+                    {
+                        // Insert between existing items
+                        if (moveData.TargetIndex.Value == 0)
+                        {
+                            // First position
+                            newOrder = dealsInTargetColumn[0].Order - 1;
+                        }
+                        else
+                        {
+                            // Between two items
+                            var prevOrder = dealsInTargetColumn[moveData.TargetIndex.Value - 1].Order;
+                            var nextOrder = dealsInTargetColumn[moveData.TargetIndex.Value].Order;
+                            newOrder = (prevOrder + nextOrder) / 2;
+                        }
+                    }
+                    else
+                    {
+                        // Last position
+                        newOrder = dealsInTargetColumn.Count > 0 
+                            ? dealsInTargetColumn[^1].Order + 1 
+                            : 1;
+                    }
+
                     var updatedDeals = deals.Value.Select(deal =>
                         deal.Id.ToString() == dealId
                             ? new DealRecord
@@ -78,11 +110,12 @@ public class DealsPipelineApp : ViewBase
                                 ContactName = deal.ContactName,
                                 DealStateName = moveData.ToColumn,
                                 Description = deal.Description,
-                                Order = moveData.TargetIndex.HasValue ? moveData.TargetIndex.Value + 1 : deal.Order,
+                                Order = newOrder,
                                 AmountFrom = deal.AmountFrom,
                                 AmountTo = deal.AmountTo,
-                                Priority = deal.Priority,
-                                OwnerName = deal.OwnerName
+                                Priority = deal.Priority, // Priority should NOT change when moving
+                                OwnerName = deal.OwnerName,
+                                NextAction = deal.NextAction
                             }
                             : deal
                     ).ToArray();
@@ -126,17 +159,20 @@ public class DealsPipelineApp : ViewBase
                 selectedDealId.Set((Guid?)null);
             }
         }, [refreshToken]);
-        
+
+        // Sheet is an overlay component - it manages its own visibility via isOpen state
+        var editSheet = selectedDealId.Value.HasValue
+            ? new DealEditSheet(
+                isEditSheetOpen,
+                refreshToken,
+                selectedDealId.Value!.Value
+            )
+            : null;
+
         return Layout.Vertical(
             kanban,
-            isEditSheetOpen.Value && selectedDealId.Value.HasValue
-                ? new DealEditSheet(
-                    isEditSheetOpen,
-                    refreshToken,
-                    selectedDealId.Value!.Value
-                )
-                : null
-        );
+            editSheet
+        ).Height(Size.Full());
     }
 
     private async Task<DealRecord[]> FetchDeals(DataContextFactory factory)
@@ -159,7 +195,8 @@ public class DealsPipelineApp : ViewBase
                 AmountFrom = d.AmountFrom,
                 AmountTo = d.AmountTo,
                 Priority = d.Priority ?? 1,
-                OwnerName = $"{d.Owner.FirstName} {d.Owner.LastName}"
+                OwnerName = $"{d.Owner.FirstName} {d.Owner.LastName}",
+                NextAction = d.NextAction
             })
             .ToArrayAsync();
     }
@@ -186,6 +223,61 @@ public class DealsPipelineApp : ViewBase
         return dealsInColumn.Count + 1;
     }
 
+    private static string FormatDealDescription(DealRecord deal)
+    {
+        var parts = new List<string>();
+
+        // Format amount range
+        if (deal.AmountFrom.HasValue || deal.AmountTo.HasValue)
+        {
+            var amountStr = deal.AmountFrom.HasValue && deal.AmountTo.HasValue
+                ? $"${deal.AmountFrom.Value:N0} - ${deal.AmountTo.Value:N0}"
+                : deal.AmountFrom.HasValue
+                    ? $"${deal.AmountFrom.Value:N0}+"
+                    : $"Up to ${deal.AmountTo.Value:N0}";
+            parts.Add(amountStr);
+        }
+
+        // Format next action date
+        if (deal.NextAction.HasValue)
+        {
+            var nextActionDate = deal.NextAction.Value;
+            var now = DateTime.UtcNow;
+            var daysUntil = (nextActionDate.Date - now.Date).Days;
+
+            string dateStr;
+            if (daysUntil < 0)
+            {
+                dateStr = $"Overdue: {nextActionDate:MMM d, yyyy}";
+            }
+            else if (daysUntil == 0)
+            {
+                dateStr = "Next action: Today";
+            }
+            else if (daysUntil == 1)
+            {
+                dateStr = "Next action: Tomorrow";
+            }
+            else if (daysUntil <= 7)
+            {
+                dateStr = $"Next action: {nextActionDate:MMM d} ({daysUntil}d)";
+            }
+            else
+            {
+                dateStr = $"Next action: {nextActionDate:MMM d, yyyy}";
+            }
+            parts.Add(dateStr);
+        }
+
+        // Join with HTML line break - amount on first line, next action on second line
+        if (parts.Count > 0)
+        {
+            return string.Join("\n", parts);
+        }
+        
+        return deal.Description;
+    }
+
     private class DealRecord
     {
         public Guid Id { get; set; }
@@ -197,5 +289,6 @@ public class DealsPipelineApp : ViewBase
         public int? AmountTo { get; set; }
         public int Priority { get; set; }
         public string OwnerName { get; set; } = "";
+        public DateTime? NextAction { get; set; }
     }
 }
