@@ -18,7 +18,7 @@ public class DeckLinksEditSheet(IState<bool> isOpen, RefreshToken refreshToken, 
 
         return deckLink
             .ToForm()
-            .Builder(e => e.LinkUrl, e => e.ToUrlInput())
+            .Builder(e => e.Secret, e => e.ToReadOnlyInput())
             .Builder(e => e.ContactId, e => e.ToAsyncSelectInput(QueryContacts(factory), LookupContact(factory), placeholder: "Select Contact"))
             .Remove(e => e.Id, e => e.DeckId, e => e.CreatedAt, e => e.UpdatedAt, e => e.DeletedAt)
             .ToSheet(isOpen, "Edit Deck Link");

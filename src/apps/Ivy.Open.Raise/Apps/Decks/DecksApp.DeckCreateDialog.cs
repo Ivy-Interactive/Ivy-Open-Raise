@@ -5,7 +5,7 @@ public class DeckCreateDialog(IState<bool> isOpen, RefreshToken refreshToken) : 
     private record DeckCreateRequest
     {
         [Required]
-        public string Title { get; init; } = "";
+        public string Title { get; init; } = "Deck";
         
         [Required]
         public FileUpload<BlobInfo>? File { get; init; } = new();
@@ -63,6 +63,18 @@ public class DeckCreateDialog(IState<bool> isOpen, RefreshToken refreshToken) : 
             FileName = request.File.FileName,
         };
         db.DeckVersions.Add(deckVersion);
+        
+        var deckLink = new DeckLink()
+        {
+            Secret = Utils.RandomKey(12),
+            Reference = null!,
+            ContactId = null,
+            DeckId = deck.Id,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
+
+        db.DeckLinks.Add(deckLink);
         
         db.SaveChanges();
 

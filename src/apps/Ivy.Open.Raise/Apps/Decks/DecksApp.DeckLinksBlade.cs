@@ -2,17 +2,33 @@ namespace Ivy.Open.Raise.Apps.Decks;
 
 public class DeckLinksBlade(Guid deckId) : ViewBase
 {
+    public record DeckLinkDto(Guid Id, string? Reference, string? ContactName, string? InvestorName, int Views);
+    
     public override object? Build()
     {
         var factory = UseService<DataContextFactory>();
         var refreshToken = this.UseRefreshToken();
-        var deckLinks = this.UseState<DeckLink[]?>();
+        var deckLinks = this.UseState<DeckLinkDto[]?>();
+        var client = UseService<IClientProvider>();
         var (alertView, showAlert) = this.UseAlert();
 
         this.UseEffect(async () =>
         {
             await using var db = factory.CreateDbContext();
-            deckLinks.Set(await db.DeckLinks.Include(dl => dl.Contact).Where(dl => dl.DeckId == deckId && dl.DeletedAt == null).ToArrayAsync());
+            deckLinks.Set(
+                await db.DeckLinks
+                    .Include(dl => dl.Contact).ThenInclude(c => c.Investor)
+                    .Include(dl => dl.DeckLinkViews)
+                    .Where(dl => dl.DeckId == deckId && dl.DeletedAt == null)
+                    .Select(dl => new DeckLinkDto(
+                        dl.Id,
+                        dl.Reference,
+                        dl.Contact != null ? $"{dl.Contact.FirstName} {dl.Contact.LastName}" : null,
+                        dl.Contact != null ? dl.Contact.Investor.Name : null,
+                        dl.DeckLinkViews.Count()
+                    ))
+                    .ToArrayAsync()
+            );
         }, [EffectTrigger.AfterInit(), refreshToken]);
 
         Action OnDelete(Guid id)
@@ -29,25 +45,46 @@ public class DeckLinksBlade(Guid deckId) : ViewBase
                 }, "Delete Deck Link");
             };
         }
+        
+        Action OnCopy(Guid id)
+        {
+            return () =>
+            {
+                //todo ivy: how can we get the current host?
+                //client.CopyToClipboard("");
+                //client.Toast("{} copied to clipboard");
+            };
+        }
 
         if (deckLinks.Value == null) return null;
 
         var table = deckLinks.Value.Select(dl => new
         {
-            ContactName = dl.Contact != null ? $"{dl.Contact.FirstName} {dl.Contact.LastName}" : "No Contact",
+            dl.Reference,
+            Contact = 
+                dl.ContactName != null ? 
+                    (object)(Layout.Vertical().Gap(0)
+                        | Text.Inline($"{dl.ContactName}")
+                        | Text.Muted(dl.InvestorName))
+                    : Text.Muted("<Anyone>"),
             _ = Layout.Horizontal().Gap(1)
                     | Icons.Ellipsis
                         .ToButton()
                         .Ghost()
                         .WithDropDown(MenuItem.Default("Delete").Icon(Icons.Trash).HandleSelect(OnDelete(dl.Id)))
+                    | Icons.Clipboard
+                        .ToButton()
+                        .Outline()
+                        .Tooltip("Copy Link")
+                        .HandleClick(OnCopy(dl.Id))
                     | Icons.Pencil
                         .ToButton()
                         .Outline()
                         .Tooltip("Edit")
                         .ToTrigger((isOpen) => new DeckLinksEditSheet(isOpen, refreshToken, dl.Id))
         })
-            .ToTable()
-            .RemoveEmptyColumns();
+        .ToTable()
+        .RemoveEmptyColumns();
 
         var addBtn = new Button("Add Deck Link").Icon(Icons.Plus).Ghost()
             .ToTrigger((isOpen) => new DeckLinksCreateDialog(isOpen, refreshToken, deckId));

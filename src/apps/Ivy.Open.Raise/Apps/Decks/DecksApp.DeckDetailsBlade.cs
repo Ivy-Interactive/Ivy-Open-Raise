@@ -75,7 +75,7 @@ public class DeckDetailsBlade(Guid deckId) : ViewBase
                     Current = (currentVersion.Value != null ? 
                         (object)(Layout.Vertical().Gap(0) | currentVersion.Value.Name //todo ivy: why is version name not aligned to the left?
                                                           | new Button(currentVersion.Value.FileName).Inline().HandleClick(OnDownloadVersion)
-                                                          | Text.Muted(Utils.FormatBytes(currentVersion.Value.FileSize))
+                                                          | Text.Muted(Ivy.Utils.FormatBytes(currentVersion.Value.FileSize))
                             )
                         : Callout.Warning("There's no current version"))
                 }

@@ -56,7 +56,7 @@ public class DeckVersionsBlade(Guid deckId) : ViewBase
             dv.Name,
             FileName = (Layout.Vertical().Gap(0)
                        | new Button(dv.FileName).Variant(ButtonVariant.Inline)
-                       | Text.Muted(Utils.FormatBytes(dv.FileSize))),
+                       | Text.Muted(Ivy.Utils.FormatBytes(dv.FileSize))),
             _ = Layout.Horizontal().Gap(1)
                     | Icons.Ellipsis
                         .ToButton()

@@ -4,8 +4,7 @@ public class DeckLinksCreateDialog(IState<bool> isOpen, RefreshToken refreshToke
 {
     private record DeckLinkCreateRequest
     {
-        [Required]
-        public string LinkUrl { get; init; } = "";
+        public string? Reference { get; init; } = null!;
 
         public Guid? ContactId { get; init; } = null;
     }
@@ -33,7 +32,9 @@ public class DeckLinksCreateDialog(IState<bool> isOpen, RefreshToken refreshToke
 
         var deckLink = new DeckLink()
         {
-            LinkUrl = request.LinkUrl,
+            Id = Guid.NewGuid(),
+            Secret = Utils.RandomKey(12),
+            Reference = request.Reference,
             ContactId = request.ContactId,
             DeckId = deckId,
             CreatedAt = DateTime.UtcNow,

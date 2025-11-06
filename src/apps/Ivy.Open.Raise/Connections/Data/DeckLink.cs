@@ -15,9 +15,12 @@ public partial class DeckLink
     [Column("id")]
     public Guid Id { get; set; }
 
-    [Column("link_url")]
-    public string LinkUrl { get; set; } = null!;
+    [Column("secret")]
+    public string Secret { get; set; } = null!;
 
+    [Column("reference")]
+    public string? Reference { get; set; } = null!;
+    
     [Column("contact_id")]
     public Guid? ContactId { get; set; }
 

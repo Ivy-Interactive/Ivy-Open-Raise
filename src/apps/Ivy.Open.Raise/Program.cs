@@ -1,3 +1,4 @@
+using System.Reflection;
 using Ivy.Open.Raise.Apps;
 using Ivy.Open.Raise.Apps.Settings;
 using Microsoft.Extensions.AI;
@@ -36,6 +37,12 @@ var chromeSettings = new ChromeSettings()
     })
     .WallpaperApp<WallpaperApp>();
 server.UseChrome(chromeSettings);
+
+server.UseBuilder(builder =>
+{
+    builder.Services.AddControllers()
+        .AddApplicationPart(Assembly.GetExecutingAssembly());
+});
 
 server.Services.UseSmtp();
 server.Services.UseBlobs();
