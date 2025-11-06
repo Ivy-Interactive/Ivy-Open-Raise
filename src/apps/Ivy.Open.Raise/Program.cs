@@ -10,12 +10,7 @@ var server = new Server();
 server.UseHotReload();
 #endif
 
-server.AddApp<DashboardApp>();
-server.AddApp<DealsPipelineApp>();
-server.AddApp<InvestorsApp>();
-server.AddApp<DecksApp>();
-server.AddApp<WallpaperApp>();
-
+server.AddAppsFromAssembly();
 server.AddConnectionsFromAssembly();
 
 var chromeSettings = new ChromeSettings()
