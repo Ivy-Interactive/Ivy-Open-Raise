@@ -14,8 +14,8 @@ public class InvestorDetailsBlade(Guid investorId) : ViewBase
         UseEffect(async () =>
         {
             var db = factory.CreateDbContext();
-            investor.Set(await db.Investors.Include(e => e.AddressCountry).Include(e => e.InvestorType).SingleOrDefaultAsync(e => e.Id == investorId));
-            contactCount.Set(await db.Contacts.CountAsync(e => e.InvestorId == investorId));
+            investor.Set(await db.Investors.Include(e => e.AddressCountry).Include(e => e.InvestorType).SingleOrDefaultAsync(e => e.Id == investorId && e.DeletedAt == null));
+            contactCount.Set(await db.Contacts.CountAsync(e => e.InvestorId == investorId && e.DeletedAt == null));
         }, [EffectTrigger.AfterInit(), refreshToken]);
 
         if (investor.Value == null) return null;
@@ -86,7 +86,7 @@ public class InvestorDetailsBlade(Guid investorId) : ViewBase
     {
         using var db = dbFactory.CreateDbContext();
         var investor = db.Investors.FirstOrDefault(e => e.Id == investorId)!;
-        db.Investors.Remove(investor);
+        investor.DeletedAt = DateTime.UtcNow;
         db.SaveChanges();
     }
 }

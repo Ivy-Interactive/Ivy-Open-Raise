@@ -12,7 +12,7 @@ public class DeckVersionsBlade(Guid deckId) : ViewBase
         this.UseEffect(async () =>
         {
             await using var db = factory.CreateDbContext();
-            deckVersions.Set(await db.DeckVersions.Where(dv => dv.DeckId == deckId).OrderByDescending(dv => dv.CreatedAt).ToArrayAsync());
+            deckVersions.Set(await db.DeckVersions.Where(dv => dv.DeckId == deckId && dv.DeletedAt == null).OrderByDescending(dv => dv.CreatedAt).ToArrayAsync());
         }, [EffectTrigger.AfterInit(), refreshToken]);
 
         Action OnDelete(Guid id)
@@ -63,7 +63,8 @@ public class DeckVersionsBlade(Guid deckId) : ViewBase
     public void Delete(DataContextFactory factory, Guid versionId)
     {
         using var db = factory.CreateDbContext();
-        db.DeckVersions.Remove(db.DeckVersions.Single(dv => dv.Id == versionId));
+        var deckVersion = db.DeckVersions.Single(dv => dv.Id == versionId);
+        deckVersion.DeletedAt = DateTime.UtcNow;
         db.SaveChanges();
     }
 }

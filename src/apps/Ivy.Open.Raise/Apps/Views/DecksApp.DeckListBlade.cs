@@ -48,7 +48,7 @@ public class DeckListBlade : ViewBase
     {
         await using var db = factory.CreateDbContext();
 
-        var linq = db.Decks.AsQueryable();
+        var linq = db.Decks.Where(e => e.DeletedAt == null);
 
         if (!string.IsNullOrWhiteSpace(filter))
         {

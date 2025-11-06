@@ -48,7 +48,7 @@ public class DealListBlade : ViewBase
     {
         await using var db = factory.CreateDbContext();
 
-        var linq = db.Deals.AsQueryable();
+        var linq = db.Deals.Where(e => e.DeletedAt == null);
 
         if (!string.IsNullOrWhiteSpace(filter))
         {

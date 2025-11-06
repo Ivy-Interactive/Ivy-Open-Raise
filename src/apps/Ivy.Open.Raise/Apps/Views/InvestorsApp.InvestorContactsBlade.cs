@@ -12,7 +12,7 @@ public class InvestorContactsBlade(Guid investorId) : ViewBase
         this.UseEffect(async () =>
         {
             await using var db = factory.CreateDbContext();
-            contacts.Set(await db.Contacts.Where(c => c.InvestorId == investorId).ToArrayAsync());
+            contacts.Set(await db.Contacts.Where(c => c.InvestorId == investorId && c.DeletedAt == null).ToArrayAsync());
         }, [EffectTrigger.AfterInit(), refreshToken]);
 
         Action OnDelete(Guid id)
@@ -65,7 +65,8 @@ public class InvestorContactsBlade(Guid investorId) : ViewBase
     public void Delete(DataContextFactory factory, Guid contactId)
     {
         using var db = factory.CreateDbContext();
-        db.Contacts.Remove(db.Contacts.Single(c => c.Id == contactId));
+        var contact = db.Contacts.Single(c => c.Id == contactId);
+        contact.DeletedAt = DateTime.UtcNow;
         db.SaveChanges();
     }
 }

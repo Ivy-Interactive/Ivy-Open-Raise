@@ -82,7 +82,7 @@ public class DealCreateDialog(IState<bool> isOpen, RefreshToken refreshToken) : 
         {
             await using var db = factory.CreateDbContext();
             return (await db.Contacts
-                    .Where(e => e.FirstName.Contains(query) || e.LastName.Contains(query))
+                    .Where(e => (e.FirstName.Contains(query) || e.LastName.Contains(query)) && e.DeletedAt == null)
                     .Select(e => new { e.Id, FullName = e.FirstName + " " + e.LastName })
                     .Take(50)
                     .ToArrayAsync())
@@ -97,7 +97,7 @@ public class DealCreateDialog(IState<bool> isOpen, RefreshToken refreshToken) : 
         {
             if (id == null) return null;
             await using var db = factory.CreateDbContext();
-            var contact = await db.Contacts.FirstOrDefaultAsync(e => e.Id == id);
+            var contact = await db.Contacts.FirstOrDefaultAsync(e => e.Id == id && e.DeletedAt == null);
             if (contact == null) return null;
             return new Option<Guid?>(contact.FirstName + " " + contact.LastName, contact.Id);
         };

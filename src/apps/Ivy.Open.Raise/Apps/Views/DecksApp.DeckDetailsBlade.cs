@@ -15,9 +15,9 @@ public class DeckDetailsBlade(Guid deckId) : ViewBase
         this.UseEffect(async () =>
         {
             await using var db = factory.CreateDbContext();
-            deck.Set(await db.Decks.SingleOrDefaultAsync(e => e.Id == deckId));
-            deckLinksCount.Set(await db.DeckLinks.CountAsync(e => e.DeckId == deckId));
-            deckVersionCount.Set(await db.DeckVersions.CountAsync(e => e.DeckId == deckId));
+            deck.Set(await db.Decks.SingleOrDefaultAsync(e => e.Id == deckId && e.DeletedAt == null));
+            deckLinksCount.Set(await db.DeckLinks.CountAsync(e => e.DeckId == deckId && e.DeletedAt == null));
+            deckVersionCount.Set(await db.DeckVersions.CountAsync(e => e.DeckId == deckId && e.DeletedAt == null));
         }, [EffectTrigger.AfterInit(), refreshToken]);
 
         if (deck.Value == null) return null;
@@ -84,7 +84,7 @@ public class DeckDetailsBlade(Guid deckId) : ViewBase
     {
         using var db = dbFactory.CreateDbContext();
         var deck = db.Decks.FirstOrDefault(e => e.Id == deckId)!;
-        db.Decks.Remove(deck);
+        deck.DeletedAt = DateTime.UtcNow;
         db.SaveChanges();
     }
 }

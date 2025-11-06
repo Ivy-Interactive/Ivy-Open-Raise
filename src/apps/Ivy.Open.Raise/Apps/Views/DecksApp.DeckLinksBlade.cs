@@ -12,7 +12,7 @@ public class DeckLinksBlade(Guid deckId) : ViewBase
         this.UseEffect(async () =>
         {
             await using var db = factory.CreateDbContext();
-            deckLinks.Set(await db.DeckLinks.Include(dl => dl.Contact).Where(dl => dl.DeckId == deckId).ToArrayAsync());
+            deckLinks.Set(await db.DeckLinks.Include(dl => dl.Contact).Where(dl => dl.DeckId == deckId && dl.DeletedAt == null).ToArrayAsync());
         }, [EffectTrigger.AfterInit(), refreshToken]);
 
         Action OnDelete(Guid id)
@@ -26,7 +26,7 @@ public class DeckLinksBlade(Guid deckId) : ViewBase
                         Delete(factory, id);
                         refreshToken.Refresh();
                     }
-                }, "Delete Deck Link", AlertButtonSet.OkCancel);
+                }, "Delete Deck Link");
             };
         }
 
@@ -60,7 +60,8 @@ public class DeckLinksBlade(Guid deckId) : ViewBase
     public void Delete(DataContextFactory factory, Guid deckLinkId)
     {
         using var db = factory.CreateDbContext();
-        db.DeckLinks.Remove(db.DeckLinks.Single(dl => dl.Id == deckLinkId));
+        var deckLink = db.DeckLinks.Single(dl => dl.Id == deckLinkId);
+        deckLink.DeletedAt = DateTime.UtcNow;
         db.SaveChanges();
     }
 }

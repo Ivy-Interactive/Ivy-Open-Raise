@@ -16,7 +16,7 @@ public class DealDetailsBlade(Guid dealId) : ViewBase
             deal.Set(await db.Deals
                 .Include(e => e.Contact)
                 .Include(e => e.DealState)
-                .SingleOrDefaultAsync(e => e.Id == dealId));
+                .SingleOrDefaultAsync(e => e.Id == dealId && e.DeletedAt == null));
         }, [EffectTrigger.AfterInit(), refreshToken]);
 
         if (deal.Value == null) return null;
@@ -77,7 +77,7 @@ public class DealDetailsBlade(Guid dealId) : ViewBase
     {
         using var db = dbFactory.CreateDbContext();
         var deal = db.Deals.FirstOrDefault(e => e.Id == dealId)!;
-        db.Deals.Remove(deal);
+        deal.DeletedAt = DateTime.UtcNow;
         db.SaveChanges();
     }
 }
