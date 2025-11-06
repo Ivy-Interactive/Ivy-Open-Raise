@@ -44,7 +44,6 @@ public class StartupVerticalDetailsBlade(int startupVerticalId) : ViewBase
         var editBtn = new Button("Edit")
             .Variant(ButtonVariant.Outline)
             .Icon(Icons.Pencil)
-            .Width(Size.Grow())
             .ToTrigger((isOpen) => new StartupVerticalEditSheet(isOpen, refreshToken, startupVerticalId));
 
         var detailsCard = new Card(
