@@ -25,9 +25,6 @@ public class DeckListBlade : ViewBase
             blades.Push(this, new DeckDetailsBlade(deck.Id), deck.Title);
         });
 
-        ListItem CreateItem(DeckListRecord record) =>
-            new(title: record.Title, subtitle: null, onClick: onItemClicked, tag: record);
-
         var createBtn = Icons.Plus.ToButton(_ =>
         {
             blades.Pop(this);
@@ -35,13 +32,16 @@ public class DeckListBlade : ViewBase
 
         return new FilteredListView<DeckListRecord>(
             fetchRecords: (filter) => FetchDecks(factory, filter),
-            createItem: CreateItem,
+            createItem: CalculateCreateItem,
             toolButtons: createBtn,
             onFilterChanged: _ =>
             {
                 blades.Pop(this);
             }
         );
+
+        ListItem CalculateCreateItem(DeckListRecord record) =>
+            new(title: record.Title, subtitle: null, onClick: onItemClicked, tag: record);
     }
 
     private async Task<DeckListRecord[]> FetchDecks(DataContextFactory factory, string filter)

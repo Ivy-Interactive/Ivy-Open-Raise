@@ -1,28 +1,30 @@
 namespace Ivy.Open.Raise.Apps.Views;
 
-public class DeckCreateDialog(IState<bool> isOpen, RefreshToken refreshToken) : ViewBase
+public class DeckVersionsCreateDialog(IState<bool> isOpen, RefreshToken refreshToken, Guid deckId) : ViewBase
 {
-    private record DeckCreateRequest
+    private record DeckVersionCreateRequest
     {
         [Required]
-        public string Title { get; init; } = "";
-        
+        public string Name { get; init; } = "";
+
         [Required]
         public FileUpload<BlobInfo>? File { get; init; } = new();
+
+        public bool IsPrimary { get; init; } = false;
     }
 
     public override object? Build()
     {
         var factory = UseService<DataContextFactory>();
-        var deckState = UseState(() => new DeckCreateRequest());
+        var versionRequest = UseState(() => new DeckVersionCreateRequest());
 
         UseEffect(() =>
         {
-            var deckId = CreateDeck(factory, deckState.Value);
+            CreateDeckVersion(factory, versionRequest.Value);
             refreshToken.Refresh(deckId);
-        }, [deckState]);
+        }, [versionRequest]);
 
-        return deckState
+        return versionRequest
             .ToForm()
             .Builder(e => e.File, (s, v) =>
             {
@@ -33,39 +35,28 @@ public class DeckCreateDialog(IState<bool> isOpen, RefreshToken refreshToken) : 
                 return s.ToFileInput(upload);
                 string CalculateBlobName(FileUpload f) => f.Id + System.IO.Path.GetExtension(f.FileName);
             })
-            .ToDialog(isOpen, title: "Create Deck", submitTitle: "Create");
+            .ToDialog(isOpen, title: "Create Version", submitTitle: "Create");
     }
 
-    private Guid CreateDeck(DataContextFactory factory, DeckCreateRequest request)
+    private void CreateDeckVersion(DataContextFactory factory, DeckVersionCreateRequest request)
     {
         using var db = factory.CreateDbContext();
 
-        var deck = new Deck
-        {
-            Id = Guid.NewGuid(),
-            Title = request.Title,
-            UpdatedAt = DateTime.UtcNow,
-            CreatedAt = DateTime.UtcNow
-        };
-        db.Decks.Add(deck);
-        
         var deckVersion = new DeckVersion
         {
             Id = Guid.NewGuid(),
-            DeckId = deck.Id,
-            Name = "Version 1",
-            UpdatedAt = DateTime.UtcNow,
-            CreatedAt = DateTime.UtcNow,
-            IsPrimary = true,
+            DeckId = deckId,
+            Name = request.Name,
+            IsPrimary = request.IsPrimary,
             BlobName = request.File.Content.BlobName,
             ContentType = request.File.ContentType,
             FileSize = request.File.Length,
             FileName = request.File.FileName,
+            UpdatedAt = DateTime.UtcNow,
+            CreatedAt = DateTime.UtcNow
         };
-        db.DeckVersions.Add(deckVersion);
-        
-        db.SaveChanges();
 
-        return deck.Id;
+        db.DeckVersions.Add(deckVersion);
+        db.SaveChanges();
     }
 }

@@ -1,27 +1,47 @@
 namespace Ivy.Open.Raise.Apps.Views;
 
-public class DeckDeckLinksEditSheet(IState<bool> isOpen, RefreshToken refreshToken, Guid deckLinkId) : ViewBase
+public class DeckLinksCreateDialog(IState<bool> isOpen, RefreshToken refreshToken, Guid deckId) : ViewBase
 {
+    private record DeckLinkCreateRequest
+    {
+        [Required]
+        public string LinkUrl { get; init; } = "";
+
+        public Guid? ContactId { get; init; } = null;
+    }
+
     public override object? Build()
     {
         var factory = UseService<DataContextFactory>();
-        var deckLink = UseState(() => factory.CreateDbContext().DeckLinks.FirstOrDefault(e => e.Id == deckLinkId)!);
+        var deckLinkRequest = UseState(() => new DeckLinkCreateRequest());
 
         UseEffect(() =>
         {
-            using var db = factory.CreateDbContext();
-            deckLink.Value.UpdatedAt = DateTime.UtcNow;
-            db.DeckLinks.Update(deckLink.Value);
-            db.SaveChanges();
-            refreshToken.Refresh();
-        }, [deckLink]);
+            CreateDeckLink(factory, deckLinkRequest.Value);
+            refreshToken.Refresh(deckId);
+        }, [deckLinkRequest]);
 
-        return deckLink
+        return deckLinkRequest
             .ToForm()
-            .Builder(e => e.LinkUrl, e => e.ToUrlInput())
             .Builder(e => e.ContactId, e => e.ToAsyncSelectInput(QueryContacts(factory), LookupContact(factory), placeholder: "Select Contact"))
-            .Remove(e => e.Id, e => e.DeckId, e => e.CreatedAt, e => e.UpdatedAt, e => e.DeletedAt)
-            .ToSheet(isOpen, "Edit Deck Link");
+            .ToDialog(isOpen, title: "Create Deck Link", submitTitle: "Create");
+    }
+
+    private void CreateDeckLink(DataContextFactory factory, DeckLinkCreateRequest request)
+    {
+        using var db = factory.CreateDbContext();
+
+        var deckLink = new DeckLink()
+        {
+            LinkUrl = request.LinkUrl,
+            ContactId = request.ContactId,
+            DeckId = deckId,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
+
+        db.DeckLinks.Add(deckLink);
+        db.SaveChanges();
     }
 
     private static AsyncSelectQueryDelegate<Guid?> QueryContacts(DataContextFactory factory)
@@ -31,10 +51,10 @@ public class DeckDeckLinksEditSheet(IState<bool> isOpen, RefreshToken refreshTok
             await using var db = factory.CreateDbContext();
             return (await db.Contacts
                     .Where(e => e.FirstName.Contains(query) || e.LastName.Contains(query))
-                    .Select(e => new { e.Id, Name = e.FirstName + " " + e.LastName })
+                    .Select(e => new { e.Id, FullName = e.FirstName + " " + e.LastName })
                     .Take(50)
                     .ToArrayAsync())
-                .Select(e => new Option<Guid?>(e.Name, e.Id))
+                .Select(e => new Option<Guid?>(e.FullName, e.Id))
                 .ToArray();
         };
     }

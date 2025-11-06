@@ -9,7 +9,7 @@ public class DeckDetailsBlade(Guid deckId) : ViewBase
         var refreshToken = this.UseRefreshToken();
         var deck = this.UseState<Deck?>();
         var deckLinksCount = this.UseState<int>();
-        var deckVersions = this.UseState<DeckVersion[]>();
+        var deckVersionCount = this.UseState<int>();
         var (alertView, showAlert) = this.UseAlert();
 
         this.UseEffect(async () =>
@@ -17,6 +17,7 @@ public class DeckDetailsBlade(Guid deckId) : ViewBase
             await using var db = factory.CreateDbContext();
             deck.Set(await db.Decks.SingleOrDefaultAsync(e => e.Id == deckId));
             deckLinksCount.Set(await db.DeckLinks.CountAsync(e => e.DeckId == deckId));
+            deckVersionCount.Set(await db.DeckVersions.CountAsync(e => e.DeckId == deckId));
         }, [EffectTrigger.AfterInit(), refreshToken]);
 
         if (deck.Value == null) return null;
@@ -49,24 +50,28 @@ public class DeckDetailsBlade(Guid deckId) : ViewBase
 
         var detailsCard = new Card(
             content: new
-            {
-                deckValue.Id,
-                deckValue.Title
-            }.ToDetails()
-                .RemoveEmpty()
-                .Builder(e => e.Id, e => e.CopyToClipboard()),
+                {
+                    deckValue.Title
+                }
+                .ToDetails()
+                .RemoveEmpty(),
             footer: Layout.Horizontal().Gap(2).Align(Align.Right)
                     | dropDown
                     | editBtn
-        ).Title("Deck Details")
-         .Width(Size.Units(140));
+        )
+            .Title("Deck Details")
+            .Width(Size.Units(100));
 
         var relatedCard = new Card(
             new List(
-                new ListItem("Deck Links", onClick: _ =>
+                new ListItem("Links", onClick: _ =>
                 {
-                    blades.Push(this, new DeckDeckLinksBlade(deckId), "Deck Links");
-                }, badge: deckLinksCount.Value.ToString("N0"))
+                    blades.Push(this, new DeckLinksBlade(deckId), "Links");
+                }, badge: deckLinksCount.Value.ToString("N0")),
+                new ListItem("Versions", onClick: _ =>
+                {
+                    blades.Push(this, new DeckVersionsBlade(deckId), "Versions");
+                }, badge: deckVersionCount.Value.ToString("N0"))
             ));
 
         return new Fragment()
