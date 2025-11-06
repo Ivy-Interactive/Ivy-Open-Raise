@@ -56,12 +56,6 @@ public partial class OrganizationSetting
     [Column("raise_ticket_size")]
     public int? RaiseTicketSize { get; set; }
 
-    [Column("created_at")]
-    public DateTime CreatedAt { get; set; }
-
-    [Column("updated_at")]
-    public DateTime UpdatedAt { get; set; }
-
     [ForeignKey("CountryId")]
     [InverseProperty("OrganizationSettings")]
     public virtual Country Country { get; set; } = null!;

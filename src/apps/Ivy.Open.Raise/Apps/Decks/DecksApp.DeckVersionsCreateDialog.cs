@@ -10,7 +10,7 @@ public class DeckVersionsCreateDialog(IState<bool> isOpen, RefreshToken refreshT
         [Required]
         public FileUpload<BlobInfo>? File { get; init; } = new();
 
-        public bool MakePrimary { get; init; } = true;
+        public bool MakeCurrent { get; init; } = true;
 
         public static DeckVersionCreateRequest Create(DataContextFactory factory, Guid deckId)
         {
@@ -52,14 +52,22 @@ public class DeckVersionsCreateDialog(IState<bool> isOpen, RefreshToken refreshT
     {
         using var db = factory.CreateDbContext();
 
-        //todo: if MakePrimary is true, set all other versions IsPrimary to false
+        if (request.MakeCurrent)
+        {
+            var currentVersions = db.DeckVersions.Where(e => e.DeckId == deckId && e.IsPrimary).ToList();
+            foreach (var version in currentVersions)
+            {
+                version.IsPrimary = false;
+                db.DeckVersions.Update(version);
+            }
+        }
         
         var deckVersion = new DeckVersion
         {
             Id = Guid.NewGuid(),
             DeckId = deckId,
             Name = request.Name,
-            IsPrimary = request.MakePrimary,
+            IsPrimary = request.MakeCurrent,
             BlobName = request.File.Content.BlobName,
             ContentType = request.File.ContentType,
             FileSize = request.File.Length,

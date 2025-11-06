@@ -32,7 +32,7 @@ public interface IBlobService
     Task<BlobInfo?> GetBlobAsync(string containerName, string blobName,
         CancellationToken cancellationToken = default);
 
-    string GetDownloadUrl(string containerName, string blobName, TimeSpan? expiresIn = null);
+    Task<string> GetDownloadUrlAsync(string containerName, string blobName, TimeSpan? expiresIn = null, CancellationToken cancellationToken = default);
 }
 
 public sealed record BlobInfo(string ContainerName, string BlobName, string ContentType, long Size, DateTime LastModified);
@@ -218,7 +218,7 @@ public class BlobService : IBlobService
         }
     }
 
-    public string GetDownloadUrl(string containerName, string blobName, TimeSpan? expiresIn = null)
+    public Task<string> GetDownloadUrlAsync(string containerName, string blobName, TimeSpan? expiresIn = null, CancellationToken cancellationToken = default)
     {
         var expiration = expiresIn ?? TimeSpan.FromHours(1);
 
@@ -230,7 +230,8 @@ public class BlobService : IBlobService
             Protocol = Protocol.HTTP
         };
 
-        return _s3Client.GetPreSignedURL(request);
+        var url = _s3Client.GetPreSignedURL(request);
+        return Task.FromResult(url);
     }
 }
 

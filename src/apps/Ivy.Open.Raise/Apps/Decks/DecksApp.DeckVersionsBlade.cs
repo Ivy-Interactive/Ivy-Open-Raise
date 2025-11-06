@@ -14,7 +14,7 @@ public class DeckVersionsBlade(Guid deckId) : ViewBase
             await using var db = factory.CreateDbContext();
             deckVersions.Set(await db.DeckVersions
                 .Where(dv => dv.DeckId == deckId && dv.DeletedAt == null)
-                .OrderByDescending(dv => dv.UpdatedAt).ToArrayAsync());
+                .OrderByDescending(dv => dv.CreatedAt).ToArrayAsync());
         }, [EffectTrigger.AfterInit(), refreshToken]);
 
         Action OnDelete(Guid id)
@@ -31,27 +31,49 @@ public class DeckVersionsBlade(Guid deckId) : ViewBase
                 }, "Delete Version", AlertButtonSet.OkCancel);
             };
         }
+        
+        Action OnMakeCurrent(Guid id)
+        {
+            return () =>
+            {
+                var db = factory.CreateDbContext();
+                var versions = db.DeckVersions.Where(dv => dv.DeckId == deckId && dv.DeletedAt == null).ToList();
+                foreach (var version in versions)
+                {
+                    version.IsPrimary = version.Id == id;
+                }
+
+                db.SaveChanges();
+                refreshToken.Refresh();
+            };
+        }
 
         if (deckVersions.Value == null) return null;
 
         var table = deckVersions.Value.Select(dv => new
         {
-            __ = dv.IsPrimary ? Icons.Star : Icons.None, //todo
+            __ = dv.IsPrimary ? Icons.Crown : Icons.None, //todo
             dv.Name,
-            dv.FileName,
-            Size = Ivy.Utils.FormatBytes(dv.FileSize),
+            FileName = (Layout.Vertical().Gap(0)
+                       | new Button(dv.FileName).Variant(ButtonVariant.Inline)
+                       | Text.Muted(Utils.FormatBytes(dv.FileSize))),
             _ = Layout.Horizontal().Gap(1)
                     | Icons.Ellipsis
                         .ToButton()
                         .Ghost()
-                        .WithDropDown(MenuItem.Default("Delete").Icon(Icons.Trash).HandleSelect(OnDelete(dv.Id)))
-                    | Icons.Pencil
-                        .ToButton()
-                        .Outline()
-                        .Tooltip("Edit")
-                        .ToTrigger((isOpen) => new DeckVersionsEditSheet(isOpen, refreshToken, dv.Id))
+                        .WithDropDown(
+                            MenuItem.Default("Delete").Icon(Icons.Trash).HandleSelect(OnDelete(dv.Id)),
+                            MenuItem.Default("Edit").Icon(Icons.Pencil), //todo ivy: how to implement this? Need a UseTrigger?
+                            MenuItem.Default("Make Current").Icon(Icons.Crown).HandleSelect(OnMakeCurrent(dv.Id))
+                        )
+                    // | Icons.Pencil
+                    //     .ToButton()
+                    //     .Outline()
+                    //     .Tooltip("Edit")
+                    //     .ToTrigger((isOpen) => new DeckVersionsEditSheet(isOpen, refreshToken, dv.Id))
         })
             .ToTable()
+            //.Width(e => e.__, Size.Units(2)) todo ivy: how can we set this to be minimal width?
             .RemoveEmptyColumns();
 
         var addBtn = new Button("Add Version").Icon(Icons.Plus).Ghost()
