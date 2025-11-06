@@ -57,7 +57,7 @@ public class StartupStageListBlade : ViewBase
         }
 
         return await linq
-            .OrderBy(e => e.Name)
+            .OrderBy(e => e.Id)
             .Take(50)
             .Select(e => new StartupStageListRecord(e.Id, e.Name))
             .ToArrayAsync();

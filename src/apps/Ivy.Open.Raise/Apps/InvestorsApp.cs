@@ -3,7 +3,7 @@ using Ivy.Open.Raise.Connections.Data;
 
 namespace Ivy.Open.Raise.Apps;
 
-[App(icon: Icons.User, path: ["Apps"], order: 1)]
+[App(icon: Icons.DollarSign, path: ["Apps"], order: 1)]
 public class InvestorsApp : ViewBase
 {
     private record InvestorRecord(
