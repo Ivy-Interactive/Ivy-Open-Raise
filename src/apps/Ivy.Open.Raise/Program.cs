@@ -1,3 +1,4 @@
+using Ivy.Open.Raise.Apps;
 using Microsoft.Extensions.AI;
 using OpenAI;
 
@@ -8,7 +9,9 @@ server.UseHotReload();
 #endif
 server.AddAppsFromAssembly();
 server.AddConnectionsFromAssembly();
-var chromeSettings = new ChromeSettings().UseTabs(preventDuplicates: true);
+var chromeSettings = new ChromeSettings()
+    .UseTabs(preventDuplicates: true)
+    .WallpaperApp<WallpaperApp>();
 server.UseChrome(chromeSettings);
 
 server.Services.UseSmtp();
@@ -24,7 +27,7 @@ if (server.Configuration.GetValue<string>("OpenAi:ApiKey") is { } openAiApiKey &
 
     var openAiChatClient = openAiClient.GetChatClient("gpt-4o");
     var chatClient = openAiChatClient.AsIChatClient();
-    server.Services.AddSingleton<IChatClient>(chatClient);
+    server.Services.AddSingleton(chatClient);
 }
 
 await server.RunAsync();

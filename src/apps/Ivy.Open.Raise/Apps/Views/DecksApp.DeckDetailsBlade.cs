@@ -32,7 +32,7 @@ public class DeckDetailsBlade(Guid deckId) : ViewBase
                     Delete(factory);
                     blades.Pop(refresh: true);
                 }
-            }, "Delete Deck", AlertButtonSet.OkCancel);
+            }, "Delete Deck");
         };
 
         var dropDown = Icons.Ellipsis
@@ -51,11 +51,7 @@ public class DeckDetailsBlade(Guid deckId) : ViewBase
             content: new
             {
                 deckValue.Id,
-                deckValue.Title,
-                deckValue.FileName,
-                deckValue.FileType,
-                deckValue.FileSize,
-                deckValue.IsPrimary
+                deckValue.Title
             }.ToDetails()
                 .RemoveEmpty()
                 .Builder(e => e.Id, e => e.CopyToClipboard()),

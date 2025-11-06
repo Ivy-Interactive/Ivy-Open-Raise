@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
 using Ivy.Services;
 
@@ -9,6 +10,51 @@ namespace Ivy.Open.Raise.Services;
 /// </summary>
 public static class BlobUploadHandler
 {
+    /// <summary>
+    /// Creates an upload handler from an IAnyState by automatically detecting the state type.
+    /// Supports: FileUpload&lt;BlobInfo&gt;?, ImmutableArray&lt;FileUpload&lt;BlobInfo&gt;&gt;
+    /// </summary>
+    public static IUploadHandler Create(
+        IAnyState anyState,
+        IBlobService blobService,
+        string containerName,
+        Func<FileUpload, string>? getBlobName = null,
+        int chunkSize = 8192)
+    {
+        var stateType = anyState.GetStateType();
+        
+        var underlyingType = Nullable.GetUnderlyingType(stateType) ?? stateType;
+        
+        if (underlyingType.IsGenericType && underlyingType.GetGenericTypeDefinition() == typeof(FileUpload<>))
+        {
+            var contentType = underlyingType.GetGenericArguments()[0];
+
+            if (contentType == typeof(BlobInfo))
+            {
+                return Create(anyState.As<FileUpload<BlobInfo>?>(), blobService, containerName, getBlobName, chunkSize);
+            }
+        }
+        
+        if (underlyingType.IsGenericType && underlyingType.GetGenericTypeDefinition() == typeof(ImmutableArray<>))
+        {
+            var elementType = underlyingType.GetGenericArguments()[0];
+
+            if (elementType.IsGenericType && elementType.GetGenericTypeDefinition() == typeof(FileUpload<>))
+            {
+                var contentType = elementType.GetGenericArguments()[0];
+
+                if (contentType == typeof(BlobInfo))
+                {
+                    return Create(anyState.As<ImmutableArray<FileUpload<BlobInfo>>>(), blobService, containerName, getBlobName, chunkSize);
+                }
+            }
+        }
+
+        throw new ArgumentException(
+            $@"Unsupported state type: {stateType}. Supported types are: FileUpload<BlobInfo>?, ImmutableArray<FileUpload<BlobInfo>>",
+            nameof(anyState));
+    }
+
     /// <summary>
     /// Creates an upload handler for a single file that uploads to blob storage.
     /// </summary>

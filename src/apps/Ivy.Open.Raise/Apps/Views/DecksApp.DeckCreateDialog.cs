@@ -24,6 +24,15 @@ public class DeckCreateDialog(IState<bool> isOpen, RefreshToken refreshToken) : 
 
         return deckState
             .ToForm()
+            .Builder(e => e.File, (s, v) =>
+            {
+                var blobService = v.UseService<IBlobService>();
+                var upload = v.UseUpload(BlobUploadHandler.Create(s, blobService, Constants.DeckBlobContainerName, CalculateBlobName))
+                    .MaxFileSize(FileSize.FromMegabytes(50))
+                    .Accept(FileTypes.Pdf);
+                return s.ToFileInput(upload);
+                string CalculateBlobName(FileUpload f) => f.Id + System.IO.Path.GetExtension(f.FileName);
+            })
             .ToDialog(isOpen, title: "Create Deck", submitTitle: "Create");
     }
 

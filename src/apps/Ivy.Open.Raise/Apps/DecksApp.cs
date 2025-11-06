@@ -2,7 +2,7 @@ using Ivy.Open.Raise.Apps.Views;
 
 namespace Ivy.Open.Raise.Apps;
 
-[App(icon: Icons.FileStack, path: ["Apps"], order: 3)]
+[App(icon: Icons.Presentation, path: ["Apps"], order: 3)]
 public class DecksApp : ViewBase
 {
     public override object? Build()
