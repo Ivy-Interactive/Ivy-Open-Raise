@@ -15,5 +15,11 @@ server.UseAuth<SliplaneAuthProvider>();
 
 server.AddAppsFromAssembly();
 server.AddConnectionsFromAssembly();
-server.UseDefaultApp(typeof(DeployApp));
+
+var chromeSettings = new ChromeSettings()
+    .DefaultApp<DeployApp>()
+    .UseTabs(preventDuplicates: true);
+server.UseChrome(
+    () => new DefaultSidebarChrome(chromeSettings)
+);
 await server.RunAsync();
