@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -7,6 +7,7 @@
     <Nullable>enable</Nullable>
     <NoWarn>CS8618;CS8603;CS8602;CS8604;CS9113</NoWarn>
     <RootNamespace>Ivy.Open.Raise.Deploy</RootNamespace>
+    <UserSecretsId>8ddb90e3-8c45-4f21-9629-3fc77af60a83</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
