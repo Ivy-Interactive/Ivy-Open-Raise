@@ -15,6 +15,7 @@ public class DeckDetailsBlade(Guid deckId) : ViewBase
         var deckVersionCount = this.UseState<int>();
         var currentVersion = this.UseState<DeckVersion?>();
         var (alertView, showAlert) = this.UseAlert();
+        var (deckEditView, showDeckEdit) = this.UseTrigger(isOpen => new DeckEditDialog(isOpen, refreshToken, deckId));
 
         this.UseEffect(async () =>
         {
@@ -46,6 +47,7 @@ public class DeckDetailsBlade(Guid deckId) : ViewBase
         async ValueTask OnDownloadVersion()
         {
             if (currentVersion.Value == null) return;
+            //todo: this isn't working
             var url = await blobService.GetDownloadUrlAsync(Constants.DeckBlobContainerName, currentVersion.Value.BlobName);
             if (!string.IsNullOrEmpty(url))
             {
@@ -53,20 +55,13 @@ public class DeckDetailsBlade(Guid deckId) : ViewBase
             }
         }
         
-        var dropDown = Icons.Ellipsis
+        var actions = Icons.Ellipsis
             .ToButton()
             .Ghost()
             .WithDropDown(
                 MenuItem.Default("Delete").Icon(Icons.Trash).HandleSelect(OnDelete),
-                MenuItem.Default("Edit").Icon(Icons.Pencil)
+                MenuItem.Default("Edit").Icon(Icons.Pencil).HandleSelect(showDeckEdit)
             );
-
-        //todo ivy: need a way to put the "..." in the title bar
-        
-        var editBtn = new Button("Edit")
-            .Variant(ButtonVariant.Outline)
-            .Icon(Icons.Pencil)
-            .ToTrigger((isOpen) => new DeckEditSheet(isOpen, refreshToken, deckId));
         
         var detailsCard = new Card(
             content: new
@@ -80,30 +75,28 @@ public class DeckDetailsBlade(Guid deckId) : ViewBase
                         : Callout.Warning("There's no current version"))
                 }
                 .ToDetails()
-                .RemoveEmpty(),
-            
-            footer: Layout.Horizontal().Gap(2).Align(Align.Right)
-                    | dropDown
-                    | editBtn
+                .RemoveEmpty()
         )
             .Title("Deck Details")
-            .Width(Size.Units(100));
+            .Icon(actions)
+            .Width(Size.Units(100)); //todo: this should be on the blade level
 
         var relatedCard = new Card(
             new List(
-                new ListItem("Links", onClick: _ =>
-                {
-                    blades.Push(this, new DeckLinksBlade(deckId), "Links");
-                }, badge: deckLinksCount.Value.ToString("N0")),
-                new ListItem("Versions", onClick: _ =>
-                {
-                    blades.Push(this, new DeckVersionsBlade(deckId), "Versions");
-                }, badge: deckVersionCount.Value.ToString("N0"))
+                new ListItem(
+                    "Links", 
+                    onClick: _ => blades.Push(this, new DeckLinksBlade(deckId), "Links"), 
+                    badge: deckLinksCount.Value.ToString("N0")),
+                new ListItem(
+                    "Versions", 
+                    onClick: _ => blades.Push(this, new DeckVersionsBlade(deckId), "Versions"),
+                    badge: deckVersionCount.Value.ToString("N0"))
             ));
 
         return new Fragment()
                | (Layout.Vertical() | detailsCard | relatedCard)
                | alertView
+               | deckEditView
                ;
     }
 

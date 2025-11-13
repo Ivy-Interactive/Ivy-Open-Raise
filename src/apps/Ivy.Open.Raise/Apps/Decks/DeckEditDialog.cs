@@ -1,6 +1,6 @@
 namespace Ivy.Open.Raise.Apps.Decks;
 
-public class DeckEditSheet(IState<bool> isOpen, RefreshToken refreshToken, Guid deckId) : ViewBase
+public class DeckEditDialog(IState<bool> isOpen, RefreshToken refreshToken, Guid deckId) : ViewBase
 {
     public override object? Build()
     {
@@ -19,6 +19,6 @@ public class DeckEditSheet(IState<bool> isOpen, RefreshToken refreshToken, Guid 
         return deck
             .ToForm()
             .Remove(e => e.Id, e => e.CreatedAt, e => e.UpdatedAt, e => e.DeletedAt)
-            .ToSheet(isOpen, "Edit Deck");
+            .ToDialog(isOpen, "Edit Deck");
     }
 }
