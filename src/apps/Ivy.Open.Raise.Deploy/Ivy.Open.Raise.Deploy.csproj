@@ -12,12 +12,24 @@
   <ItemGroup>
     <EmbeddedResource Include="Assets/**/*" />
   </ItemGroup>
+  <PropertyGroup>
+    <IvyProjectPath Condition="'$(IVY_PROJECT_PATH)' != '' AND Exists('$(IVY_PROJECT_PATH)')">$(IVY_PROJECT_PATH)</IvyProjectPath>
+  </PropertyGroup>
+
   <ItemGroup>
-    <PackageReference Include="Ivy" Version="1.*" />
+    <PackageReference Include="Ivy" Version="1.*" Condition="'$(IvyProjectPath)' == '' AND !Exists('..\..\..\..\ivy-framework\Ivy\Ivy.csproj')" />
   </ItemGroup>
   
   <ItemGroup>
     <ProjectReference Include="Ivy-Sliplane\Ivy.Sliplane.AuthProvider\Ivy.Sliplane.AuthProvider.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(IvyProjectPath)' == '' AND Exists('..\..\..\..\ivy-framework\Ivy\Ivy.csproj')">
+    <ProjectReference Include="..\..\..\..\ivy-framework\Ivy\Ivy.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(IvyProjectPath)' != ''">
+    <ProjectReference Include="$(IvyProjectPath)" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Apps" />
