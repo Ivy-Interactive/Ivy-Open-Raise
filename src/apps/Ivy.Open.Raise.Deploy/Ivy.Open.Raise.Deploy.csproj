@@ -18,5 +18,12 @@
   <ItemGroup>
     <Folder Include="Apps" />
   </ItemGroup>
+  
+  <ItemGroup>
+    <Compile Remove="Ivy-Sliplane/**" />
+    <Content Remove="Ivy-Sliplane/**" />
+    <EmbeddedResource Remove="Ivy-Sliplane/**" />
+    <None Remove="Ivy-Sliplane/**" />
+  </ItemGroup>
 
 </Project>
