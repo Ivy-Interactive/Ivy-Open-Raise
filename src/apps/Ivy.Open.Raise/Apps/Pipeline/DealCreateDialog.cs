@@ -1,4 +1,4 @@
-namespace Ivy.Open.Raise.Apps.Deals;
+namespace Ivy.Open.Raise.Apps.Pipeline;
 
 public class DealCreateDialog(IState<bool> isOpen, RefreshToken refreshToken) : ViewBase
 {
@@ -10,30 +10,21 @@ public class DealCreateDialog(IState<bool> isOpen, RefreshToken refreshToken) : 
         [Required]
         public int DealStateId { get; init; }
 
-        public int? DealApproachId { get; init; }
+        [Required]
+        public Guid OwnerId { get; init; } = Guid.Empty;
 
         [Required]
-        public Guid OwnerId { get; init; }
-
-        public int? AmountFrom { get; init; }
-
-        public int? AmountTo { get; init; }
-
-        public int? Priority { get; init; }
-
-        public float Order { get; init; }
-
-        public string? Notes { get; init; }
-
-        public DateTime? NextAction { get; init; }
-
-        public string? NextActionNotes { get; init; }
+        [Range(0, int.MaxValue)] //todo ivy
+        public int? Amount { get; set; }
     }
 
     public override object? Build()
     {
         var factory = UseService<DataContextFactory>();
-        var deal = UseState(() => new DealCreateRequest());
+        var deal = UseState(() => new DealCreateRequest()
+        {
+            DealStateId = 1
+        });
 
         UseEffect(() =>
         {
@@ -45,7 +36,8 @@ public class DealCreateDialog(IState<bool> isOpen, RefreshToken refreshToken) : 
             .ToForm()
             .Builder(e => e.ContactId, e => e.ToAsyncSelectInput(QueryContacts(factory), LookupContact(factory), placeholder: "Select Contact"))
             .Builder(e => e.DealStateId, e => e.ToAsyncSelectInput(QueryDealStates(factory), LookupDealState(factory), placeholder: "Select Deal State"))
-            .Builder(e => e.DealApproachId, e => e.ToAsyncSelectInput(QueryDealApproaches(factory), LookupDealApproach(factory), placeholder: "Select Deal Approach"))
+            .Remove(e => e.OwnerId)
+            .Place(e => e.ContactId, e => e.DealStateId, e => e.Amount)
             .ToDialog(isOpen, title: "Create Deal", submitTitle: "Create");
     }
 
@@ -57,15 +49,8 @@ public class DealCreateDialog(IState<bool> isOpen, RefreshToken refreshToken) : 
         {
             ContactId = request.ContactId,
             DealStateId = request.DealStateId,
-            DealApproachId = request.DealApproachId,
             OwnerId = request.OwnerId,
-            AmountFrom = request.AmountFrom,
-            AmountTo = request.AmountTo,
-            Priority = request.Priority,
-            Order = request.Order,
-            Notes = request.Notes,
-            NextAction = request.NextAction,
-            NextActionNotes = request.NextActionNotes,
+            AmountFrom = request.Amount,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
@@ -81,12 +66,18 @@ public class DealCreateDialog(IState<bool> isOpen, RefreshToken refreshToken) : 
         return async query =>
         {
             await using var db = factory.CreateDbContext();
-            return (await db.Contacts
-                    .Where(e => (e.FirstName.Contains(query) || e.LastName.Contains(query)) && e.DeletedAt == null)
-                    .Select(e => new { e.Id, FullName = e.FirstName + " " + e.LastName })
+            return (await db.Contacts.Include(c => c.Investor)
+                        
+                    .Where(e => (e.FirstName.Contains(query) || e.LastName.Contains(query) || e.Investor.Name.Contains(query)) && e.DeletedAt == null)
+                    .Select(e => new
+                    {
+                        e.Id, 
+                        FullName = e.FirstName + " " + e.LastName,
+                        Investor = e.Investor.Name
+                    })
                     .Take(50)
                     .ToArrayAsync())
-                .Select(e => new Option<Guid?>(e.FullName, e.Id))
+                .Select(e => new Option<Guid?>(e.FullName, e.Id, description:e.Investor))
                 .ToArray();
         };
     }
@@ -97,7 +88,9 @@ public class DealCreateDialog(IState<bool> isOpen, RefreshToken refreshToken) : 
         {
             if (id == null) return null;
             await using var db = factory.CreateDbContext();
-            var contact = await db.Contacts.FirstOrDefaultAsync(e => e.Id == id && e.DeletedAt == null);
+            var contact = await db
+                .Contacts
+                .FirstOrDefaultAsync(e => e.Id == id && e.DeletedAt == null);
             if (contact == null) return null;
             return new Option<Guid?>(contact.FirstName + " " + contact.LastName, contact.Id);
         };
@@ -127,33 +120,6 @@ public class DealCreateDialog(IState<bool> isOpen, RefreshToken refreshToken) : 
             var dealState = await db.DealStates.FirstOrDefaultAsync(e => e.Id == id);
             if (dealState == null) return null;
             return new Option<int?>(dealState.Name, dealState.Id);
-        };
-    }
-
-    private static AsyncSelectQueryDelegate<int?> QueryDealApproaches(DataContextFactory factory)
-    {
-        return async query =>
-        {
-            await using var db = factory.CreateDbContext();
-            return (await db.DealApproaches
-                    .Where(e => e.Name.Contains(query))
-                    .Select(e => new { e.Id, e.Name })
-                    .Take(50)
-                    .ToArrayAsync())
-                .Select(e => new Option<int?>(e.Name, e.Id))
-                .ToArray();
-        };
-    }
-
-    private static AsyncSelectLookupDelegate<int?> LookupDealApproach(DataContextFactory factory)
-    {
-        return async id =>
-        {
-            if (id == null) return null;
-            await using var db = factory.CreateDbContext();
-            var dealApproach = await db.DealApproaches.FirstOrDefaultAsync(e => e.Id == id);
-            if (dealApproach == null) return null;
-            return new Option<int?>(dealApproach.Name, dealApproach.Id);
         };
     }
 }
