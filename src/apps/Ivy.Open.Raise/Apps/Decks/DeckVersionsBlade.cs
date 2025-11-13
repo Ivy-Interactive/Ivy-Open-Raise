@@ -52,7 +52,7 @@ public class DeckVersionsBlade(Guid deckId) : ViewBase
 
         var table = deckVersions.Value.Select(dv => new
         {
-            __ = dv.IsPrimary ? Icons.Crown : Icons.None, //todo
+            __ = dv.IsPrimary ? Icons.Crown : Icons.None,
             dv.Name,
             FileName = (Layout.Vertical().Gap(0)
                        | new Button(dv.FileName).Variant(ButtonVariant.Inline)

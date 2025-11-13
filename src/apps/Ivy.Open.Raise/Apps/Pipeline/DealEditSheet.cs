@@ -1,4 +1,4 @@
-namespace Ivy.Open.Raise.Apps.Deals;
+namespace Ivy.Open.Raise.Apps.Pipeline;
 
 public class DealEditSheet(IState<bool> isOpen, RefreshToken refreshToken, Guid dealId) : ViewBase
 {
