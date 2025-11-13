@@ -8,6 +8,8 @@ public class DeckVersionsBlade(Guid deckId) : ViewBase
         var refreshToken = this.UseRefreshToken();
         var deckVersions = this.UseState<DeckVersion[]?>();
         var (alertView, showAlert) = this.UseAlert();
+        var (editView, showEdit) = this.UseTrigger((IState<bool> isOpen, Guid versionId) 
+            => new DeckVersionsEditDialog(isOpen, refreshToken, versionId));
 
         this.UseEffect(async () =>
         {
@@ -28,7 +30,7 @@ public class DeckVersionsBlade(Guid deckId) : ViewBase
                         Delete(factory, id);
                         refreshToken.Refresh();
                     }
-                }, "Delete Version", AlertButtonSet.OkCancel);
+                }, "Delete Version");
             };
         }
         
@@ -63,25 +65,23 @@ public class DeckVersionsBlade(Guid deckId) : ViewBase
                         .Ghost()
                         .WithDropDown(
                             MenuItem.Default("Delete").Icon(Icons.Trash).HandleSelect(OnDelete(dv.Id)),
-                            MenuItem.Default("Edit").Icon(Icons.Pencil), //todo ivy: how to implement this? Need a UseTrigger?
+                            MenuItem.Default("Edit").Icon(Icons.Pencil).HandleSelect(() => showEdit(dv.Id)),
                             MenuItem.Default("Make Current").Icon(Icons.Crown).HandleSelect(OnMakeCurrent(dv.Id))
                         )
-                    // | Icons.Pencil
-                    //     .ToButton()
-                    //     .Outline()
-                    //     .Tooltip("Edit")
-                    //     .ToTrigger((isOpen) => new DeckVersionsEditSheet(isOpen, refreshToken, dv.Id))
         })
             .ToTable()
-            //.Width(e => e.__, Size.Units(2)) todo ivy: how can we set this to be minimal width?
+            // .Width(e => e._, Size.Fit())
+            // .Width(e => e.__, Size.Fit())
+            // .Width(e => e.FileName, Size.Fraction(1))
             .RemoveEmptyColumns();
 
-        var addBtn = new Button("Add Version").Icon(Icons.Plus).Ghost()
+        var addBtn = new Button("Add Version").Icon(Icons.Plus).Outline()
             .ToTrigger((isOpen) => new DeckVersionsCreateDialog(isOpen, refreshToken, deckId));
 
         return new Fragment()
                | BladeHelper.WithHeader(addBtn, table)
-               | alertView;
+               | alertView
+               | editView;
     }
 
     public void Delete(DataContextFactory factory, Guid versionId)

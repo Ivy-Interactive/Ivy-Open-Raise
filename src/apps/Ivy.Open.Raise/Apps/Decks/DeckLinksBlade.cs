@@ -11,7 +11,9 @@ public class DeckLinksBlade(Guid deckId) : ViewBase
         var deckLinks = this.UseState<DeckLinkDto[]?>();
         var client = UseService<IClientProvider>();
         var (alertView, showAlert) = this.UseAlert();
-
+        var (editView, showEdit) = this.UseTrigger((IState<bool> isOpen, Guid linkId) 
+            => new DeckLinksEditDialog(isOpen, refreshToken, linkId));
+        
         this.UseEffect(async () =>
         {
             await using var db = factory.CreateDbContext();
@@ -71,27 +73,27 @@ public class DeckLinksBlade(Guid deckId) : ViewBase
                     | Icons.Ellipsis
                         .ToButton()
                         .Ghost()
-                        .WithDropDown(MenuItem.Default("Delete").Icon(Icons.Trash).HandleSelect(OnDelete(dl.Id)))
+                        .WithDropDown(
+                            MenuItem.Default("Delete").Icon(Icons.Trash).HandleSelect(OnDelete(dl.Id)),
+                            MenuItem.Default("Edit").Icon(Icons.Pencil).HandleSelect(() => showEdit(dl.Id))
+                        )
                     | Icons.Clipboard
                         .ToButton()
                         .Outline()
                         .Tooltip("Copy Link")
                         .HandleClick(OnCopy(dl.Id))
-                    | Icons.Pencil
-                        .ToButton()
-                        .Outline()
-                        .Tooltip("Edit")
-                        .ToTrigger((isOpen) => new DeckLinksEditSheet(isOpen, refreshToken, dl.Id))
         })
         .ToTable()
         .RemoveEmptyColumns();
 
-        var addBtn = new Button("Add Deck Link").Icon(Icons.Plus).Ghost()
+        var addBtn = new Button("Add Deck Link").Icon(Icons.Plus).Outline()
             .ToTrigger((isOpen) => new DeckLinksCreateDialog(isOpen, refreshToken, deckId));
 
         return new Fragment()
                | BladeHelper.WithHeader(addBtn, table)
-               | alertView;
+               | alertView
+               | editView
+            ;
     }
 
     public void Delete(DataContextFactory factory, Guid deckLinkId)
