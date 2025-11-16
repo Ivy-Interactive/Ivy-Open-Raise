@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -7,16 +7,41 @@
     <Nullable>enable</Nullable>
     <NoWarn>CS8618;CS8603;CS8602;CS8604;CS9113</NoWarn>
     <RootNamespace>Ivy.Open.Raise.Deploy</RootNamespace>
+    <UserSecretsId>8ddb90e3-8c45-4f21-9629-3fc77af60a83</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="Assets/**/*" />
   </ItemGroup>
+  <PropertyGroup>
+    <IvyProjectPath Condition="'$(IVY_PROJECT_PATH)' != '' AND Exists('$(IVY_PROJECT_PATH)')">$(IVY_PROJECT_PATH)</IvyProjectPath>
+  </PropertyGroup>
+
   <ItemGroup>
-    <PackageReference Include="Ivy" Version="1.*" />
+    <PackageReference Include="Ivy" Version="1.*" Condition="'$(IvyProjectPath)' == '' AND !Exists('..\..\..\..\ivy-framework\Ivy\Ivy.csproj')" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="Ivy-Sliplane\Ivy.Sliplane.AuthProvider\Ivy.Sliplane.AuthProvider.csproj" />
+    <ProjectReference Include="Ivy-Sliplane\Ivy.Sliplane\Ivy.Sliplane.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(IvyProjectPath)' == '' AND Exists('..\..\..\..\ivy-framework\Ivy\Ivy.csproj')">
+    <ProjectReference Include="..\..\..\..\ivy-framework\Ivy\Ivy.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(IvyProjectPath)' != ''">
+    <ProjectReference Include="$(IvyProjectPath)" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Apps" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Compile Remove="Ivy-Sliplane/**" />
+    <Content Remove="Ivy-Sliplane/**" />
+    <EmbeddedResource Remove="Ivy-Sliplane/**" />
+    <None Remove="Ivy-Sliplane/**" />
   </ItemGroup>
 
 </Project>

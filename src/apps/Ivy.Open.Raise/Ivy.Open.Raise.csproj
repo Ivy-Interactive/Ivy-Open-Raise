@@ -33,6 +33,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\Ivy-Framework\Ivy\Ivy.csproj" />
+    <ProjectReference Include="..\Ivy.Open.Raise.Deploy\Ivy-Sliplane\Ivy.Sliplane\Ivy.Sliplane.csproj" />
+    <ProjectReference Include="..\Ivy.Open.Raise.Deploy\Ivy-Sliplane\Ivy.Sliplane.AuthProvider\Ivy.Sliplane.AuthProvider.csproj" />
   </ItemGroup>
 
 <!--  <ItemGroup Condition="'$(IvyProjectPath)' != ''">-->
