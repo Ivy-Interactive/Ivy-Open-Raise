@@ -1,3 +1,4 @@
+using Ivy.Open.Raise.Deploy.Apps.Services;
 using Ivy.Sliplane;
 using Ivy.Sliplane.Models;
 
@@ -23,8 +24,7 @@ public class ServicesApp : ViewBase
         {
             try
             {
-                var loadingValue = true;
-                isLoading.Set(loadingValue);
+                isLoading.Set(true);
                 error.Set((string?)null);
                 var projectsList = await sliplaneService.ListProjectsAsync();
                 projects.Set(projectsList);
@@ -42,8 +42,7 @@ public class ServicesApp : ViewBase
             }
             finally
             {
-                var notLoadingValue = false;
-                isLoading.Set(notLoadingValue);
+                isLoading.Set(false);
             }
         }, []);
 
@@ -58,8 +57,7 @@ public class ServicesApp : ViewBase
 
             try
             {
-                var loadingValue = true;
-                isLoading.Set(loadingValue);
+                isLoading.Set(true);
                 error.Set((string?)null);
                 var servicesList = await sliplaneService.ListServicesAsync(selectedProjectId.Value!);
                 services.Set(servicesList);
@@ -72,8 +70,7 @@ public class ServicesApp : ViewBase
             }
             finally
             {
-                var notLoadingValue = false;
-                isLoading.Set(notLoadingValue);
+                isLoading.Set(false);
             }
         }, selectedProjectId);
 
@@ -90,19 +87,6 @@ public class ServicesApp : ViewBase
         // Project options for dropdown
         var projectOptions = projects.Value
             .Select(p => new Option<string>(p.Id ?? "", p.Name ?? p.Id ?? "Unknown"))
-            .ToList();
-
-        // Filter services to show only running ones (Live status)
-        var runningServices = services.Value
-            .Where(s => s.Status == ServiceStatus.Live)
-            .Select(s => new ServiceViewModel
-            {
-                Name = s.Name ?? "Unknown",
-                Status = s.Status.ToString(),
-                ServerId = s.ServerId ?? "N/A",
-                IsPublic = s.Network != null && s.Network.Public ? "Yes" : "No",
-                Domain = s.Network != null ? (s.Network.ManagedDomain ?? s.Network.InternalDomain ?? "N/A") : "N/A"
-            })
             .ToList();
 
         return Layout.Vertical().Padding(4).Gap(4)
@@ -134,20 +118,7 @@ public class ServicesApp : ViewBase
                 : null)
 
             | (selectedProjectId.Value != null && !isLoading.Value
-                ? runningServices.Count > 0
-                    ? runningServices.ToTable()
-                        .Header(s => s.Name, "Name")
-                        .Header(s => s.Status, "Status")
-                        .Header(s => s.ServerId, "Server ID")
-                        .Header(s => s.IsPublic, "Public")
-                        .Header(s => s.Domain, "Domain")
-                    : new Card(
-                        Layout.Vertical().Gap(2).Align(Align.Center).Padding(8)
-                            | new Icon(Icons.Container, Colors.Gray).Size(Size.Units(4))
-                            | Text.H3("No Running Services")
-                            | Text.Block($"No services with 'Live' status found in this project.")
-                                .Color(Colors.Gray)
-                    )
+                ? new ServicesListView(services, isLoading, RefreshServices)
                 : null)
 
             | (selectedProjectId.Value == null && !isLoading.Value
@@ -160,13 +131,5 @@ public class ServicesApp : ViewBase
                 )
                 : null);
     }
-
-    private class ServiceViewModel
-    {
-        public string Name { get; set; } = "";
-        public string Status { get; set; } = "";
-        public string ServerId { get; set; } = "";
-        public string IsPublic { get; set; } = "";
-        public string Domain { get; set; } = "";
-    }
 }
+
