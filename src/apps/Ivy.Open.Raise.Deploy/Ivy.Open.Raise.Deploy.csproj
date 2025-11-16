@@ -23,6 +23,7 @@
   
   <ItemGroup>
     <ProjectReference Include="Ivy-Sliplane\Ivy.Sliplane.AuthProvider\Ivy.Sliplane.AuthProvider.csproj" />
+    <ProjectReference Include="Ivy-Sliplane\Ivy.Sliplane\Ivy.Sliplane.csproj" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(IvyProjectPath)' == '' AND Exists('..\..\..\..\ivy-framework\Ivy\Ivy.csproj')">
