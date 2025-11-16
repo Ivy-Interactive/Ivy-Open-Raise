@@ -36,12 +36,9 @@ public class ServicesListView : ViewBase
 
         if (runningServices.Count > 0)
         {
-            return runningServices.ToTable()
-                .Header(s => s.Name, "Name")
-                .Header(s => s.Status, "Status")
-                .Header(s => s.ServerId, "Server ID")
-                .Header(s => s.IsPublic, "Public")
-                .Header(s => s.Domain, "Domain");
+            return runningServices.AsQueryable().ToDataTable()
+                .Width(Size.Full())
+                .Height(Size.Full());
         }
 
         return new Card(

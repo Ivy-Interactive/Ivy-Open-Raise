@@ -101,7 +101,11 @@ public class SliplaneService : ISliplaneService
 
     public async Task<List<Service>> ListServicesAsync(string projectId, CancellationToken cancellationToken = default)
     {
-        var response = await _httpClient.GetAsync($"projects/{projectId}/services", cancellationToken);
+        if (string.IsNullOrWhiteSpace(projectId))
+            throw new ArgumentException("Project ID cannot be null or empty", nameof(projectId));
+            
+        var encodedProjectId = Uri.EscapeDataString(projectId);
+        var response = await _httpClient.GetAsync($"projects/{encodedProjectId}/services", cancellationToken);
         await EnsureSuccessStatusCodeAsync(response);
         var json = await response.Content.ReadAsStringAsync(cancellationToken);
         return JsonSerializer.Deserialize<List<Service>>(json) ?? throw new InvalidOperationException("Deserialization returned null");
