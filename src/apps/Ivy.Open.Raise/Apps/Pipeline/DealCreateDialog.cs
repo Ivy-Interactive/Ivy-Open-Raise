@@ -6,6 +6,10 @@ public class DealCreateDialog(IState<bool> isOpen, RefreshToken refreshToken) : 
 {
     private record DealCreateRequest
     {
+        [Required] 
+        [Range(0, int.MaxValue)] 
+        public int Amount { get; set; } = 0;
+        
         [Required]
         public Guid ContactId { get; init; }
 
@@ -14,10 +18,6 @@ public class DealCreateDialog(IState<bool> isOpen, RefreshToken refreshToken) : 
 
         [Required]
         public Guid OwnerId { get; init; } = Guid.Empty;
-
-        [Required]
-        [Range(0, int.MaxValue)] //todo ivy
-        public int? Amount { get; set; }
     }
 
     public override object? Build()
@@ -25,7 +25,8 @@ public class DealCreateDialog(IState<bool> isOpen, RefreshToken refreshToken) : 
         var factory = UseService<DataContextFactory>();
         var deal = UseState(() => new DealCreateRequest()
         {
-            DealStateId = 1
+            DealStateId = 1, //todo: Get the state with the lowest order
+            //todo: populate OwnerId with current user
         });
 
         UseEffect(() =>
@@ -36,17 +37,18 @@ public class DealCreateDialog(IState<bool> isOpen, RefreshToken refreshToken) : 
 
         return deal
             .ToForm()
+            .Label(e => e.DealStateId, "State")
             .Builder(e => e.ContactId, e => e.ToAsyncSelectInput(QueryContacts(factory), LookupContact(factory), placeholder: "Select Contact"))
             .Builder(e => e.DealStateId, e => e.ToAsyncSelectInput(QueryDealStates(factory), LookupDealState(factory), placeholder: "Select Deal State"))
-            .Remove(e => e.OwnerId)
-            .Place(e => e.ContactId, e => e.DealStateId, e => e.Amount)
+            .Builder(e => e.OwnerId, e => e.ToAsyncSelectInput(QueryUsers(factory), LookupUser(factory), placeholder: "Select Owner"))
+            .Place(e => e.Amount, e => e.ContactId, e => e.DealStateId)
             .ToDialog(isOpen, title: "Create Deal", submitTitle: "Create");
     }
 
     private Guid CreateDeal(DataContextFactory factory, DealCreateRequest request)
     {
         using var db = factory.CreateDbContext();
-
+        
         var deal = new Deal()
         {
             ContactId = request.ContactId,

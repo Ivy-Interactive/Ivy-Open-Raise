@@ -2,6 +2,33 @@
 
 public static class Shared
 {
+    public static AsyncSelectQueryDelegate<Guid?> QueryUsers(DataContextFactory factory)
+    {
+        return async query =>
+        {
+            await using var db = factory.CreateDbContext();
+            return (await db.Users
+                    .Where(e => (e.FirstName + " " + e.LastName).Contains(query) || e.Email.Contains(query))
+                    .Select(e => new { e.Id, Name = e.FirstName + " " + e.LastName })
+                    .Take(50)
+                    .ToArrayAsync())
+                .Select(e => new Option<Guid?>(e.Name, e.Id))
+                .ToArray();
+        };
+    }
+
+    public static AsyncSelectLookupDelegate<Guid?> LookupUser(DataContextFactory factory)
+    {
+        return async id =>
+        {
+            if (id == null) return null;
+            await using var db = factory.CreateDbContext();
+            var user = await db.Users.FirstOrDefaultAsync(e => e.Id == id);
+            if (user == null) return null;
+            return new Option<Guid?>(user.FirstName + " " + user.LastName, user.Id);
+        };
+    }
+    
     public static AsyncSelectQueryDelegate<int?> QueryCountries(DataContextFactory factory)
     {
         return async query =>

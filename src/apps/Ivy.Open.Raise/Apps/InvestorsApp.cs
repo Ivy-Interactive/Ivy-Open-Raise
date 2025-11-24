@@ -41,15 +41,15 @@ public class InvestorsApp : ViewBase
                 
                 .Hidden(i => i.Id, i => i.CreatedAt, i => i.UpdatedAt)
                 
-                .RowActions2(
+                .RowActions(
                     MenuItem.Default(Icons.Delete).Tooltip("Delete"),
                     MenuItem.Default(Icons.Pencil).Tooltip("Edit"),
                     MenuItem.Default(Icons.Menu) | MenuItem.Default("Bar") | MenuItem.Default("Foo")
                 )
-                .HandleRowAction((record, menuItem) =>
-                {
-                    
-                })
+                // .HandleRowAction((e) =>
+                // {
+                //     
+                // })
                 
                 .Renderer(e => e.ContactsCount, new ButtonDisplayRenderer())
                 .HandleCellAction(e => e.ContactsCount, record =>
