@@ -83,7 +83,7 @@ public class PipelineApp : ViewBase
                 if (result.IsOk())
                 { 
                     deals.Set([..deals.Value.Where(d => d.Id != cardId)]);
-                    DeleteDeal(factory, cardId); //todo: fire and forget
+                    _ = DeleteDeal(factory, cardId); //fire and forget
                 }
             }, "Delete Deal");
         }
@@ -91,105 +91,102 @@ public class PipelineApp : ViewBase
         void OnMove((object? cardId, string toState, int? targetIndex) moveData)
         {
             if (!Guid.TryParse(moveData.cardId?.ToString(), out var dealId)) return;
-
-            // var ds = deals.Value;
-            //
-            // var deal = deals.Value.FirstOrDefault(d => d.Id == dealId);
-            // if(deal == null) return;
-            //
-            // var updatedList = items
-            //     .Select(i => i.Id == id ? i with { State = newState } : i)
-            //     .ToList();
-            //
-            // string fromStack = deal.DealState; //can we get this from moveData?
-            //
-            // var stacks = deals.Value.GroupBy(e => e.DealState);
-            //
-            // stacks.Select((stack,group) =>
-            // {
-            //     if(e => )    
-            // })
-            //     
-            // var dealsInTargetColumn = deals.Value.Where(d => d.DealState == moveData.toState)
-            //     .OrderBy(d => d.Order)
-            //     .ToList();
-                
-            //refreshToken.Refresh();
-            // float newOrder;
-            // if (moveData.TargetIndex.HasValue && moveData.TargetIndex.Value < dealsInTargetColumn.Count)
-            // {
-            //     // Insert between existing items
-            //     if (moveData.TargetIndex.Value == 0)
-            //     {
-            //         // First position
-            //         newOrder = dealsInTargetColumn[0].Order - 1;
-            //     }
-            //     else
-            //     {
-            //         // Between two items
-            //         var prevOrder = dealsInTargetColumn[moveData.TargetIndex.Value - 1].Order;
-            //         var nextOrder = dealsInTargetColumn[moveData.TargetIndex.Value].Order;
-            //         newOrder = (prevOrder + nextOrder) / 2;
-            //     }
-            // }
-            // else
-            // {
-            //     // Last position
-            //     newOrder = dealsInTargetColumn.Count > 0
-            //         ? dealsInTargetColumn[^1].Order + 1
-            //         : 1;
-            // }
-            //
-            // var updatedDeals = deals.Value.Select(deal => deal.Id.ToString() == dealId
-            //         ? new DealRecord
-            //         {
-            //             Id = deal.Id,
-            //             ContactName = deal.ContactName,
-            //             DealStateName = moveData.ToColumn,
-            //             Description = deal.Description,
-            //             Order = newOrder,
-            //             AmountFrom = deal.AmountFrom,
-            //             AmountTo = deal.AmountTo,
-            //             Priority = deal.Priority, // Priority should NOT change when moving
-            //             OwnerName = deal.OwnerName,
-            //             NextAction = deal.NextAction
-            //         }
-            //         : deal)
-            //     .ToArray();
-            //
-            // deals.Set(updatedDeals);
-        
-            //todo: 
+            deals.Set(MoveDealLocally(deals.Value, dealId, moveData.toState, moveData.targetIndex ?? 0));
+            _ = MoveDeal(factory, dealId, moveData.toState, moveData.targetIndex ?? 0); // fire and forget
         }
     }
 
-    private void MoveDeal(DataContextFactory factory, Guid cardId, string toColumn, float newOrder) 
+    private async Task MoveDeal(DataContextFactory factory, Guid dealId, string toState, int targetIndex)
     {
-        using var db = factory.CreateDbContext();
-        
-        var deal = db.Deals
-            .Include(d => d.DealState)
-            .SingleOrDefault(d => d.Id == cardId);
-        if (deal == null) return;
-        
-        var targetDealState = db.DealStates.SingleOrDefault(ds => ds.Name == toColumn);
-        if (targetDealState == null) return;
-        
-        deal.DealStateId = targetDealState.Id;
-        deal.Order = newOrder;
-        
-        db.SaveChanges();
+        await using var db = factory.CreateDbContext();
+
+        var strategy = db.Database.CreateExecutionStrategy();
+        await strategy.ExecuteAsync(async () =>
+        {
+            await using var tx = await db.Database.BeginTransactionAsync();
+
+            var moved = await db.Deals.SingleOrDefaultAsync(d => d.Id == dealId);
+            if (moved is null)
+                return;
+
+            var toStateId = await db.DealStates
+                .Where(ds => ds.Name == toState)
+                .Select(ds => (int?)ds.Id)
+                .FirstOrDefaultAsync();
+
+            if (toStateId == null)
+                return;
+
+            moved.DealStateId = toStateId.Value;
+
+            var destGroup = await db.Deals
+                .Where(d => d.DealStateId == toStateId && d.Id != dealId)
+                .OrderBy(d => d.Order)
+                .ToListAsync();
+
+            targetIndex = Math.Clamp(targetIndex, 0, destGroup.Count);
+            destGroup.Insert(targetIndex, moved);
+
+            for (int k = 0; k < destGroup.Count; k++)
+            {
+                destGroup[k].Order = k;
+                destGroup[k].UpdatedAt = DateTime.UtcNow;
+            }
+
+            await db.SaveChangesAsync();
+            await tx.CommitAsync();
+        });
     }
     
-    private void DeleteDeal(DataContextFactory factory, Guid dealId)
+    ImmutableArray<DealRecord> MoveDealLocally(
+        ImmutableArray<DealRecord> items,
+        Guid dealId,
+        string toState,
+        int targetIndex)
     {
-        using var db = factory.CreateDbContext();
+        var updatedList = items
+            .Select(i => i.Id == dealId ? i with { DealState = toState } : i)
+            .ToList();
+            
+        var movedItem = updatedList.FirstOrDefault(i => i.Id == dealId);
+        if (movedItem is null)
+            return items;
+            
+        var group = updatedList
+            .Where(i => i.DealState == movedItem.DealState)
+            .OrderBy(i => i.Order)
+            .ToList();
+            
+        group.RemoveAll(i => i.Id == dealId);
+        targetIndex = Math.Clamp(targetIndex, 0, group.Count);
+        group.Insert(targetIndex, movedItem);
+            
+        for (int k = 0; k < group.Count; k++)
+            group[k] = group[k] with { Order = k };
+            
+        var byId = group.ToDictionary(g => g.Id);
+        for (int i = 0; i < updatedList.Count; i++)
+        {
+            if (byId.TryGetValue(updatedList[i].Id, out var gitem))
+                updatedList[i] = gitem;
+        }
+            
+        return [
+            ..updatedList
+                .OrderBy(i => i.DealState)
+                .ThenBy(i => i.Order)
+        ];
+    }
+    
+    private async Task DeleteDeal(DataContextFactory factory, Guid dealId)
+    {
+        await using var db = factory.CreateDbContext();
         
-        var deal = db.Deals.SingleOrDefault(d => d.Id == dealId);
+        var deal = await db.Deals.SingleOrDefaultAsync(d => d.Id == dealId);
         if (deal == null) return;
         
         deal.DeletedAt = DateTime.UtcNow;
-        db.SaveChanges();
+        await db.SaveChangesAsync();
     }
     
     private async Task<ImmutableArray<DealRecord>> FetchDeals(DataContextFactory factory)
