@@ -40,6 +40,7 @@ public class InvestorCreateDialog(IState<bool> isOpen, RefreshToken refreshToken
 
         var investor = new Investor()
         {
+            Id = Guid.NewGuid(),
             Name = request.Name,
             AddressCountryId = request.AddressCountryId,
             InvestorTypeId = request.InvestorTypeId,

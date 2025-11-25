@@ -66,6 +66,7 @@ public class DeckCreateDialog(IState<bool> isOpen, RefreshToken refreshToken) : 
         
         var deckLink = new DeckLink()
         {
+            Id = Guid.NewGuid(),
             Secret = Utils.RandomKey(12),
             Reference = null!,
             ContactId = null,

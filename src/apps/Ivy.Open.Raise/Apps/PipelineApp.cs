@@ -37,7 +37,6 @@ public class PipelineApp : ViewBase
             .ColumnOrder(deal => deal.DealStateOrder)
             .CardBuilder(CardBuilder)
             .HandleMove(OnMove)
-            //.Size(Size.Full())
             ;
 
         var header = Layout.Horizontal() | createBtn;
@@ -83,22 +82,40 @@ public class PipelineApp : ViewBase
             {
                 if (result.IsOk())
                 { 
-                    DeleteDeal(factory, cardId);
                     deals.Set([..deals.Value.Where(d => d.Id != cardId)]);
+                    DeleteDeal(factory, cardId); //todo: fire and forget
                 }
             }, "Delete Deal");
         }
-
-        void OnMove((object? cardId, string toColumn, int? targetIndex) moveData)
+        
+        //todo: include fromStack         
+        void OnMove((object? cardId, string toState, int? targetIndex) moveData)
         {
-            Console.WriteLine(moveData);
-            
-            // var dealId = moveData.CardId?.ToString();
-            // if (string.IsNullOrEmpty(dealId)) return;
+            if (!Guid.TryParse(moveData.cardId?.ToString(), out var dealId)) return;
+
+            // var ds = deals.Value;
             //
-            // var dealsInTargetColumn = deals.Value.Where(d => d.DealStateName == moveData.ToColumn)
+            // var deal = deals.Value.FirstOrDefault(d => d.Id == dealId);
+            // if(deal == null) return;
+            //
+            // var updatedList = items
+            //     .Select(i => i.Id == id ? i with { State = newState } : i)
+            //     .ToList();
+            //
+            // string fromStack = deal.DealState; //can we get this from moveData?
+            //
+            // var stacks = deals.Value.GroupBy(e => e.DealState);
+            //
+            // stacks.Select((stack,group) =>
+            // {
+            //     if(e => )    
+            // })
+            //     
+            // var dealsInTargetColumn = deals.Value.Where(d => d.DealState == moveData.toState)
             //     .OrderBy(d => d.Order)
             //     .ToList();
+                
+            //refreshToken.Refresh();
             // float newOrder;
             // if (moveData.TargetIndex.HasValue && moveData.TargetIndex.Value < dealsInTargetColumn.Count)
             // {
@@ -147,6 +164,24 @@ public class PipelineApp : ViewBase
         }
     }
 
+    private void MoveDeal(DataContextFactory factory, Guid cardId, string toColumn, float newOrder) 
+    {
+        using var db = factory.CreateDbContext();
+        
+        var deal = db.Deals
+            .Include(d => d.DealState)
+            .SingleOrDefault(d => d.Id == cardId);
+        if (deal == null) return;
+        
+        var targetDealState = db.DealStates.SingleOrDefault(ds => ds.Name == toColumn);
+        if (targetDealState == null) return;
+        
+        deal.DealStateId = targetDealState.Id;
+        deal.Order = newOrder;
+        
+        db.SaveChanges();
+    }
+    
     private void DeleteDeal(DataContextFactory factory, Guid dealId)
     {
         using var db = factory.CreateDbContext();
@@ -168,7 +203,6 @@ public class PipelineApp : ViewBase
                 .Include(d => d.DealState)
                 .Include(d => d.Owner)
                 .Where(d => d.DeletedAt == null)
-                .OrderBy(d => d.Order)
                 .Select(d => new DealRecord
                 {
                     Id = d.Id,
@@ -185,6 +219,7 @@ public class PipelineApp : ViewBase
                     OwnerName = $"{d.Owner.FirstName} {d.Owner.LastName}",
                     NextAction = d.NextAction
                 })
+                .OrderBy(e => e.DealStateOrder).ThenBy(e => e.Order)
                 .ToArrayAsync())
         ];
     }

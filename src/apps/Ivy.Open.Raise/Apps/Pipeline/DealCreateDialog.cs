@@ -51,6 +51,7 @@ public class DealCreateDialog(IState<bool> isOpen, RefreshToken refreshToken) : 
         
         var deal = new Deal()
         {
+            Id = Guid.NewGuid(),
             ContactId = request.ContactId,
             DealStateId = request.DealStateId,
             OwnerId = request.OwnerId,
