@@ -91,7 +91,7 @@ public class DeckLinksBlade(Guid deckId) : ViewBase
                 // .Width(e => e.Reference, Size.Fraction(1/2f))
                 // .Width(e => e.Contact, Size.Fraction(1/2f))
                 // .Width(e => e.Views, Size.Shrink())
-                .Width(e => e._, Size.Shrink())
+                .ColumnWidth(e => e._, Size.Shrink())
             ;
 
         var addBtn = new Button("Add Deck Link").Icon(Icons.Plus).Outline()
