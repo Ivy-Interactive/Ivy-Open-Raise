@@ -57,15 +57,14 @@ public class PipelineApp : ViewBase
                 .ToButton()
                 .Ghost()
                 .WithDropDown(
-                    MenuItem.Default("Delete").Icon(Icons.Trash).HandleSelect(() => OnDelete(deal.Id)),
-                    MenuItem.Default("Edit").Icon(Icons.Pencil)
+                    MenuItem.Default("Delete").Icon(Icons.Trash).HandleSelect(() => OnDelete(deal.Id))
                 );
             
             var details = new
             {
-                Amount = new Button(deal.AmountFormatted()).Inline().HandleClick(() => showEdit(deal.Id)),
+                Amount = deal.AmountFormatted(),
                 Contact = deal.ContactName,
-                Owner = new Button(deal.OwnerName).Inline().HandleClick(() => showEdit(deal.Id))
+                Owner = deal.OwnerName
             };
 
             var content = details.ToDetails();
@@ -73,6 +72,7 @@ public class PipelineApp : ViewBase
             return new Card(content)
                 .Title(deal.InvestorName)
                 .Icon(dropDown)
+                .HandleClick(() => showEdit(deal.Id))
                 .Key(deal.Id);
         }
         
@@ -88,7 +88,6 @@ public class PipelineApp : ViewBase
             }, "Delete Deal");
         }
         
-        //todo: include fromStack         
         void OnMove((object? cardId, string toState, int? targetIndex) moveData)
         {
             if (!Guid.TryParse(moveData.cardId?.ToString(), out var dealId)) return;
