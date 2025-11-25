@@ -7,10 +7,8 @@ namespace Ivy.Open.Raise.Services;
 [ApiController]
 public class DeckLinkController(DataContextFactory factory, IBlobService blobService) : ControllerBase
 {
-    //todo: how can I get a route working like this?
-    
     [HttpGet]
-    [Route("decks/link/{secret}")]
+    [Route("links/{secret}")]
     public async Task<IActionResult> GetDeckLink(string secret, CancellationToken cancellationToken)
     {
         // await using var db = factory.CreateDbContext();

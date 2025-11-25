@@ -1,0 +1,1 @@
+﻿dotnet watch --project "src\apps\Ivy.Open.Raise\Ivy.Open.Raise.csproj"

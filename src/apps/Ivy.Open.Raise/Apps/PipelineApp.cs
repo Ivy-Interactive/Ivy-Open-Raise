@@ -36,9 +36,8 @@ public class PipelineApp : ViewBase
             ) 
             .ColumnOrder(deal => deal.DealStateOrder)
             .CardBuilder(CardBuilder)
-            //.HandleMove(OnMove)
-            //.HandleDelete(OnDelete)
-            //.HandleClick(OnClick)
+            .HandleMove(OnMove)
+            //.Size(Size.Full())
             ;
 
         var header = Layout.Horizontal() | createBtn;
@@ -90,60 +89,62 @@ public class PipelineApp : ViewBase
             }, "Delete Deal");
         }
 
-        // void OnMove((object? CardId, string FromColumn, string ToColumn, int? TargetIndex) moveData)
-        // {
-        //     var dealId = moveData.CardId?.ToString();
-        //     if (string.IsNullOrEmpty(dealId)) return;
-        //
-        //     var dealsInTargetColumn = deals.Value.Where(d => d.DealStateName == moveData.ToColumn)
-        //         .OrderBy(d => d.Order)
-        //         .ToList();
-        //     float newOrder;
-        //     if (moveData.TargetIndex.HasValue && moveData.TargetIndex.Value < dealsInTargetColumn.Count)
-        //     {
-        //         // Insert between existing items
-        //         if (moveData.TargetIndex.Value == 0)
-        //         {
-        //             // First position
-        //             newOrder = dealsInTargetColumn[0].Order - 1;
-        //         }
-        //         else
-        //         {
-        //             // Between two items
-        //             var prevOrder = dealsInTargetColumn[moveData.TargetIndex.Value - 1].Order;
-        //             var nextOrder = dealsInTargetColumn[moveData.TargetIndex.Value].Order;
-        //             newOrder = (prevOrder + nextOrder) / 2;
-        //         }
-        //     }
-        //     else
-        //     {
-        //         // Last position
-        //         newOrder = dealsInTargetColumn.Count > 0
-        //             ? dealsInTargetColumn[^1].Order + 1
-        //             : 1;
-        //     }
-        //
-        //     var updatedDeals = deals.Value.Select(deal => deal.Id.ToString() == dealId
-        //             ? new DealRecord
-        //             {
-        //                 Id = deal.Id,
-        //                 ContactName = deal.ContactName,
-        //                 DealStateName = moveData.ToColumn,
-        //                 Description = deal.Description,
-        //                 Order = newOrder,
-        //                 AmountFrom = deal.AmountFrom,
-        //                 AmountTo = deal.AmountTo,
-        //                 Priority = deal.Priority, // Priority should NOT change when moving
-        //                 OwnerName = deal.OwnerName,
-        //                 NextAction = deal.NextAction
-        //             }
-        //             : deal)
-        //         .ToArray();
-        //
-        //     deals.Set(updatedDeals);
-        //
-        //     //todo: 
-        // }
+        void OnMove((object? cardId, string toColumn, int? targetIndex) moveData)
+        {
+            Console.WriteLine(moveData);
+            
+            // var dealId = moveData.CardId?.ToString();
+            // if (string.IsNullOrEmpty(dealId)) return;
+            //
+            // var dealsInTargetColumn = deals.Value.Where(d => d.DealStateName == moveData.ToColumn)
+            //     .OrderBy(d => d.Order)
+            //     .ToList();
+            // float newOrder;
+            // if (moveData.TargetIndex.HasValue && moveData.TargetIndex.Value < dealsInTargetColumn.Count)
+            // {
+            //     // Insert between existing items
+            //     if (moveData.TargetIndex.Value == 0)
+            //     {
+            //         // First position
+            //         newOrder = dealsInTargetColumn[0].Order - 1;
+            //     }
+            //     else
+            //     {
+            //         // Between two items
+            //         var prevOrder = dealsInTargetColumn[moveData.TargetIndex.Value - 1].Order;
+            //         var nextOrder = dealsInTargetColumn[moveData.TargetIndex.Value].Order;
+            //         newOrder = (prevOrder + nextOrder) / 2;
+            //     }
+            // }
+            // else
+            // {
+            //     // Last position
+            //     newOrder = dealsInTargetColumn.Count > 0
+            //         ? dealsInTargetColumn[^1].Order + 1
+            //         : 1;
+            // }
+            //
+            // var updatedDeals = deals.Value.Select(deal => deal.Id.ToString() == dealId
+            //         ? new DealRecord
+            //         {
+            //             Id = deal.Id,
+            //             ContactName = deal.ContactName,
+            //             DealStateName = moveData.ToColumn,
+            //             Description = deal.Description,
+            //             Order = newOrder,
+            //             AmountFrom = deal.AmountFrom,
+            //             AmountTo = deal.AmountTo,
+            //             Priority = deal.Priority, // Priority should NOT change when moving
+            //             OwnerName = deal.OwnerName,
+            //             NextAction = deal.NextAction
+            //         }
+            //         : deal)
+            //     .ToArray();
+            //
+            // deals.Set(updatedDeals);
+        
+            //todo: 
+        }
     }
 
     private void DeleteDeal(DataContextFactory factory, Guid dealId)
