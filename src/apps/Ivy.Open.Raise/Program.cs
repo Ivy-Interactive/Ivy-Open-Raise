@@ -36,6 +36,6 @@ if (server.Configuration.GetValue<string>("OpenAi:ApiKey") is { } openAiApiKey &
     server.Services.AddSingleton(chatClient);
 }
 
-server.SetMetaTitle("Open Raise by Ivy");
+server.SetMetaTitle("Open Raise by Ivy.app");
 
 await server.RunAsync();

@@ -54,7 +54,7 @@ public class DeckLinksBlade(Guid deckId) : ViewBase
         {
             return () =>
             {
-                var link = $"{args.Scheme}://{args.Host}/decks/link/{secret}";
+                var link = $"{args.Scheme}://{args.Host}/links/{secret}";
                 client.CopyToClipboard(link);
                 client.Toast($"{link} copied to clipboard");
             };
