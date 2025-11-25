@@ -1,6 +1,5 @@
 using System.Reflection;
 using Ivy.Open.Raise.Apps;
-using Ivy.Open.Raise.Apps.Settings;
 using Microsoft.Extensions.AI;
 using OpenAI;
 
@@ -13,25 +12,7 @@ server.UseHotReload();
 server.AddAppsFromAssembly();
 server.AddConnectionsFromAssembly();
 
-var chromeSettings = new ChromeSettings()
-    .UseTabs(preventDuplicates: true)
-    .UseFooterMenuItemsTransformer((menuItems, navigator) =>
-    {
-        return [ 
-            MenuItem.Default("Users").Icon(Icons.User).HandleSelect(() => navigator.Navigate<UsersApp>()),
-            MenuItem.Default("Settings").Icon(Icons.Settings) 
-                | MenuItem.Default("General").HandleSelect(() => navigator.Navigate<OrganizationSettingsApp>())
-                | MenuItem.Default("Deal Approaches").HandleSelect(() => navigator.Navigate<DealApproachesApp>())
-                | MenuItem.Default("Deal States").HandleSelect(() => navigator.Navigate<DealStatesApp>())
-                | MenuItem.Default("Interaction Types").HandleSelect(() => navigator.Navigate<InteractionTypesApp>())
-                | MenuItem.Default("Investor Types").HandleSelect(() => navigator.Navigate<InvestorTypesApp>())
-                | MenuItem.Default("Startup Stages").HandleSelect(() => navigator.Navigate<StartupStagesApp>())
-                | MenuItem.Default("Verticals").HandleSelect(() => navigator.Navigate<StartupVerticalsApp>()),
-            ..menuItems
-        ];
-    })
-    .WallpaperApp<WallpaperApp>();
-server.UseChrome(chromeSettings);
+server.UseChrome<ChromeApp>();
 
 server.UseBuilder(builder =>
 {
@@ -54,5 +35,7 @@ if (server.Configuration.GetValue<string>("OpenAi:ApiKey") is { } openAiApiKey &
     var chatClient = openAiChatClient.AsIChatClient();
     server.Services.AddSingleton(chatClient);
 }
+
+server.SetMetaTitle("Open Raise by Ivy");
 
 await server.RunAsync();
