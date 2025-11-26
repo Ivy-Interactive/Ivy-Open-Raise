@@ -31,7 +31,7 @@ public class InvestorCreateDialog(IState<bool> isOpen, RefreshToken refreshToken
             .ToForm()
             .Builder(e => e.AddressCountryId, e => e.ToAsyncSelectInput(QueryCountries(factory), LookupCountry(factory), placeholder: "Select Country"))
             .Builder(e => e.InvestorTypeId, e => e.ToAsyncSelectInput(QueryInvestorTypes(factory), LookupInvestorType(factory), placeholder: "Select Investor Type"))
-            .ToDialog(isOpen, title: "Create Investor", submitTitle: "Create");
+            .ToDialog(isOpen, title: "New Investor", submitTitle: "Create");
     }
 
     private Guid CreateInvestor(DataContextFactory factory, InvestorCreateRequest request)

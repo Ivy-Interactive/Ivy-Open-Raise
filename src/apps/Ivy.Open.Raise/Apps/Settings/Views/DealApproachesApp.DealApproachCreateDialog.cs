@@ -22,7 +22,7 @@ public class DealApproachCreateDialog(IState<bool> isOpen, RefreshToken refreshT
         return dealApproach
             .ToForm()
             .Builder(e => e.Name, e => e.ToTextAreaInput())
-            .ToDialog(isOpen, title: "Create Deal Approach", submitTitle: "Create");
+            .ToDialog(isOpen, title: "New Deal Approach", submitTitle: "Create");
     }
 
     private int CreateDealApproach(DataContextFactory factory, DealApproachCreateRequest request)

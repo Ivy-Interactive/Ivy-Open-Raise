@@ -42,7 +42,7 @@ public class DealCreateDialog(IState<bool> isOpen, RefreshToken refreshToken) : 
             .Builder(e => e.DealStateId, e => e.ToAsyncSelectInput(QueryDealStates(factory), LookupDealState(factory), placeholder: "Select Deal State"))
             .Builder(e => e.OwnerId, e => e.ToAsyncSelectInput(QueryUsers(factory), LookupUser(factory), placeholder: "Select Owner"))
             .Place(e => e.Amount, e => e.ContactId, e => e.DealStateId)
-            .ToDialog(isOpen, title: "Create Deal", submitTitle: "Create");
+            .ToDialog(isOpen, title: "New Deal", submitTitle: "Create");
     }
 
     private Guid CreateDeal(DataContextFactory factory, DealCreateRequest request)

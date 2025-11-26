@@ -33,7 +33,7 @@ public class DeckCreateDialog(IState<bool> isOpen, RefreshToken refreshToken) : 
                 return s.ToFileInput(upload);
                 string CalculateBlobName(FileUpload f) => f.Id + System.IO.Path.GetExtension(f.FileName);
             })
-            .ToDialog(isOpen, title: "Create Deck", submitTitle: "Create");
+            .ToDialog(isOpen, title: "New Deck", submitTitle: "Create");
     }
 
     private Guid CreateDeck(DataContextFactory factory, DeckCreateRequest request)

@@ -21,7 +21,7 @@ public class InteractionTypeCreateDialog(IState<bool> isOpen, RefreshToken refre
 
         return interactionType
             .ToForm()
-            .ToDialog(isOpen, title: "Create Interaction Type", submitTitle: "Create");
+            .ToDialog(isOpen, title: "New Interaction Type", submitTitle: "Create");
     }
 
     private int CreateInteractionType(DataContextFactory factory, InteractionTypeCreateRequest request)

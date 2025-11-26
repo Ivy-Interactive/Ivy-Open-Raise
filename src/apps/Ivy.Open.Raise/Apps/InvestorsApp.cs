@@ -25,7 +25,7 @@ public class InvestorsApp : ViewBase
         var factory = UseService<DataContextFactory>();
         var refreshToken = this.UseRefreshToken();
 
-        var createBtn = new Button("Create Investor")   
+        var createBtn = new Button("New Investor")   
                             .Outline()
                             .Icon(Icons.Plus)
                             .ToTrigger((isOpen) => new InvestorCreateDialog(isOpen, refreshToken));

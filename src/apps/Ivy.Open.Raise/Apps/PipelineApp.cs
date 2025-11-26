@@ -25,7 +25,7 @@ public class PipelineApp : ViewBase
         
         if(isLoading.Value) return Text.Muted("Loading...");
         
-        var createBtn = new Button("Create Deal").Icon(Icons.Plus).Outline()
+        var createBtn = new Button("New Deal").Icon(Icons.Plus).Outline()
             .ToTrigger((isOpen) => new DealCreateDialog(isOpen, refreshToken));
 
         var kanban = deals.Value

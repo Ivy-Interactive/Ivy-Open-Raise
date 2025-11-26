@@ -21,7 +21,7 @@ public class StartupStageCreateDialog(IState<bool> isOpen, RefreshToken refreshT
 
         return startupStage
             .ToForm()
-            .ToDialog(isOpen, title: "Create Startup Stage", submitTitle: "Create");
+            .ToDialog(isOpen, title: "New Startup Stage", submitTitle: "Create");
     }
 
     private int CreateStartupStage(DataContextFactory factory, StartupStageCreateRequest request)

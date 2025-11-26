@@ -38,7 +38,7 @@ public class UserCreateDialog(IState<bool> isOpen, RefreshToken refreshToken) : 
         return user
             .ToForm()
             .Builder(e => e.Title, e => e.ToTextAreaInput())
-            .ToDialog(isOpen, title: "Create User", submitTitle: "Create");
+            .ToDialog(isOpen, title: "New User", submitTitle: "Create");
     }
 
     private Guid CreateUser(DataContextFactory factory, UserCreateRequest request)

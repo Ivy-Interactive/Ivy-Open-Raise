@@ -21,7 +21,7 @@ public class DealStateCreateDialog(IState<bool> isOpen, RefreshToken refreshToke
 
         return dealState
             .ToForm()
-            .ToDialog(isOpen, title: "Create Deal State", submitTitle: "Create");
+            .ToDialog(isOpen, title: "New Deal State", submitTitle: "Create");
     }
 
     private int CreateDealState(DataContextFactory factory, DealStateCreateRequest request)

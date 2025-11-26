@@ -21,7 +21,7 @@ public class StartupVerticalCreateDialog(IState<bool> isOpen, RefreshToken refre
 
         return startupVertical
             .ToForm()
-            .ToDialog(isOpen, title: "Create Startup Vertical", submitTitle: "Create");
+            .ToDialog(isOpen, title: "New Startup Vertical", submitTitle: "Create");
     }
 
     private void CreateStartupVertical(DataContextFactory factory, StartupVerticalCreateRequest request)

@@ -21,7 +21,7 @@ public class InvestorTypeCreateDialog(IState<bool> isOpen, RefreshToken refreshT
 
         return investorTypeState
             .ToForm()
-            .ToDialog(isOpen, title: "Create Investor Type", submitTitle: "Create");
+            .ToDialog(isOpen, title: "New Investor Type", submitTitle: "Create");
     }
 
     private int CreateInvestorType(DataContextFactory factory, InvestorTypeCreateRequest request)

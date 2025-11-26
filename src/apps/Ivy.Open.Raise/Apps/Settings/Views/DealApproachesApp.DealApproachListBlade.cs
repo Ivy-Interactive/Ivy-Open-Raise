@@ -31,7 +31,7 @@ public class DealApproachListBlade : ViewBase
         var createBtn = Icons.Plus.ToButton(_ =>
         {
             blades.Pop(this);
-        }).Ghost().Tooltip("Create Deal Approach").ToTrigger((isOpen) => new DealApproachCreateDialog(isOpen, refreshToken));
+        }).Ghost().Tooltip("New Deal Approach").ToTrigger((isOpen) => new DealApproachCreateDialog(isOpen, refreshToken));
 
         return new FilteredListView<DealApproachListRecord>(
             fetchRecords: (filter) => FetchDealApproaches(factory, filter),

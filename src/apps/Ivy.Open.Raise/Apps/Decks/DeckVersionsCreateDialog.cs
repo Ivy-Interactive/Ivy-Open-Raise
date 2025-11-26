@@ -45,7 +45,7 @@ public class DeckVersionsCreateDialog(IState<bool> isOpen, RefreshToken refreshT
                 return s.ToFileInput(upload);
                 string CalculateBlobName(FileUpload f) => f.Id + System.IO.Path.GetExtension(f.FileName);
             })
-            .ToDialog(isOpen, title: "Create Version", submitTitle: "Create");
+            .ToDialog(isOpen, title: "New Version", submitTitle: "Create");
     }
 
     private void CreateDeckVersion(DataContextFactory factory, DeckVersionCreateRequest request)

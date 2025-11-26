@@ -31,7 +31,7 @@ public class StartupVerticalListBlade : ViewBase
         var createBtn = Icons.Plus.ToButton(_ =>
         {
             blades.Pop(this);
-        }).Ghost().Tooltip("Create Startup Vertical").ToTrigger((isOpen) => new StartupVerticalCreateDialog(isOpen, refreshToken));
+        }).Ghost().Tooltip("New Startup Vertical").ToTrigger((isOpen) => new StartupVerticalCreateDialog(isOpen, refreshToken));
 
         return new FilteredListView<StartupVerticalListRecord>(
             fetchRecords: (filter) => FetchStartupVerticals(factory, filter),
