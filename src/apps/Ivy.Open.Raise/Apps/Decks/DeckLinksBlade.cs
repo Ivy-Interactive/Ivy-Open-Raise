@@ -87,14 +87,15 @@ public class DeckLinksBlade(Guid deckId) : ViewBase
                             .HandleClick(OnCopy(dl.Secret))
                 })
                 .ToTable()
-                //todo ivy: this isn't working
-                // .Width(e => e.Reference, Size.Fraction(1/2f))
-                // .Width(e => e.Contact, Size.Fraction(1/2f))
-                // .Width(e => e.Views, Size.Shrink())
-                .ColumnWidth(e => e._, Size.Shrink())
+                // //todo ivy: this isn't working
+                // .Width(Size.Units(100))
+                // .ColumnWidth(e => e.Reference, Size.Fraction(0.5f))
+                // .ColumnWidth(e => e.Contact, Size.Fraction(0.5f))
+                // .ColumnWidth(e => e.Views, Size.Fit())
+                .ColumnWidth(e => e._, Size.Fit())
             ;
 
-        var addBtn = new Button("Add Deck Link").Icon(Icons.Plus).Outline()
+        var addBtn = new Button("New Link").Icon(Icons.Plus).Outline()
             .ToTrigger((isOpen) => new DeckLinksCreateDialog(isOpen, refreshToken, deckId));
 
         return new Fragment()

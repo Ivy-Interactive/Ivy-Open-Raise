@@ -8,7 +8,7 @@ public class DeckCreateDialog(IState<bool> isOpen, RefreshToken refreshToken) : 
         public string Title { get; init; } = "Deck";
         
         [Required]
-        public FileUpload<BlobInfo>? File { get; init; } = new();
+        public FileUpload<BlobInfo>? File { get; init; }
     }
 
     public override object? Build()

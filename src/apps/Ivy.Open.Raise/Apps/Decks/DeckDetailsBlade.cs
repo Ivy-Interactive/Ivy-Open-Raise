@@ -47,7 +47,6 @@ public class DeckDetailsBlade(Guid deckId) : ViewBase
         async ValueTask OnDownloadVersion()
         {
             if (currentVersion.Value == null) return;
-            //todo: this isn't working
             var url = await blobService.GetDownloadUrlAsync(Constants.DeckBlobContainerName, currentVersion.Value.BlobName);
             if (!string.IsNullOrEmpty(url))
             {
@@ -68,9 +67,10 @@ public class DeckDetailsBlade(Guid deckId) : ViewBase
                 {
                     deckValue.Title,
                     Current = (currentVersion.Value != null ? 
-                        (object)(Layout.Vertical().Gap(0) | currentVersion.Value.Name //todo ivy: why is version name not aligned to the left?
-                                                          | new Button(currentVersion.Value.FileName).Inline().HandleClick(OnDownloadVersion)
-                                                          | Text.Muted(Ivy.Utils.FormatBytes(currentVersion.Value.FileSize))
+                        (object)(Layout.Vertical().Gap(0) 
+                            | Text.Inline(currentVersion.Value.Name) 
+                            | new Button(currentVersion.Value.FileName).Inline().HandleClick(OnDownloadVersion).Width(Size.Fit().Max(Size.Units(50)))
+                            | Text.Muted(Ivy.Utils.FormatBytes(currentVersion.Value.FileSize))
                             )
                         : Callout.Warning("There's no current version"))
                 }

@@ -75,7 +75,7 @@ public class DeckVersionsBlade(Guid deckId) : ViewBase
             // .Width(e => e.FileName, Size.Fraction(1))
             .RemoveEmptyColumns();
 
-        var addBtn = new Button("Add Version").Icon(Icons.Plus).Outline()
+        var addBtn = new Button("New Version").Icon(Icons.Plus).Outline()
             .ToTrigger((isOpen) => new DeckVersionsCreateDialog(isOpen, refreshToken, deckId));
 
         return new Fragment()

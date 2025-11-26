@@ -8,7 +8,7 @@ public class DeckVersionsCreateDialog(IState<bool> isOpen, RefreshToken refreshT
         public string Name { get; private init; } = "";
 
         [Required]
-        public FileUpload<BlobInfo>? File { get; init; } = new();
+        public FileUpload<BlobInfo>? File { get; init; }
 
         public bool MakeCurrent { get; init; } = true;
 

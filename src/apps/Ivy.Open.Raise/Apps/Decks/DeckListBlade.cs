@@ -28,7 +28,7 @@ public class DeckListBlade : ViewBase
         var createBtn = Icons.Plus.ToButton(_ =>
         {
             blades.Pop(this);
-        }).Ghost().Tooltip("Create Deck").ToTrigger((isOpen) => new DeckCreateDialog(isOpen, refreshToken));
+        }).Ghost().Tooltip("New Deck").ToTrigger((isOpen) => new DeckCreateDialog(isOpen, refreshToken));
 
         return new FilteredListView<DeckListRecord>(
             fetchRecords: (filter) => FetchDecks(factory, filter),
