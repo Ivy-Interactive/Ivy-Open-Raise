@@ -5,19 +5,19 @@ public class UserEditSheet(IState<bool> isOpen, RefreshToken refreshToken, Guid 
     public override object? Build()
     {
         var factory = UseService<DataContextFactory>();
-        var details = UseState<User?>();
+        var user = UseState<User?>();
         var loading = UseState(true);
 
         UseEffect(async () =>
         {
             await using var context = factory.CreateDbContext();
-            details.Set(await context.Users.FirstOrDefaultAsync(e => e.Id == userId));
+            user.Set(await context.Users.FirstOrDefaultAsync(e => e.Id == userId));
             loading.Set(false);
         });
 
-        if (loading.Value) return null;
+        if (loading.Value) return new Loading();
 
-        return details
+        return user
             .ToForm()
             .Builder(e => e.Email, e => e.ToEmailInput())
             .Builder(e => e.FirstName, e => e.ToTextAreaInput())
@@ -31,12 +31,12 @@ public class UserEditSheet(IState<bool> isOpen, RefreshToken refreshToken, Guid 
             .HandleSubmit(OnSubmit)
             .ToSheet(isOpen, "Edit User");
 
-        async Task OnSubmit(User? user)
+        async Task OnSubmit(User? modifiedUser)
         {
-            if (user == null) return;
+            if (modifiedUser == null) return;
             await using var db = factory.CreateDbContext();
-            user.UpdatedAt = DateTime.UtcNow;
-            db.Users.Update(user);
+            modifiedUser.UpdatedAt = DateTime.UtcNow;
+            db.Users.Update(modifiedUser);
             await db.SaveChangesAsync();
             refreshToken.Refresh();
         }

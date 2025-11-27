@@ -9,30 +9,30 @@ public class OrganizationSettingsApp : ViewBase
     {
         var factory = UseService<DataContextFactory>();
         var client = UseService<IClientProvider>();
-        var details = UseState<OrganizationSetting?>();
+        var settings = UseState<OrganizationSetting?>();
         var loading = UseState(true);
 
         UseEffect(async () =>
         {
             await using var context = factory.CreateDbContext();
-            details.Set(await context.OrganizationSettings.FirstOrDefaultAsync());
+            settings.Set(await context.OrganizationSettings.FirstOrDefaultAsync());
             loading.Set(false);
         });
 
-        if (loading.Value) return null;
+        if (loading.Value) return new Loading();
 
-        if (details.Value == null) return Callout.Warning("Missing Organization Settings.");
+        if (settings.Value == null) return Callout.Warning("Missing Organization Settings.");
 
-        var form = details
+        var form = settings
             .ToForm()
             .Builder(e => e.OutreachBody, e => e.ToTextAreaInput().Height(30))
             .Builder(e => e.ElevatorPitch, e => e.ToTextAreaInput().Height(30))
             .Builder(e => e.CurrencyId, SelectCurrencyBuilder(factory))
             .Builder(e => e.CountryId, SelectCountryBuilder(factory))
             .Builder(e => e.StartupStageId, SelectStartupStageBuilder(factory))
-            .Builder(e => e.RaiseTargetMin, e => e.ToMoneyInput().Currency(details.Value.CurrencyId))
-            .Builder(e => e.RaiseTargetMax, e => e.ToMoneyInput().Currency(details.Value.CurrencyId))
-            .Builder(e => e.RaiseTicketSize, e => e.ToMoneyInput().Currency(details.Value.CurrencyId))
+            .Builder(e => e.RaiseTargetMin, e => e.ToMoneyInput().Currency(settings.Value.CurrencyId))
+            .Builder(e => e.RaiseTargetMax, e => e.ToMoneyInput().Currency(settings.Value.CurrencyId))
+            .Builder(e => e.RaiseTicketSize, e => e.ToMoneyInput().Currency(settings.Value.CurrencyId))
             .Place(e => e.OutreachSubject, e => e.OutreachBody)
             .Label(e => e.StartupDateOfIncorporation, "Date of Incorporation")
             .Label(e => e.StartupLinkedinUrl, "LinkedIn URL")
@@ -67,11 +67,11 @@ public class OrganizationSettingsApp : ViewBase
             | Text.H1("Settings")
             | form;
 
-        async Task OnSubmit(OrganizationSetting? organizationSetting)
+        async Task OnSubmit(OrganizationSetting? modifiedSettings)
         {
-            if (organizationSetting == null) return;
+            if (modifiedSettings == null) return;
             await using var db = factory.CreateDbContext();
-            db.OrganizationSettings.Update(organizationSetting);
+            db.OrganizationSettings.Update(modifiedSettings);
             await db.SaveChangesAsync();
             client.Toast("Organization settings updated.");
         }

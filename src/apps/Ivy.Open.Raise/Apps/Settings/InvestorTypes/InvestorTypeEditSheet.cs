@@ -5,30 +5,30 @@ public class InvestorTypeEditSheet(IState<bool> isOpen, RefreshToken refreshToke
     public override object? Build()
     {
         var factory = UseService<DataContextFactory>();
-        var details = UseState<InvestorType?>();
+        var investorType = UseState<InvestorType?>();
         var loading = UseState(true);
 
         UseEffect(async () =>
         {
             await using var context = factory.CreateDbContext();
-            details.Set(await context.InvestorTypes.FirstOrDefaultAsync(e => e.Id == investorTypeId));
+            investorType.Set(await context.InvestorTypes.FirstOrDefaultAsync(e => e.Id == investorTypeId));
             loading.Set(false);
         });
 
-        if (loading.Value) return null;
+        if (loading.Value) return new Loading();
 
-        return details
+        return investorType
             .ToForm()
             .Remove(e => e.Id)
             .Place(e => e.Name)
             .HandleSubmit(OnSubmit)
             .ToSheet(isOpen, "Edit Investor Type");
 
-        async Task OnSubmit(InvestorType? investorType)
+        async Task OnSubmit(InvestorType? modifiedInvestorType)
         {
-            if (investorType == null) return;
+            if (modifiedInvestorType == null) return;
             await using var db = factory.CreateDbContext();
-            db.InvestorTypes.Update(investorType);
+            db.InvestorTypes.Update(modifiedInvestorType);
             await db.SaveChangesAsync();
             refreshToken.Refresh();
         }

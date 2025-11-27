@@ -18,31 +18,31 @@ public class DeckVersionsCreateDialog(IState<bool> isOpen, RefreshToken refreshT
     public override object? Build()
     {
         var factory = UseService<DataContextFactory>();
-        var details = UseState<DeckVersionCreateRequest?>();
+        var request = UseState<DeckVersionCreateRequest?>();
         var loading = UseState(true);
 
         UseEffect(async () =>
         {
             await using var db = factory.CreateDbContext();
             var count = await db.DeckVersions.CountAsync(e => e.DeckId == deckId);
-            details.Set(new DeckVersionCreateRequest { Name = $"Version {count + 1}" });
+            request.Set(new DeckVersionCreateRequest { Name = $"Version {count + 1}" });
             loading.Set(false);
         });
 
-        if (loading.Value) return null;
+        if (loading.Value) return new Loading();
 
-        return details
+        return request
             .ToForm()
             .Builder(e => e.File, FileUploadBuilder)
             .HandleSubmit(OnSubmit)
             .ToDialog(isOpen, title: "New Version", submitTitle: "Create");
 
-        async Task OnSubmit(DeckVersionCreateRequest? request)
+        async Task OnSubmit(DeckVersionCreateRequest? modifiedRequest)
         {
-            if (request?.File == null) return;
+            if (modifiedRequest?.File == null) return;
             await using var db = factory.CreateDbContext();
 
-            if (request.MakeCurrent)
+            if (modifiedRequest.MakeCurrent)
             {
                 var currentVersions = await db.DeckVersions.Where(e => e.DeckId == deckId && e.IsPrimary).ToListAsync();
                 foreach (var version in currentVersions)
@@ -56,12 +56,12 @@ public class DeckVersionsCreateDialog(IState<bool> isOpen, RefreshToken refreshT
             {
                 Id = Guid.NewGuid(),
                 DeckId = deckId,
-                Name = request.Name,
-                IsPrimary = request.MakeCurrent,
-                BlobName = request.File.Content.BlobName,
-                ContentType = request.File.ContentType,
-                FileSize = request.File.Length,
-                FileName = request.File.FileName,
+                Name = modifiedRequest.Name,
+                IsPrimary = modifiedRequest.MakeCurrent,
+                BlobName = modifiedRequest.File.Content.BlobName,
+                ContentType = modifiedRequest.File.ContentType,
+                FileSize = modifiedRequest.File.Length,
+                FileName = modifiedRequest.File.FileName,
                 UpdatedAt = DateTime.UtcNow,
                 CreatedAt = DateTime.UtcNow
             };

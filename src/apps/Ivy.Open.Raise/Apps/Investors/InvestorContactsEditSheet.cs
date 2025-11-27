@@ -15,7 +15,7 @@ public class InvestorContactsEditSheet(IState<bool> isOpen, RefreshToken refresh
             loading.Set(false);
         });
 
-        if (loading.Value) return null;
+        if (loading.Value) return new Loading();
 
         return details
             .ToForm()
@@ -28,12 +28,12 @@ public class InvestorContactsEditSheet(IState<bool> isOpen, RefreshToken refresh
             .HandleSubmit(OnSubmit)
             .ToSheet(isOpen, "Edit Contact");
 
-        async Task OnSubmit(Contact? contact)
+        async Task OnSubmit(Contact? modifiedContact)
         {
-            if (contact == null) return;
+            if (modifiedContact == null) return;
             await using var db = factory.CreateDbContext();
-            contact.UpdatedAt = DateTime.UtcNow;
-            db.Contacts.Update(contact);
+            modifiedContact.UpdatedAt = DateTime.UtcNow;
+            db.Contacts.Update(modifiedContact);
             await db.SaveChangesAsync();
             refreshToken.Refresh();
         }

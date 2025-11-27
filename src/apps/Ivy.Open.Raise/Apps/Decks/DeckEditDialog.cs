@@ -15,7 +15,7 @@ public class DeckEditDialog(IState<bool> isOpen, RefreshToken refreshToken, Guid
             loading.Set(false);
         });
 
-        if (loading.Value) return null;
+        if (loading.Value) return new Loading();
 
         return deck
             .ToForm()
@@ -23,12 +23,12 @@ public class DeckEditDialog(IState<bool> isOpen, RefreshToken refreshToken, Guid
             .HandleSubmit(OnSubmit)
             .ToDialog(isOpen, "Edit Deck");
 
-        async Task OnSubmit(Deck? deck)
+        async Task OnSubmit(Deck? modifiedDeck)
         {
-            if (deck == null) return;
+            if (modifiedDeck == null) return;
             await using var db = factory.CreateDbContext();
-            deck.UpdatedAt = DateTime.UtcNow;
-            db.Decks.Update(deck);
+            modifiedDeck.UpdatedAt = DateTime.UtcNow;
+            db.Decks.Update(modifiedDeck);
             await db.SaveChangesAsync();
             refreshToken.Refresh();
         }

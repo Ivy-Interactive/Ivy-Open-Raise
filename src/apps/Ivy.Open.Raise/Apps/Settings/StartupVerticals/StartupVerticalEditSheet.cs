@@ -15,7 +15,7 @@ public class StartupVerticalEditSheet(IState<bool> isOpen, RefreshToken refreshT
             loading.Set(false);
         });
 
-        if (loading.Value) return null;
+        if (loading.Value) return new Loading();
 
         return details
             .ToForm()
@@ -24,11 +24,11 @@ public class StartupVerticalEditSheet(IState<bool> isOpen, RefreshToken refreshT
             .HandleSubmit(OnSubmit)
             .ToSheet(isOpen, "Edit Startup Vertical");
 
-        async Task OnSubmit(StartupVertical? startupVertical)
+        async Task OnSubmit(StartupVertical? modifiedStartupVertical)
         {
-            if (startupVertical == null) return;
+            if (modifiedStartupVertical == null) return;
             await using var db = factory.CreateDbContext();
-            db.StartupVerticals.Update(startupVertical);
+            db.StartupVerticals.Update(modifiedStartupVertical);
             await db.SaveChangesAsync();
             refreshToken.Refresh();
         }

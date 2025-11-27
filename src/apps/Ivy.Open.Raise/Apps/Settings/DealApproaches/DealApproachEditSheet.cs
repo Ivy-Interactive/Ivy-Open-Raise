@@ -5,29 +5,29 @@ public class DealApproachEditSheet(IState<bool> isOpen, RefreshToken refreshToke
     public override object? Build()
     {
         var factory = UseService<DataContextFactory>();
-        var details = UseState<DealApproach?>();
+        var dealApproach = UseState<DealApproach?>();
         var loading = UseState(true);
 
         UseEffect(async () =>
         {
             await using var context = factory.CreateDbContext();
-            details.Set(await context.DealApproaches.FirstOrDefaultAsync(e => e.Id == dealApproachId));
+            dealApproach.Set(await context.DealApproaches.FirstOrDefaultAsync(e => e.Id == dealApproachId));
             loading.Set(false);
         });
 
-        if (loading.Value) return null;
+        if (loading.Value) return new Loading();
 
-        return details
+        return dealApproach
             .ToForm()
             .Remove(e => e.Id)
             .HandleSubmit(OnSubmit)
             .ToSheet(isOpen, "Edit Deal Approach");
 
-        async Task OnSubmit(DealApproach? dealApproach)
+        async Task OnSubmit(DealApproach? modifiedDealApproach)
         {
-            if (dealApproach == null) return;
+            if (modifiedDealApproach == null) return;
             await using var db = factory.CreateDbContext();
-            db.DealApproaches.Update(dealApproach);
+            db.DealApproaches.Update(modifiedDealApproach);
             await db.SaveChangesAsync();
             refreshToken.Refresh();
         }

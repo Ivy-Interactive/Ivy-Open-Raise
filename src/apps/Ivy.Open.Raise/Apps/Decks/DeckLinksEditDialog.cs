@@ -15,7 +15,7 @@ public class DeckLinksEditDialog(IState<bool> isOpen, RefreshToken refreshToken,
             loading.Set(false);
         });
 
-        if (loading.Value) return null;
+        if (loading.Value) return new Loading();
 
         return details
             .ToForm()
@@ -24,12 +24,12 @@ public class DeckLinksEditDialog(IState<bool> isOpen, RefreshToken refreshToken,
             .HandleSubmit(OnSubmit)
             .ToDialog(isOpen, "Edit Deck Link");
 
-        async Task OnSubmit(DeckLink? deckLink)
+        async Task OnSubmit(DeckLink? modifiedDeckLink)
         {
-            if (deckLink == null) return;
+            if (modifiedDeckLink == null) return;
             await using var db = factory.CreateDbContext();
-            deckLink.UpdatedAt = DateTime.UtcNow;
-            db.DeckLinks.Update(deckLink);
+            modifiedDeckLink.UpdatedAt = DateTime.UtcNow;
+            db.DeckLinks.Update(modifiedDeckLink);
             await db.SaveChangesAsync();
             refreshToken.Refresh();
         }

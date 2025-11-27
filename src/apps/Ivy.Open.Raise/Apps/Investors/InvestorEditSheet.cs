@@ -5,19 +5,19 @@ public class InvestorEditSheet(IState<bool> isOpen, RefreshToken refreshToken, G
     public override object? Build()
     {
         var factory = UseService<DataContextFactory>();
-        var details = UseState<Investor?>();
+        var investor = UseState<Investor?>();
         var loading = UseState(true);
 
         UseEffect(async () =>
         {
             await using var context = factory.CreateDbContext();
-            details.Set(await context.Investors.FirstOrDefaultAsync(e => e.Id == investorId));
+            investor.Set(await context.Investors.FirstOrDefaultAsync(e => e.Id == investorId));
             loading.Set(false);
         });
 
-        if (loading.Value) return null;
+        if (loading.Value) return new Loading();
 
-        return details
+        return investor
             .ToForm()
             .Builder(e => e.WebsiteUrl, e => e.ToUrlInput())
             .Builder(e => e.LinkedinUrl, e => e.ToUrlInput())
@@ -27,12 +27,12 @@ public class InvestorEditSheet(IState<bool> isOpen, RefreshToken refreshToken, G
             .HandleSubmit(OnSubmit)
             .ToSheet(isOpen, "Edit Investor");
 
-        async Task OnSubmit(Investor? investor)
+        async Task OnSubmit(Investor? modifiedInvestor)
         {
-            if (investor == null) return;
+            if (modifiedInvestor == null) return;
             await using var db = factory.CreateDbContext();
-            investor.UpdatedAt = DateTime.UtcNow;
-            db.Investors.Update(investor);
+            modifiedInvestor.UpdatedAt = DateTime.UtcNow;
+            db.Investors.Update(modifiedInvestor);
             await db.SaveChangesAsync();
             refreshToken.Refresh();
         }

@@ -15,7 +15,7 @@ public class InteractionTypeEditSheet(IState<bool> isOpen, RefreshToken refreshT
             loading.Set(false);
         });
 
-        if (loading.Value) return null;
+        if (loading.Value) return new Loading();
 
         return details
             .ToForm()
@@ -23,11 +23,11 @@ public class InteractionTypeEditSheet(IState<bool> isOpen, RefreshToken refreshT
             .HandleSubmit(OnSubmit)
             .ToSheet(isOpen, "Edit Interaction Type");
 
-        async Task OnSubmit(InteractionType? interactionType)
+        async Task OnSubmit(InteractionType? modifiedInteractionType)
         {
-            if (interactionType == null) return;
+            if (modifiedInteractionType == null) return;
             await using var db = factory.CreateDbContext();
-            db.InteractionTypes.Update(interactionType);
+            db.InteractionTypes.Update(modifiedInteractionType);
             await db.SaveChangesAsync();
             refreshToken.Refresh();
         }

@@ -17,7 +17,7 @@ public class DealEditSheet(IState<bool> isOpen, RefreshToken refreshToken, Guid 
             loading.Set(false);
         });
 
-        if (loading.Value) return null;
+        if (loading.Value) return new Loading();
 
         return details
             .ToForm()
@@ -40,12 +40,12 @@ public class DealEditSheet(IState<bool> isOpen, RefreshToken refreshToken, Guid 
             .HandleSubmit(OnSubmit)
             .ToSheet(isOpen, "Edit Deal");
 
-        async Task OnSubmit(Deal? deal)
+        async Task OnSubmit(Deal? modifiedDeal)
         {
-            if (deal == null) return;
+            if (modifiedDeal == null) return;
             await using var db = factory.CreateDbContext();
-            deal.UpdatedAt = DateTime.UtcNow;
-            db.Deals.Update(deal);
+            modifiedDeal.UpdatedAt = DateTime.UtcNow;
+            db.Deals.Update(modifiedDeal);
             await db.SaveChangesAsync();
             refreshToken.Refresh();
         }
