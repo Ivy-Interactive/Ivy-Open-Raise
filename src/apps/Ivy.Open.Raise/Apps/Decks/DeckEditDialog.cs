@@ -5,20 +5,32 @@ public class DeckEditDialog(IState<bool> isOpen, RefreshToken refreshToken, Guid
     public override object? Build()
     {
         var factory = UseService<DataContextFactory>();
-        var deck = UseState(() => factory.CreateDbContext().Decks.FirstOrDefault(e => e.Id == deckId)!);
-
-        UseEffect(() =>
+        var deck = UseState<Deck?>();
+        var loading = UseState(true);
+        
+        UseEffect(async () =>
         {
-            using var db = factory.CreateDbContext();
-            deck.Value.UpdatedAt = DateTime.UtcNow;
-            db.Decks.Update(deck.Value);
-            db.SaveChanges();
-            refreshToken.Refresh();
-        }, [deck]);
+            await using var context = factory.CreateDbContext();
+            deck.Set(context.Decks.FirstOrDefault(e => e.Id == deckId));
+            loading.Set(false);
+        });
+
+        if (loading.Value) return null;
 
         return deck
             .ToForm()
             .Remove(e => e.Id, e => e.CreatedAt, e => e.UpdatedAt, e => e.DeletedAt)
+            .HandleSubmit(OnSubmit)
             .ToDialog(isOpen, "Edit Deck");
+
+        async Task OnSubmit(Deck? deck)
+        {
+            if (deck == null) return;
+            await using var db = factory.CreateDbContext();
+            deck.UpdatedAt = DateTime.UtcNow;
+            db.Decks.Update(deck);
+            await db.SaveChangesAsync();
+            refreshToken.Refresh();
+        }
     }
 }

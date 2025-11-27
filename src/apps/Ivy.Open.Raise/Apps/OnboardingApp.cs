@@ -100,7 +100,7 @@ public class CompanyStepView(IState<int> stepperIndex) : ViewBase
     public override object? Build()
     {
         var factory = UseService<DataContextFactory>();
-        var companyDetails = UseState<CompanyDetails?>();
+        var details = UseState<CompanyDetails?>();
         var loading = UseState(true);
 
         UseEffect(async () =>
@@ -108,7 +108,7 @@ public class CompanyStepView(IState<int> stepperIndex) : ViewBase
             await using var context = factory.CreateDbContext();
             var settings = await context.OrganizationSettings
                 .FirstOrDefaultAsync() ?? throw new InvalidOperationException("Organization settings not found.");
-            companyDetails.Set(CompanyDetails.From(settings));
+            details.Set(CompanyDetails.From(settings));
             loading.Set(false);
         });
         
@@ -116,7 +116,7 @@ public class CompanyStepView(IState<int> stepperIndex) : ViewBase
 
         return Layout.Vertical()
                | Text.H2("Tell us about your startup")
-               | companyDetails.ToForm().Large()
+               | details.ToForm().Large()
                    .Builder(e => e.CurrencyId, SelectCurrencyBuilder(factory))
                    .Builder(e => e.CountryId, SelectCountryBuilder(factory))
                    .SubmitBuilder((saving) => new Button("Next").Icon(Icons.ArrowRight, Align.Right).Disabled(saving).Loading(saving))
@@ -182,7 +182,7 @@ public class RaiseStepView(IState<int> stepperIndex) : ViewBase
     public override object? Build()
     {
         var factory = UseService<DataContextFactory>();
-        var raiseDetails = UseState<RaiseDetails?>();
+        var details = UseState<RaiseDetails?>();
         var loading = UseState(true);
         
         UseEffect(async () =>
@@ -190,7 +190,7 @@ public class RaiseStepView(IState<int> stepperIndex) : ViewBase
             await using var context = factory.CreateDbContext();
             var settings = await context.OrganizationSettings
                 .FirstOrDefaultAsync() ?? throw new InvalidOperationException("Organization settings not found.");
-            raiseDetails.Set(RaiseDetails.From(settings));
+            details.Set(RaiseDetails.From(settings));
             loading.Set(false);
         });
         
@@ -198,7 +198,7 @@ public class RaiseStepView(IState<int> stepperIndex) : ViewBase
 
         return Layout.Vertical()
                | Text.H2("How much are you raising?")
-               | raiseDetails.ToForm().Large()
+               | details.ToForm().Large()
                    .PlaceHorizontal(e => e.RaiseTargetMin, e => e.RaiseTargetMax)
                    .Builder(e => e.StartupStageId, SelectStartupStageBuilder(factory))
                    .SubmitBuilder((saving) => new Button("Next").Icon(Icons.ArrowRight, Align.Right).Disabled(saving).Loading(saving))
@@ -238,11 +238,11 @@ public class DeckStepView(IState<int> stepperIndex) : ViewBase
     public override object? Build()
     {
         var factory = UseService<DataContextFactory>();
-        var deckDetails = UseState(new DeckDetails());
+        var details = UseState(new DeckDetails());
 
         return Layout.Vertical()
                | Text.H2("Upload your deck")
-               | deckDetails.ToForm()
+               | details.ToForm()
                    .Large()
                    .Builder(e => e.File, FileUploadBuilder)
                    .SubmitBuilder((saving) => new Button("Finish").Icon(Icons.Check, Align.Right).Disabled(saving).Loading(saving))
