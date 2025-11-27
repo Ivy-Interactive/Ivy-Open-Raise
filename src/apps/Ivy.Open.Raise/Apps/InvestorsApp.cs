@@ -64,7 +64,7 @@ public class InvestorsApp : ViewBase
 
         var header = Layout.Horizontal() | createBtn;
 
-        return new HeaderLayout(header, dataTable);
+        return new HeaderLayout(header, dataTable).Scroll(Scroll.None);
     }
 
     private static IQueryable<InvestorRecord> BuildInvestorQuery(DataContextFactory factory)

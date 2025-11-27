@@ -44,7 +44,7 @@ public class PipelineApp : ViewBase
         var body = new HeaderLayout(
             header, 
             kanban
-        );
+        ).Scroll(Scroll.None);
 
         return new Fragment()
                | body
