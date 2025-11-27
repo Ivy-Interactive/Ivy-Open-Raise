@@ -15,7 +15,7 @@ public class StartupStageDetailsBlade(int startupStageId) : ViewBase
         {
             var db = factory.CreateDbContext();
             startupStage.Set(await db.StartupStages.SingleOrDefaultAsync(e => e.Id == startupStageId));
-            organizationSettingsCount.Set(await db.OrganizationSettings.CountAsync(e => e.StartupStage == startupStageId));
+            organizationSettingsCount.Set(await db.OrganizationSettings.CountAsync(e => e.StartupStageId == startupStageId));
         }, [EffectTrigger.AfterInit(), refreshToken]);
 
         if (startupStage.Value == null) return null;
@@ -66,7 +66,7 @@ public class StartupStageDetailsBlade(int startupStageId) : ViewBase
     {
         using var db = dbFactory.CreateDbContext();
 
-        var connectedOrganizationSettingsCount = db.OrganizationSettings.Count(e => e.StartupStage == startupStageId);
+        var connectedOrganizationSettingsCount = db.OrganizationSettings.Count(e => e.StartupStageId == startupStageId);
 
         if (connectedOrganizationSettingsCount > 0)
         {

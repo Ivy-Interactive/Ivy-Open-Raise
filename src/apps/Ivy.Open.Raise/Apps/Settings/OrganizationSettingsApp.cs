@@ -1,3 +1,5 @@
+using static Ivy.Open.Raise.Apps.Shared;
+
 namespace Ivy.Open.Raise.Apps.Settings;
 
 [App(order:-1, icon:Icons.Settings, path:["Apps", "Settings"], title:"General", isVisible:false)]
@@ -23,15 +25,9 @@ public class OrganizationSettingsApp : ViewBase
             .ToForm()
             .Builder(e => e.OutreachBody, e => e.ToTextAreaInput().Height(30))
             .Builder(e => e.ElevatorPitch, e => e.ToTextAreaInput().Height(30))
-            .Builder(e => e.CurrencyId,
-                e => e.ToAsyncSelectInput(QueryCurrencies(factory), LookupCurrency(factory),
-                    placeholder: "Select Currency"))
-            .Builder(e => e.CountryId,
-                e => e.ToAsyncSelectInput(QueryCountries(factory), LookupCountry(factory),
-                    placeholder: "Select Country"))
-            .Builder(e => e.StartupStage,
-                e => e.ToAsyncSelectInput(QueryStartupStages(factory), LookupStartupStage(factory),
-                    placeholder: "Select Startup Stage"))
+            .Builder(e => e.CurrencyId, SelectCurrencyBuilder(factory))
+            .Builder(e => e.CountryId, SelectCountryBuilder(factory))
+            .Builder(e => e.StartupStageId, SelectStartupStageBuilder(factory))
             .Builder(e => e.RaiseTargetMin, e => e.ToMoneyInput().Currency(organizationSetting.Value.CurrencyId))
             .Builder(e => e.RaiseTargetMax, e => e.ToMoneyInput().Currency(organizationSetting.Value.CurrencyId))
             .Builder(e => e.RaiseTicketSize, e => e.ToMoneyInput().Currency(organizationSetting.Value.CurrencyId))
@@ -39,7 +35,14 @@ public class OrganizationSettingsApp : ViewBase
             .Label(e => e.StartupDateOfIncorporation, "Date of Incorporation")
             .Label(e => e.StartupLinkedinUrl, "LinkedIn URL")
             .Label(e => e.StartupWebsite, "Website")
+            .Label(e => e.StartupName, "Company Name")
+            .Label(e => e.StartupGovId, "Identification Number")
+            .Description(e => e.StartupGovId, "Tax ID, Government Registration Number, etc.")
+            .Builder(e => e.StartupGovId, e => e.ToTextInput())
+            .Required(e => e.StartupName)
             .Group("Startup", 
+                e => e.StartupName,
+                e => e.StartupGovId,
                 e => e.CountryId,
                 e => e.StartupWebsite, 
                 e => e.StartupLinkedinUrl,
@@ -47,7 +50,7 @@ public class OrganizationSettingsApp : ViewBase
                 e => e.ElevatorPitch,
                 e => e.Cofounders)
             .Group("Raise",
-                e => e.StartupStage,
+                e => e.StartupStageId,
                 e => e.CurrencyId,
                 e => e.RaiseTargetMin,
                 e => e.RaiseTargetMax,
@@ -60,86 +63,5 @@ public class OrganizationSettingsApp : ViewBase
         return Layout.Vertical()
             | Text.H1("Settings")
             | form;
-    }
-
-    private static AsyncSelectQueryDelegate<string?> QueryCurrencies(DataContextFactory factory)
-    {
-        return async query =>
-        {
-            await using var db = factory.CreateDbContext();
-            return (await db.Currencies
-                    .Where(e => e.Name.Contains(query) || e.Id.Contains(query))
-                    .Select(e => new { e.Id, e.Name })
-                    //.Take(50)
-                    .ToArrayAsync())
-                .Select(e => new Option<string?>(e.Name, e.Id))
-                .ToArray();
-        };
-    }
-
-    private static AsyncSelectLookupDelegate<string?> LookupCurrency(DataContextFactory factory)
-    {
-        return async id =>
-        {
-            if (id == null) return null;
-            await using var db = factory.CreateDbContext();
-            var currency = await db.Currencies.FirstOrDefaultAsync(e => e.Id == id);
-            if (currency == null) return null;
-            return new Option<string?>(currency.Name, currency.Id);
-        };
-    }
-
-    private static AsyncSelectQueryDelegate<int?> QueryCountries(DataContextFactory factory)
-    {
-        return async query =>
-        {
-            await using var db = factory.CreateDbContext();
-            return (await db.Countries
-                    .Where(e => e.Name.Contains(query) || e.Iso.Contains(query))
-                    .Select(e => new { e.Id, e.Name })
-                    //.Take(50)
-                    .ToArrayAsync())
-                .Select(e => new Option<int?>(e.Name, e.Id))
-                .ToArray();
-        };
-    }
-
-    private static AsyncSelectLookupDelegate<int?> LookupCountry(DataContextFactory factory)
-    {
-        return async id =>
-        {
-            if (id == null) return null;
-            await using var db = factory.CreateDbContext();
-            var country = await db.Countries.FirstOrDefaultAsync(e => e.Id == id);
-            if (country == null) return null;
-            return new Option<int?>(country.Name, country.Id);
-        };
-    }
-
-    private static AsyncSelectQueryDelegate<int?> QueryStartupStages(DataContextFactory factory)
-    {
-        return async query =>
-        {
-            await using var db = factory.CreateDbContext();
-            return (await db.StartupStages
-                    .Where(e => e.Name.Contains(query))
-                    .Select(e => new { e.Id, e.Name })
-                    //.Take(50)
-                    .ToArrayAsync())
-                .Select(e => new Option<int?>(e.Name, e.Id))
-                .ToArray();
-        };
-    }
-
-    private static AsyncSelectLookupDelegate<int?> LookupStartupStage(DataContextFactory factory)
-    {
-        return async id =>
-        {
-            if (id == null) return null;
-            await using var db = factory.CreateDbContext();
-            var startupStage = await db.StartupStages.FirstOrDefaultAsync(e => e.Id == id);
-            if (startupStage == null) return null;
-            return new Option<int?>(startupStage.Name, startupStage.Id);
-        };
     }
 }

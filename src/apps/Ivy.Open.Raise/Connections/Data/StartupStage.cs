@@ -16,7 +16,7 @@ public partial class StartupStage
     [Column("name")]
     public string Name { get; set; } = null!;
 
-    [InverseProperty("StartupStageNavigation")]
+    [InverseProperty("StartupStage")]
     public virtual ICollection<OrganizationSetting> OrganizationSettings { get; set; } = new List<OrganizationSetting>();
 
     [ForeignKey("StartupStage")]

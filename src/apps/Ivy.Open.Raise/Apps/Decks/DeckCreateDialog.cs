@@ -1,3 +1,5 @@
+using static Ivy.Open.Raise.Apps.Shared;
+
 namespace Ivy.Open.Raise.Apps.Decks;
 
 public class DeckCreateDialog(IState<bool> isOpen, RefreshToken refreshToken) : ViewBase
@@ -24,15 +26,7 @@ public class DeckCreateDialog(IState<bool> isOpen, RefreshToken refreshToken) : 
 
         return deckState
             .ToForm()
-            .Builder(e => e.File, (s, v) =>
-            {
-                var blobService = v.UseService<IBlobService>();
-                var upload = v.UseUpload(BlobUploadHandler.Create(s, blobService, Constants.DeckBlobContainerName, CalculateBlobName))
-                    .MaxFileSize(Constants.MaxUploadFileSize)
-                    .Accept(FileTypes.Pdf);
-                return s.ToFileInput(upload);
-                string CalculateBlobName(FileUpload f) => f.Id + System.IO.Path.GetExtension(f.FileName);
-            })
+            .Builder(e => e.File, FileUploadBuilder)
             .ToDialog(isOpen, title: "New Deck", submitTitle: "Create");
     }
 
