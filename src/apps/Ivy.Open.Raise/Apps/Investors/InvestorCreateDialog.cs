@@ -19,40 +19,34 @@ public class InvestorCreateDialog(IState<bool> isOpen, RefreshToken refreshToken
     public override object? Build()
     {
         var factory = UseService<DataContextFactory>();
-        var investor = UseState(() => new InvestorCreateRequest());
+        var details = UseState(() => new InvestorCreateRequest());
 
-        UseEffect(() =>
-        {
-            var investorId = CreateInvestor(factory, investor.Value);
-            refreshToken.Refresh(investorId);
-        }, [investor]);
-
-        return investor
+        return details
             .ToForm()
             .Label(e => e.AddressCountryId, "Country")
             .Label(e => e.InvestorTypeId, "Type")
             .Builder(e => e.AddressCountryId, e => e.ToAsyncSelectInput(QueryCountries(factory), LookupCountry(factory), placeholder: "Select Country"))
             .Builder(e => e.InvestorTypeId, e => e.ToAsyncSelectInput(QueryInvestorTypes(factory), LookupInvestorType(factory), placeholder: "Select Type"))
+            .HandleSubmit(OnSubmit)
             .ToDialog(isOpen, title: "New Investor", submitTitle: "Create");
-    }
 
-    private Guid CreateInvestor(DataContextFactory factory, InvestorCreateRequest request)
-    {
-        using var db = factory.CreateDbContext();
-
-        var investor = new Investor()
+        async Task OnSubmit(InvestorCreateRequest request)
         {
-            Id = Guid.NewGuid(),
-            Name = request.Name,
-            AddressCountryId = request.AddressCountryId,
-            InvestorTypeId = request.InvestorTypeId,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
-        };
+            await using var db = factory.CreateDbContext();
 
-        db.Investors.Add(investor);
-        db.SaveChanges();
+            var investor = new Investor
+            {
+                Id = Guid.NewGuid(),
+                Name = request.Name,
+                AddressCountryId = request.AddressCountryId,
+                InvestorTypeId = request.InvestorTypeId,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
 
-        return investor.Id;
+            db.Investors.Add(investor);
+            await db.SaveChangesAsync();
+            refreshToken.Refresh(investor.Id);
+        }
     }
 }

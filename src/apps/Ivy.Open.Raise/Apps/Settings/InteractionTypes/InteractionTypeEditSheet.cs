@@ -5,19 +5,31 @@ public class InteractionTypeEditSheet(IState<bool> isOpen, RefreshToken refreshT
     public override object? Build()
     {
         var factory = UseService<DataContextFactory>();
-        var interactionType = UseState(() => factory.CreateDbContext().InteractionTypes.FirstOrDefault(e => e.Id == interactionTypeId)!);
+        var details = UseState<InteractionType?>();
+        var loading = UseState(true);
 
-        UseEffect(() =>
+        UseEffect(async () =>
         {
-            using var db = factory.CreateDbContext();
-            db.InteractionTypes.Update(interactionType.Value);
-            db.SaveChanges();
-            refreshToken.Refresh();
-        }, [interactionType]);
+            await using var context = factory.CreateDbContext();
+            details.Set(await context.InteractionTypes.FirstOrDefaultAsync(e => e.Id == interactionTypeId));
+            loading.Set(false);
+        });
 
-        return interactionType
+        if (loading.Value) return null;
+
+        return details
             .ToForm()
             .Remove(e => e.Id)
+            .HandleSubmit(OnSubmit)
             .ToSheet(isOpen, "Edit Interaction Type");
+
+        async Task OnSubmit(InteractionType? interactionType)
+        {
+            if (interactionType == null) return;
+            await using var db = factory.CreateDbContext();
+            db.InteractionTypes.Update(interactionType);
+            await db.SaveChangesAsync();
+            refreshToken.Refresh();
+        }
     }
 }

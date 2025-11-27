@@ -5,20 +5,32 @@ public class DeckVersionsEditDialog(IState<bool> isOpen, RefreshToken refreshTok
     public override object? Build()
     {
         var factory = UseService<DataContextFactory>();
-        var deckVersion = UseState(() => factory.CreateDbContext().DeckVersions.FirstOrDefault(e => e.Id == versionId)!);
+        var details = UseState<DeckVersion?>();
+        var loading = UseState(true);
 
-        UseEffect(() =>
+        UseEffect(async () =>
         {
-            using var db = factory.CreateDbContext();
-            deckVersion.Value.UpdatedAt = DateTime.UtcNow;
-            db.DeckVersions.Update(deckVersion.Value);
-            db.SaveChanges();
-            refreshToken.Refresh();
-        }, [deckVersion]);
+            await using var context = factory.CreateDbContext();
+            details.Set(await context.DeckVersions.FirstOrDefaultAsync(e => e.Id == versionId));
+            loading.Set(false);
+        });
 
-        return deckVersion
+        if (loading.Value) return null;
+
+        return details
             .ToForm()
             .Remove(e => e.Id, e => e.DeckId, e => e.BlobName, e => e.ContentType, e => e.FileSize, e => e.FileName, e => e.CreatedAt, e => e.UpdatedAt, e => e.DeletedAt)
+            .HandleSubmit(OnSubmit)
             .ToDialog(isOpen, "Edit Version");
+
+        async Task OnSubmit(DeckVersion? deckVersion)
+        {
+            if (deckVersion == null) return;
+            await using var db = factory.CreateDbContext();
+            deckVersion.UpdatedAt = DateTime.UtcNow;
+            db.DeckVersions.Update(deckVersion);
+            await db.SaveChangesAsync();
+            refreshToken.Refresh();
+        }
     }
 }

@@ -5,20 +5,32 @@ public class StartupStageEditSheet(IState<bool> isOpen, RefreshToken refreshToke
     public override object? Build()
     {
         var factory = UseService<DataContextFactory>();
-        var startupStage = UseState(() => factory.CreateDbContext().StartupStages.FirstOrDefault(e => e.Id == startupStageId)!);
+        var details = UseState<StartupStage?>();
+        var loading = UseState(true);
 
-        UseEffect(() =>
+        UseEffect(async () =>
         {
-            using var db = factory.CreateDbContext();
-            db.StartupStages.Update(startupStage.Value);
-            db.SaveChanges();
-            refreshToken.Refresh();
-        }, [startupStage]);
+            await using var context = factory.CreateDbContext();
+            details.Set(await context.StartupStages.FirstOrDefaultAsync(e => e.Id == startupStageId));
+            loading.Set(false);
+        });
 
-        return startupStage
+        if (loading.Value) return null;
+
+        return details
             .ToForm()
             .Remove(e => e.Id)
             .Place(e => e.Name)
+            .HandleSubmit(OnSubmit)
             .ToSheet(isOpen, "Edit Startup Stage");
+
+        async Task OnSubmit(StartupStage? startupStage)
+        {
+            if (startupStage == null) return;
+            await using var db = factory.CreateDbContext();
+            db.StartupStages.Update(startupStage);
+            await db.SaveChangesAsync();
+            refreshToken.Refresh();
+        }
     }
 }

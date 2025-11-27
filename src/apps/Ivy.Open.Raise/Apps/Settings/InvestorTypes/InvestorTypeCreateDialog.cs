@@ -11,31 +11,25 @@ public class InvestorTypeCreateDialog(IState<bool> isOpen, RefreshToken refreshT
     public override object? Build()
     {
         var factory = UseService<DataContextFactory>();
-        var investorTypeState = UseState(() => new InvestorTypeCreateRequest());
+        var details = UseState(() => new InvestorTypeCreateRequest());
 
-        UseEffect(() =>
-        {
-            var investorTypeId = CreateInvestorType(factory, investorTypeState.Value);
-            refreshToken.Refresh(investorTypeId);
-        }, [investorTypeState]);
-
-        return investorTypeState
+        return details
             .ToForm()
+            .HandleSubmit(OnSubmit)
             .ToDialog(isOpen, title: "New Investor Type", submitTitle: "Create");
-    }
 
-    private int CreateInvestorType(DataContextFactory factory, InvestorTypeCreateRequest request)
-    {
-        using var db = factory.CreateDbContext();
-
-        var investorType = new InvestorType
+        async Task OnSubmit(InvestorTypeCreateRequest request)
         {
-            Name = request.Name
-        };
+            await using var db = factory.CreateDbContext();
 
-        db.InvestorTypes.Add(investorType);
-        db.SaveChanges();
+            var investorType = new InvestorType
+            {
+                Name = request.Name
+            };
 
-        return investorType.Id;
+            db.InvestorTypes.Add(investorType);
+            await db.SaveChangesAsync();
+            refreshToken.Refresh(investorType.Id);
+        }
     }
 }

@@ -12,63 +12,32 @@ public class DeckLinksCreateDialog(IState<bool> isOpen, RefreshToken refreshToke
     public override object? Build()
     {
         var factory = UseService<DataContextFactory>();
-        var deckLinkRequest = UseState(() => new DeckLinkCreateRequest());
+        var details = UseState(() => new DeckLinkCreateRequest());
 
-        UseEffect(() =>
-        {
-            CreateDeckLink(factory, deckLinkRequest.Value);
-            refreshToken.Refresh(deckId);
-        }, [deckLinkRequest]);
-
-        return deckLinkRequest
+        return details
             .ToForm()
-            .Builder(e => e.ContactId, e => e.ToAsyncSelectInput(QueryContacts(factory), LookupContact(factory), placeholder: "Select Contact"))
+            .Builder(e => e.ContactId, e => e.ToAsyncSelectInput(Shared.QueryContacts(factory), Shared.LookupContact(factory), placeholder: "Select Contact"))
+            .HandleSubmit(OnSubmit)
             .ToDialog(isOpen, title: "New Link", submitTitle: "Create");
-    }
 
-    private void CreateDeckLink(DataContextFactory factory, DeckLinkCreateRequest request)
-    {
-        using var db = factory.CreateDbContext();
-
-        var deckLink = new DeckLink()
-        {
-            Id = Guid.NewGuid(),
-            Secret = Utils.RandomKey(12),
-            Reference = request.Reference,
-            ContactId = request.ContactId,
-            DeckId = deckId,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
-        };
-
-        db.DeckLinks.Add(deckLink);
-        db.SaveChanges();
-    }
-
-    private static AsyncSelectQueryDelegate<Guid?> QueryContacts(DataContextFactory factory)
-    {
-        return async query =>
+        async Task OnSubmit(DeckLinkCreateRequest request)
         {
             await using var db = factory.CreateDbContext();
-            return (await db.Contacts
-                    .Where(e => (e.FirstName.Contains(query) || e.LastName.Contains(query)) && e.DeletedAt == null)
-                    .Select(e => new { e.Id, FullName = e.FirstName + " " + e.LastName })
-                    .Take(50)
-                    .ToArrayAsync())
-                .Select(e => new Option<Guid?>(e.FullName, e.Id))
-                .ToArray();
-        };
-    }
 
-    private static AsyncSelectLookupDelegate<Guid?> LookupContact(DataContextFactory factory)
-    {
-        return async id =>
-        {
-            if (id == null) return null;
-            await using var db = factory.CreateDbContext();
-            var contact = await db.Contacts.FirstOrDefaultAsync(e => e.Id == id && e.DeletedAt == null);
-            if (contact == null) return null;
-            return new Option<Guid?>(contact.FirstName + " " + contact.LastName, contact.Id);
-        };
+            var deckLink = new DeckLink
+            {
+                Id = Guid.NewGuid(),
+                Secret = Utils.RandomKey(12),
+                Reference = request.Reference,
+                ContactId = request.ContactId,
+                DeckId = deckId,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+
+            db.DeckLinks.Add(deckLink);
+            await db.SaveChangesAsync();
+            refreshToken.Refresh(deckId);
+        }
     }
 }

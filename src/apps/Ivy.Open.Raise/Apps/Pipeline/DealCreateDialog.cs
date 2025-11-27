@@ -6,10 +6,10 @@ public class DealCreateDialog(IState<bool> isOpen, RefreshToken refreshToken) : 
 {
     private record DealCreateRequest
     {
-        [Required] 
-        [Range(0, int.MaxValue)] 
+        [Required]
+        [Range(0, int.MaxValue)]
         public int Amount { get; set; } = 0;
-        
+
         [Required]
         public Guid ContactId { get; init; }
 
@@ -23,46 +23,40 @@ public class DealCreateDialog(IState<bool> isOpen, RefreshToken refreshToken) : 
     public override object? Build()
     {
         var factory = UseService<DataContextFactory>();
-        var deal = UseState(() => new DealCreateRequest()
+        var details = UseState(() => new DealCreateRequest
         {
             DealStateId = 1, //todo: Get the state with the lowest order
             //todo: populate OwnerId with current user
         });
 
-        UseEffect(() =>
-        {
-            var dealId = CreateDeal(factory, deal.Value);
-            refreshToken.Refresh(dealId);
-        }, [deal]);
-
-        return deal
+        return details
             .ToForm()
             .Label(e => e.DealStateId, "State")
             .Builder(e => e.ContactId, e => e.ToAsyncSelectInput(QueryContacts(factory), LookupContact(factory), placeholder: "Select Contact"))
             .Builder(e => e.DealStateId, e => e.ToAsyncSelectInput(QueryDealStates(factory), LookupDealState(factory), placeholder: "Select Deal State"))
             .Builder(e => e.OwnerId, e => e.ToAsyncSelectInput(QueryUsers(factory), LookupUser(factory), placeholder: "Select Owner"))
             .Place(e => e.Amount, e => e.ContactId, e => e.DealStateId)
+            .HandleSubmit(OnSubmit)
             .ToDialog(isOpen, title: "New Deal", submitTitle: "Create");
-    }
 
-    private Guid CreateDeal(DataContextFactory factory, DealCreateRequest request)
-    {
-        using var db = factory.CreateDbContext();
-        
-        var deal = new Deal()
+        async Task OnSubmit(DealCreateRequest request)
         {
-            Id = Guid.NewGuid(),
-            ContactId = request.ContactId,
-            DealStateId = request.DealStateId,
-            OwnerId = request.OwnerId,
-            AmountFrom = request.Amount,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
-        };
+            await using var db = factory.CreateDbContext();
 
-        db.Deals.Add(deal);
-        db.SaveChanges();
+            var deal = new Deal
+            {
+                Id = Guid.NewGuid(),
+                ContactId = request.ContactId,
+                DealStateId = request.DealStateId,
+                OwnerId = request.OwnerId,
+                AmountFrom = request.Amount,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
 
-        return deal.Id;
+            db.Deals.Add(deal);
+            await db.SaveChangesAsync();
+            refreshToken.Refresh(deal.Id);
+        }
     }
 }

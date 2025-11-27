@@ -9,28 +9,30 @@ public class OrganizationSettingsApp : ViewBase
     {
         var factory = UseService<DataContextFactory>();
         var client = UseService<IClientProvider>();
-        var organizationSetting = UseState(() => factory.CreateDbContext().OrganizationSettings.FirstOrDefault());
+        var details = UseState<OrganizationSetting?>();
+        var loading = UseState(true);
 
-        UseEffect(() =>
+        UseEffect(async () =>
         {
-            using var db = factory.CreateDbContext();
-            db.OrganizationSettings.Update(organizationSetting.Value);
-            db.SaveChanges();
-            client.Toast("Organization settings updated.");
-        }, [organizationSetting]);
+            await using var context = factory.CreateDbContext();
+            details.Set(await context.OrganizationSettings.FirstOrDefaultAsync());
+            loading.Set(false);
+        });
 
-        if (organizationSetting.Value != null) Callout.Warning("Missing Organization Settings.");
+        if (loading.Value) return null;
 
-        var form = organizationSetting
+        if (details.Value == null) return Callout.Warning("Missing Organization Settings.");
+
+        var form = details
             .ToForm()
             .Builder(e => e.OutreachBody, e => e.ToTextAreaInput().Height(30))
             .Builder(e => e.ElevatorPitch, e => e.ToTextAreaInput().Height(30))
             .Builder(e => e.CurrencyId, SelectCurrencyBuilder(factory))
             .Builder(e => e.CountryId, SelectCountryBuilder(factory))
             .Builder(e => e.StartupStageId, SelectStartupStageBuilder(factory))
-            .Builder(e => e.RaiseTargetMin, e => e.ToMoneyInput().Currency(organizationSetting.Value.CurrencyId))
-            .Builder(e => e.RaiseTargetMax, e => e.ToMoneyInput().Currency(organizationSetting.Value.CurrencyId))
-            .Builder(e => e.RaiseTicketSize, e => e.ToMoneyInput().Currency(organizationSetting.Value.CurrencyId))
+            .Builder(e => e.RaiseTargetMin, e => e.ToMoneyInput().Currency(details.Value.CurrencyId))
+            .Builder(e => e.RaiseTargetMax, e => e.ToMoneyInput().Currency(details.Value.CurrencyId))
+            .Builder(e => e.RaiseTicketSize, e => e.ToMoneyInput().Currency(details.Value.CurrencyId))
             .Place(e => e.OutreachSubject, e => e.OutreachBody)
             .Label(e => e.StartupDateOfIncorporation, "Date of Incorporation")
             .Label(e => e.StartupLinkedinUrl, "LinkedIn URL")
@@ -40,13 +42,13 @@ public class OrganizationSettingsApp : ViewBase
             .Description(e => e.StartupGovId, "Tax ID, Government Registration Number, etc.")
             .Builder(e => e.StartupGovId, e => e.ToTextInput())
             .Required(e => e.StartupName)
-            .Group("Startup", 
+            .Group("Startup",
                 e => e.StartupName,
                 e => e.StartupGovId,
                 e => e.CountryId,
-                e => e.StartupWebsite, 
+                e => e.StartupWebsite,
                 e => e.StartupLinkedinUrl,
-                e => e.StartupDateOfIncorporation, 
+                e => e.StartupDateOfIncorporation,
                 e => e.ElevatorPitch,
                 e => e.Cofounders)
             .Group("Raise",
@@ -58,10 +60,20 @@ public class OrganizationSettingsApp : ViewBase
             .Group("Outreach",
                 e => e.OutreachSubject,
                 e => e.OutreachBody)
-            .Remove(e => e.Id);
-        
+            .Remove(e => e.Id)
+            .HandleSubmit(OnSubmit);
+
         return Layout.Vertical()
             | Text.H1("Settings")
             | form;
+
+        async Task OnSubmit(OrganizationSetting? organizationSetting)
+        {
+            if (organizationSetting == null) return;
+            await using var db = factory.CreateDbContext();
+            db.OrganizationSettings.Update(organizationSetting);
+            await db.SaveChangesAsync();
+            client.Toast("Organization settings updated.");
+        }
     }
 }

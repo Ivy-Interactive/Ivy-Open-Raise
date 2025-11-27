@@ -7,26 +7,19 @@ public class DealEditSheet(IState<bool> isOpen, RefreshToken refreshToken, Guid 
     public override object? Build()
     {
         var factory = UseService<DataContextFactory>();
-        var deal = UseState<Deal?>();
+        var details = UseState<Deal?>();
+        var loading = UseState(true);
 
         UseEffect(async () =>
         {
-            await using var db = factory.CreateDbContext();
-            deal.Set(await db.Deals.FirstOrDefaultAsync(e => e.Id == dealId));
+            await using var context = factory.CreateDbContext();
+            details.Set(await context.Deals.FirstOrDefaultAsync(e => e.Id == dealId));
+            loading.Set(false);
         });
 
-        if (deal.Value == null) return null;
+        if (loading.Value) return null;
 
-        UseEffect(() =>
-        {
-            using var db = factory.CreateDbContext();
-            deal.Value.UpdatedAt = DateTime.UtcNow;
-            db.Deals.Update(deal.Value);
-            db.SaveChanges();
-            refreshToken.Refresh();
-        }, [deal]);
-
-        return deal
+        return details
             .ToForm()
             .Builder(e => e.ContactId, e => e.ToAsyncSelectInput(QueryContacts(factory), LookupContact(factory), placeholder: "Select Contact"))
             .Builder(e => e.DealStateId, e => e.ToAsyncSelectInput(QueryDealStates(factory), LookupDealState(factory), placeholder: "Select Deal State"))
@@ -37,13 +30,24 @@ public class DealEditSheet(IState<bool> isOpen, RefreshToken refreshToken, Guid 
             .Place(e => e.Contact)
             .Label(e => e.DealStateId, "State")
             .Label(e => e.DealApproachId, "Approach")
-            .Place(e => e.Contact) //todo ivy: why isn't Contact placed correctly 
+            .Place(e => e.Contact) //todo ivy: why isn't Contact placed correctly
             .PlaceHorizontal(e => e.AmountFrom, e => e.AmountTo)
             .Builder(e => e.Priority, e => e.ToFeedbackInput())
             .Builder(e => e.Notes, e => e.ToTextAreaInput())
             .Builder(e => e.NextActionNotes, e => e.ToTextAreaInput())
             .Remove(e => e.Id, e => e.CreatedAt, e => e.UpdatedAt, e => e.DeletedAt, e => e.Order)
             .Builder(e => e.NextAction, e => e.ToDateInput())
+            .HandleSubmit(OnSubmit)
             .ToSheet(isOpen, "Edit Deal");
+
+        async Task OnSubmit(Deal? deal)
+        {
+            if (deal == null) return;
+            await using var db = factory.CreateDbContext();
+            deal.UpdatedAt = DateTime.UtcNow;
+            db.Deals.Update(deal);
+            await db.SaveChangesAsync();
+            refreshToken.Refresh();
+        }
     }
 }

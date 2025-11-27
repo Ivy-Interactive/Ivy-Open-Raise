@@ -5,18 +5,19 @@ public class InvestorContactsEditSheet(IState<bool> isOpen, RefreshToken refresh
     public override object? Build()
     {
         var factory = UseService<DataContextFactory>();
-        var contact = UseState(() => factory.CreateDbContext().Contacts.FirstOrDefault(e => e.Id == contactId)!);
+        var details = UseState<Contact?>();
+        var loading = UseState(true);
 
-        UseEffect(() =>
+        UseEffect(async () =>
         {
-            using var db = factory.CreateDbContext();
-            contact.Value.UpdatedAt = DateTime.UtcNow;
-            db.Contacts.Update(contact.Value);
-            db.SaveChanges();
-            refreshToken.Refresh();
-        }, [contact]);
+            await using var context = factory.CreateDbContext();
+            details.Set(await context.Contacts.FirstOrDefaultAsync(e => e.Id == contactId));
+            loading.Set(false);
+        });
 
-        return contact
+        if (loading.Value) return null;
+
+        return details
             .ToForm()
             .Builder(e => e.Email, e => e.ToEmailInput())
             .Builder(e => e.LinkedinUrl, e => e.ToUrlInput())
@@ -24,6 +25,17 @@ public class InvestorContactsEditSheet(IState<bool> isOpen, RefreshToken refresh
             .Place(e => e.FirstName, e => e.LastName)
             .Group("Contact Details", e => e.Email, e => e.Title, e => e.LinkedinUrl, e => e.XUrl)
             .Remove(e => e.Id, e => e.CreatedAt, e => e.UpdatedAt, e => e.DeletedAt, e => e.InvestorId)
+            .HandleSubmit(OnSubmit)
             .ToSheet(isOpen, "Edit Contact");
+
+        async Task OnSubmit(Contact? contact)
+        {
+            if (contact == null) return;
+            await using var db = factory.CreateDbContext();
+            contact.UpdatedAt = DateTime.UtcNow;
+            db.Contacts.Update(contact);
+            await db.SaveChangesAsync();
+            refreshToken.Refresh();
+        }
     }
 }

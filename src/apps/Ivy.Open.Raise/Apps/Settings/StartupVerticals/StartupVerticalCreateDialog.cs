@@ -11,29 +11,25 @@ public class StartupVerticalCreateDialog(IState<bool> isOpen, RefreshToken refre
     public override object? Build()
     {
         var factory = UseService<DataContextFactory>();
-        var startupVertical = UseState(() => new StartupVerticalCreateRequest());
+        var details = UseState(() => new StartupVerticalCreateRequest());
 
-        UseEffect(() =>
-        {
-            CreateStartupVertical(factory, startupVertical.Value);
-            refreshToken.Refresh();
-        }, [startupVertical]);
-
-        return startupVertical
+        return details
             .ToForm()
+            .HandleSubmit(OnSubmit)
             .ToDialog(isOpen, title: "New Startup Vertical", submitTitle: "Create");
-    }
 
-    private void CreateStartupVertical(DataContextFactory factory, StartupVerticalCreateRequest request)
-    {
-        using var db = factory.CreateDbContext();
-
-        var startupVertical = new StartupVertical
+        async Task OnSubmit(StartupVerticalCreateRequest request)
         {
-            Name = request.Name
-        };
+            await using var db = factory.CreateDbContext();
 
-        db.StartupVerticals.Add(startupVertical);
-        db.SaveChanges();
+            var startupVertical = new StartupVertical
+            {
+                Name = request.Name
+            };
+
+            db.StartupVerticals.Add(startupVertical);
+            await db.SaveChangesAsync();
+            refreshToken.Refresh(startupVertical.Id);
+        }
     }
 }

@@ -5,24 +5,36 @@ public class InvestorEditSheet(IState<bool> isOpen, RefreshToken refreshToken, G
     public override object? Build()
     {
         var factory = UseService<DataContextFactory>();
-        var investor = UseState(() => factory.CreateDbContext().Investors.FirstOrDefault(e => e.Id == investorId)!);
+        var details = UseState<Investor?>();
+        var loading = UseState(true);
 
-        UseEffect(() =>
+        UseEffect(async () =>
         {
-            using var db = factory.CreateDbContext();
-            investor.Value.UpdatedAt = DateTime.UtcNow;
-            db.Investors.Update(investor.Value);
-            db.SaveChanges();
-            refreshToken.Refresh();
-        }, [investor]);
+            await using var context = factory.CreateDbContext();
+            details.Set(await context.Investors.FirstOrDefaultAsync(e => e.Id == investorId));
+            loading.Set(false);
+        });
 
-        return investor
+        if (loading.Value) return null;
+
+        return details
             .ToForm()
             .Builder(e => e.WebsiteUrl, e => e.ToUrlInput())
             .Builder(e => e.LinkedinUrl, e => e.ToUrlInput())
             .Builder(e => e.XUrl, e => e.ToUrlInput())
             .Builder(e => e.Thesis, e => e.ToTextAreaInput())
             .Remove(e => e.Id, e => e.CreatedAt, e => e.UpdatedAt, e => e.DeletedAt)
+            .HandleSubmit(OnSubmit)
             .ToSheet(isOpen, "Edit Investor");
+
+        async Task OnSubmit(Investor? investor)
+        {
+            if (investor == null) return;
+            await using var db = factory.CreateDbContext();
+            investor.UpdatedAt = DateTime.UtcNow;
+            db.Investors.Update(investor);
+            await db.SaveChangesAsync();
+            refreshToken.Refresh();
+        }
     }
 }

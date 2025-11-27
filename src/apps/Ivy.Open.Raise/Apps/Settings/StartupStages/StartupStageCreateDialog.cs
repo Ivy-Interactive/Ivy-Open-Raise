@@ -11,31 +11,25 @@ public class StartupStageCreateDialog(IState<bool> isOpen, RefreshToken refreshT
     public override object? Build()
     {
         var factory = UseService<DataContextFactory>();
-        var startupStage = UseState(() => new StartupStageCreateRequest());
+        var details = UseState(() => new StartupStageCreateRequest());
 
-        UseEffect(() =>
-        {
-            var startupStageId = CreateStartupStage(factory, startupStage.Value);
-            refreshToken.Refresh(startupStageId);
-        }, [startupStage]);
-
-        return startupStage
+        return details
             .ToForm()
+            .HandleSubmit(OnSubmit)
             .ToDialog(isOpen, title: "New Startup Stage", submitTitle: "Create");
-    }
 
-    private int CreateStartupStage(DataContextFactory factory, StartupStageCreateRequest request)
-    {
-        using var db = factory.CreateDbContext();
-
-        var startupStage = new StartupStage()
+        async Task OnSubmit(StartupStageCreateRequest request)
         {
-            Name = request.Name
-        };
+            await using var db = factory.CreateDbContext();
 
-        db.StartupStages.Add(startupStage);
-        db.SaveChanges();
+            var startupStage = new StartupStage
+            {
+                Name = request.Name
+            };
 
-        return startupStage.Id;
+            db.StartupStages.Add(startupStage);
+            await db.SaveChangesAsync();
+            refreshToken.Refresh(startupStage.Id);
+        }
     }
 }

@@ -5,22 +5,33 @@ public class DeckLinksEditDialog(IState<bool> isOpen, RefreshToken refreshToken,
     public override object? Build()
     {
         var factory = UseService<DataContextFactory>();
-        var deckLink = UseState(() => factory.CreateDbContext().DeckLinks.FirstOrDefault(e => e.Id == deckLinkId)!);
+        var details = UseState<DeckLink?>();
+        var loading = UseState(true);
 
-        UseEffect(() =>
+        UseEffect(async () =>
         {
-            using var db = factory.CreateDbContext();
-            deckLink.Value.UpdatedAt = DateTime.UtcNow;
-            db.DeckLinks.Update(deckLink.Value);
-            db.SaveChanges();
-            refreshToken.Refresh();
-        }, [deckLink]);
+            await using var context = factory.CreateDbContext();
+            details.Set(await context.DeckLinks.FirstOrDefaultAsync(e => e.Id == deckLinkId));
+            loading.Set(false);
+        });
 
-        return deckLink
+        if (loading.Value) return null;
+
+        return details
             .ToForm()
-            //.Builder(e => e.Secret, e => e.ToReadOnlyInput())
             .Builder(e => e.ContactId, e => e.ToAsyncSelectInput(Shared.QueryContacts(factory), Shared.LookupContact(factory), placeholder: "Select Contact"))
             .Remove(e => e.Id, e => e.DeckId, e => e.CreatedAt, e => e.UpdatedAt, e => e.DeletedAt, e => e.Secret)
+            .HandleSubmit(OnSubmit)
             .ToDialog(isOpen, "Edit Deck Link");
+
+        async Task OnSubmit(DeckLink? deckLink)
+        {
+            if (deckLink == null) return;
+            await using var db = factory.CreateDbContext();
+            deckLink.UpdatedAt = DateTime.UtcNow;
+            db.DeckLinks.Update(deckLink);
+            await db.SaveChangesAsync();
+            refreshToken.Refresh();
+        }
     }
 }

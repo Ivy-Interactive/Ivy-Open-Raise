@@ -11,31 +11,25 @@ public class InteractionTypeCreateDialog(IState<bool> isOpen, RefreshToken refre
     public override object? Build()
     {
         var factory = UseService<DataContextFactory>();
-        var interactionType = UseState(() => new InteractionTypeCreateRequest());
+        var details = UseState(() => new InteractionTypeCreateRequest());
 
-        UseEffect(() =>
-        {
-            var interactionTypeId = CreateInteractionType(factory, interactionType.Value);
-            refreshToken.Refresh(interactionTypeId);
-        }, [interactionType]);
-
-        return interactionType
+        return details
             .ToForm()
+            .HandleSubmit(OnSubmit)
             .ToDialog(isOpen, title: "New Interaction Type", submitTitle: "Create");
-    }
 
-    private int CreateInteractionType(DataContextFactory factory, InteractionTypeCreateRequest request)
-    {
-        using var db = factory.CreateDbContext();
-
-        var interactionType = new InteractionType
+        async Task OnSubmit(InteractionTypeCreateRequest request)
         {
-            Name = request.Name
-        };
+            await using var db = factory.CreateDbContext();
 
-        db.InteractionTypes.Add(interactionType);
-        db.SaveChanges();
+            var interactionType = new InteractionType
+            {
+                Name = request.Name
+            };
 
-        return interactionType.Id;
+            db.InteractionTypes.Add(interactionType);
+            await db.SaveChangesAsync();
+            refreshToken.Refresh(interactionType.Id);
+        }
     }
 }

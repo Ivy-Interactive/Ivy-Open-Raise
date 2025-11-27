@@ -11,32 +11,26 @@ public class DealApproachCreateDialog(IState<bool> isOpen, RefreshToken refreshT
     public override object? Build()
     {
         var factory = UseService<DataContextFactory>();
-        var dealApproach = UseState(() => new DealApproachCreateRequest());
+        var details = UseState(() => new DealApproachCreateRequest());
 
-        UseEffect(() =>
-        {
-            var dealApproachId = CreateDealApproach(factory, dealApproach.Value);
-            refreshToken.Refresh(dealApproachId);
-        }, [dealApproach]);
-
-        return dealApproach
+        return details
             .ToForm()
             .Builder(e => e.Name, e => e.ToTextAreaInput())
+            .HandleSubmit(OnSubmit)
             .ToDialog(isOpen, title: "New Deal Approach", submitTitle: "Create");
-    }
 
-    private int CreateDealApproach(DataContextFactory factory, DealApproachCreateRequest request)
-    {
-        using var db = factory.CreateDbContext();
-
-        var dealApproach = new DealApproach()
+        async Task OnSubmit(DealApproachCreateRequest request)
         {
-            Name = request.Name
-        };
+            await using var db = factory.CreateDbContext();
 
-        db.DealApproaches.Add(dealApproach);
-        db.SaveChanges();
+            var dealApproach = new DealApproach
+            {
+                Name = request.Name
+            };
 
-        return dealApproach.Id;
+            db.DealApproaches.Add(dealApproach);
+            await db.SaveChangesAsync();
+            refreshToken.Refresh(dealApproach.Id);
+        }
     }
 }

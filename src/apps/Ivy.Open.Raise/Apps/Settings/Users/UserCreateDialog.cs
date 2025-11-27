@@ -27,41 +27,35 @@ public class UserCreateDialog(IState<bool> isOpen, RefreshToken refreshToken) : 
     public override object? Build()
     {
         var factory = UseService<DataContextFactory>();
-        var user = UseState(() => new UserCreateRequest());
+        var details = UseState(() => new UserCreateRequest());
 
-        UseEffect(() =>
-        {
-            var userId = CreateUser(factory, user.Value);
-            refreshToken.Refresh(userId);
-        }, [user]);
-
-        return user
+        return details
             .ToForm()
             .Builder(e => e.Title, e => e.ToTextAreaInput())
+            .HandleSubmit(OnSubmit)
             .ToDialog(isOpen, title: "New User", submitTitle: "Create");
-    }
 
-    private Guid CreateUser(DataContextFactory factory, UserCreateRequest request)
-    {
-        using var db = factory.CreateDbContext();
-
-        var user = new User()
+        async Task OnSubmit(UserCreateRequest request)
         {
-            Email = request.Email,
-            FirstName = request.FirstName,
-            LastName = request.LastName,
-            Title = request.Title,
-            CalendarUrl = request.CalendarUrl,
-            ProfilePictureUrl = request.ProfilePictureUrl,
-            LinkedinUrl = request.LinkedinUrl,
-            XUrl = request.XUrl,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
-        };
+            await using var db = factory.CreateDbContext();
 
-        db.Users.Add(user);
-        db.SaveChanges();
+            var user = new User
+            {
+                Email = request.Email,
+                FirstName = request.FirstName,
+                LastName = request.LastName,
+                Title = request.Title,
+                CalendarUrl = request.CalendarUrl,
+                ProfilePictureUrl = request.ProfilePictureUrl,
+                LinkedinUrl = request.LinkedinUrl,
+                XUrl = request.XUrl,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
 
-        return user.Id;
+            db.Users.Add(user);
+            await db.SaveChangesAsync();
+            refreshToken.Refresh(user.Id);
+        }
     }
 }
