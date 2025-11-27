@@ -65,7 +65,7 @@ public record CompanyDetails
             CountryId = settings.CountryId,
             CurrencyId = settings.CurrencyId,
             StartupWebsite = settings.StartupWebsite,
-            DateOfIncorporation = settings.StartupDateOfIncorporation,
+            StartupDateOfIncorporation = settings.StartupDateOfIncorporation,
             Cofounders = settings.Cofounders
         };
     }
@@ -88,7 +88,7 @@ public record CompanyDetails
     
     [DataType(DataType.Date)]
     [Display(Name = "When did you incorporate your company?")]
-    public DateTime? DateOfIncorporation { get; set; }
+    public DateTime? StartupDateOfIncorporation { get; set; }
 
     [Required]
     [Display(Name = "How many co-founders do you have?")]
@@ -111,18 +111,6 @@ public class CompanyStepView(IState<int> stepperIndex) : ViewBase
             companyDetails.Set(CompanyDetails.From(settings));
             loading.Set(false);
         });
-
-        // todo ivy: HandleSubmit instead of relying on UseEffect to save on change
-        // UseEffect(() =>
-        // {
-        //     if (loading.Value) return;
-        //     saving.Set(true);
-        //
-        //     //todo: Save to organisation
-        //     
-        //     saving.Set(false);
-        //     stepperIndex.Incr();
-        // }, [companyDetails]);
         
         if (loading.Value) return Text.Muted("Loading...");
 
@@ -132,7 +120,30 @@ public class CompanyStepView(IState<int> stepperIndex) : ViewBase
                    .Builder(e => e.CurrencyId, SelectCurrencyBuilder(factory))
                    .Builder(e => e.CountryId, SelectCountryBuilder(factory))
                    .SubmitBuilder((saving) => new Button("Next").Icon(Icons.ArrowRight, Align.Right).Disabled(saving).Loading(saving))
+                   .HandleSubmit(OnSubmit)
             ;
+
+        async Task OnSubmit(CompanyDetails? details)
+        {
+            if(details == null) return;
+            await using var context = factory.CreateDbContext();
+
+            var settings = await context.OrganizationSettings
+                .FirstOrDefaultAsync();
+
+            if (settings == null) return;
+
+            settings.StartupName = details.StartupName;
+            settings.CountryId = details.CountryId;
+            settings.CurrencyId = details.CurrencyId;
+            settings.StartupWebsite = details.StartupWebsite;
+            settings.StartupDateOfIncorporation = details.StartupDateOfIncorporation;
+            settings.Cofounders = details.Cofounders;
+
+            await context.SaveChangesAsync();
+
+            stepperIndex.Incr();
+        }
     }
 }
 
@@ -183,16 +194,6 @@ public class RaiseStepView(IState<int> stepperIndex) : ViewBase
             loading.Set(false);
         });
         
-        // UseEffect(() =>
-        // {
-        //     saving.Set(true);
-        //
-        //     //todo: Save to organisation
-        //     
-        //     saving.Set(false);
-        //     stepperIndex.Incr();
-        // }, [raiseDetails]);
-        
         if (loading.Value) return Text.Muted("Loading...");
 
         return Layout.Vertical()
@@ -201,7 +202,28 @@ public class RaiseStepView(IState<int> stepperIndex) : ViewBase
                    .PlaceHorizontal(e => e.RaiseTargetMin, e => e.RaiseTargetMax)
                    .Builder(e => e.StartupStageId, SelectStartupStageBuilder(factory))
                    .SubmitBuilder((saving) => new Button("Next").Icon(Icons.ArrowRight, Align.Right).Disabled(saving).Loading(saving))
+                   .HandleSubmit(OnSubmit)
             ;
+
+        async Task OnSubmit(RaiseDetails? details)
+        {
+            if (details == null) return;
+            await using var context = factory.CreateDbContext();
+
+            var settings = await context.OrganizationSettings
+                .FirstOrDefaultAsync();
+
+            if (settings == null) return;
+
+            settings.RaiseTargetMin = details.RaiseTargetMin;
+            settings.RaiseTargetMax = details.RaiseTargetMax;
+            settings.RaiseTicketSize = details.RaiseTicketSize;
+            settings.StartupStageId = details.StartupStageId;
+
+            await context.SaveChangesAsync();
+
+            stepperIndex.Incr();
+        }
     }
 }
 
@@ -217,18 +239,21 @@ public class DeckStepView(IState<int> stepperIndex) : ViewBase
     {
         var factory = UseService<DataContextFactory>();
         var deckDetails = UseState(new DeckDetails());
-        
-        // UseEffect(() =>
-        // {
-        //     stepperIndex.Incr();
-        // }, [deckDetails]);
-        
+
         return Layout.Vertical()
                | Text.H2("Upload your deck")
                | deckDetails.ToForm()
                    .Large()
                    .Builder(e => e.File, FileUploadBuilder)
-                   .SubmitBuilder((saving) => new Button("Next").Icon(Icons.ArrowRight, Align.Right).Disabled(saving).Loading(saving))
+                   .SubmitBuilder((saving) => new Button("Finish").Icon(Icons.Check, Align.Right).Disabled(saving).Loading(saving))
+                   .HandleSubmit(OnSubmit)
             ;
+
+        async Task OnSubmit(DeckDetails details)
+        {
+            if (details.File?.Content == null) return;
+            await CreateDeckAsync(factory, "Deck", details.File);
+            stepperIndex.Incr();
+        }
     }
 }

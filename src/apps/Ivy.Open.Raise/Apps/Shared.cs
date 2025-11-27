@@ -259,4 +259,49 @@ public static class Shared
             return new Option<int?>(startupStage.Name, startupStage.Id);
         };
     }
+
+    public static async Task<Guid> CreateDeckAsync(DataContextFactory factory, string title, FileUpload<BlobInfo> file)
+    {
+        await using var db = factory.CreateDbContext();
+
+        var deck = new Deck
+        {
+            Id = Guid.NewGuid(),
+            Title = title,
+            UpdatedAt = DateTime.UtcNow,
+            CreatedAt = DateTime.UtcNow
+        };
+        db.Decks.Add(deck);
+
+        var deckVersion = new DeckVersion
+        {
+            Id = Guid.NewGuid(),
+            DeckId = deck.Id,
+            Name = "Version 1",
+            UpdatedAt = DateTime.UtcNow,
+            CreatedAt = DateTime.UtcNow,
+            IsPrimary = true,
+            BlobName = file.Content.BlobName,
+            ContentType = file.ContentType,
+            FileSize = file.Length,
+            FileName = file.FileName,
+        };
+        db.DeckVersions.Add(deckVersion);
+
+        var deckLink = new DeckLink
+        {
+            Id = Guid.NewGuid(),
+            Secret = Utils.RandomKey(12),
+            Reference = null!,
+            ContactId = null,
+            DeckId = deck.Id,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
+        db.DeckLinks.Add(deckLink);
+
+        await db.SaveChangesAsync();
+
+        return deck.Id;
+    }
 }
