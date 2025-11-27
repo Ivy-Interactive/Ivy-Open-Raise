@@ -183,6 +183,7 @@ public class RaiseStepView(IState<int> stepperIndex) : ViewBase
     {
         var factory = UseService<DataContextFactory>();
         var details = UseState<RaiseDetails?>();
+        var currency = UseState<string>("");
         var loading = UseState(true);
         
         UseEffect(async () =>
@@ -191,6 +192,7 @@ public class RaiseStepView(IState<int> stepperIndex) : ViewBase
             var settings = await context.OrganizationSettings
                 .FirstOrDefaultAsync() ?? throw new InvalidOperationException("Organization settings not found.");
             details.Set(RaiseDetails.From(settings));
+            currency.Set(settings.CurrencyId);
             loading.Set(false);
         });
         
@@ -201,6 +203,9 @@ public class RaiseStepView(IState<int> stepperIndex) : ViewBase
                | details.ToForm().Large()
                    .PlaceHorizontal(e => e.RaiseTargetMin, e => e.RaiseTargetMax)
                    .Builder(e => e.StartupStageId, SelectStartupStageBuilder(factory))
+                   .Builder(e => e.RaiseTargetMin, e => e.ToMoneyInput(currency: currency.Value))
+                   .Builder(e => e.RaiseTargetMax, e => e.ToMoneyInput(currency: currency.Value))
+                   .Builder(e => e.RaiseTicketSize, e => e.ToMoneyInput(currency: currency.Value))
                    .SubmitBuilder((saving) => new Button("Next").Icon(Icons.ArrowRight, Align.Right).Disabled(saving).Loading(saving))
                    .HandleSubmit(OnSubmit)
             ;
