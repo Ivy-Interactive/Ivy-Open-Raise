@@ -56,6 +56,12 @@ public partial class OrganizationSetting
     [Column("raise_ticket_size")]
     public int? RaiseTicketSize { get; set; }
 
+    [Column("startup_name")]
+    public string? StartupName { get; set; }
+
+    [Column("startup_gov_id")]
+    public string? StartupGovId { get; set; }
+
     [ForeignKey("CountryId")]
     [InverseProperty("OrganizationSettings")]
     public virtual Country Country { get; set; } = null!;

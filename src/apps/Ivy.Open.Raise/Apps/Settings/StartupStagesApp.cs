@@ -1,4 +1,4 @@
-using Ivy.Open.Raise.Apps.Settings.Views;
+using Ivy.Open.Raise.Apps.Settings.StartupStages;
 
 namespace Ivy.Open.Raise.Apps.Settings;
 

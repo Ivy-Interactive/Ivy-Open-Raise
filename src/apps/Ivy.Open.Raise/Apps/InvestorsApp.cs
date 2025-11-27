@@ -26,40 +26,41 @@ public class InvestorsApp : ViewBase
         var refreshToken = this.UseRefreshToken();
 
         var createBtn = new Button("New Investor")   
-                            .Outline()
-                            .Icon(Icons.Plus)
-                            .ToTrigger((isOpen) => new InvestorCreateDialog(isOpen, refreshToken));
+            .Outline()
+            .Icon(Icons.Plus)
+            .ToTrigger((isOpen) => new InvestorCreateDialog(isOpen, refreshToken));
 
-        var dataTable = 
+        var dataTable =
             BuildInvestorQuery(factory)
                 .ToDataTable()
-                
-                .Renderer(e => e.WebsiteUrl, new LinkDisplayRenderer())  
-                
+
+                .Renderer(e => e.WebsiteUrl, new LinkDisplayRenderer())
+
                 .Width(i => i.ContactsCount, Size.Px(100))
                 .Align(i => i.ContactsCount, Align.Center)
-                
+
                 .Hidden(i => i.Id, i => i.CreatedAt, i => i.UpdatedAt)
-                
+
                 .RowActions(
-                    MenuItem.Default(Icons.Delete).Tooltip("Delete"),
-                    MenuItem.Default(Icons.Pencil).Tooltip("Edit"),
-                    MenuItem.Default(Icons.Menu) | MenuItem.Default("Bar") | MenuItem.Default("Foo")
+                    MenuItem.Default(Icons.Menu)
                 )
-                // .HandleRowAction((e) =>
-                // {
-                //     
-                // })
-                
-                .Renderer(e => e.ContactsCount, new ButtonDisplayRenderer())
-                .HandleCellAction(e => e.ContactsCount, record =>
+                .HandleRowAction((e) =>
                 {
-                            
+                    //this isn't the event type I was expecting
+                    Console.WriteLine(e.Value.EventName);
+                    Console.WriteLine(e.Value.ActionId);
+                    Console.WriteLine(e.Value.RowIndex);
+                    Console.WriteLine(e.Value.RowData);
+
+                    return ValueTask.CompletedTask;
                 })
-                
-                .Config(config =>
-                {
-                });
+
+                .Renderer(e => e.ContactsCount, new ButtonDisplayRenderer())
+                // .HandleCellAction(e => e.ContactsCount, record => //todo ivy: this should be of the correct type
+                // {
+                //     Console.WriteLine($"Here! {record.}");
+                // })
+                .Height(Size.Units(200)); //todo ivy: make height full when we have fixed the HeaderLayout issue.
 
         var header = Layout.Horizontal() | createBtn;
 

@@ -1,4 +1,4 @@
-using Ivy.Open.Raise.Apps.Settings.Views;
+using Ivy.Open.Raise.Apps.Settings.DealApproaches;
 
 namespace Ivy.Open.Raise.Apps.Settings;
 
