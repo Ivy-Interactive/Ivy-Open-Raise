@@ -101,7 +101,6 @@ public class CompanyStepView(IState<int> stepperIndex) : ViewBase
     {
         var factory = UseService<DataContextFactory>();
         var companyDetails = UseState<CompanyDetails?>();
-        var saving = UseState(false);
         var loading = UseState(true);
 
         UseEffect(async () =>
@@ -132,9 +131,8 @@ public class CompanyStepView(IState<int> stepperIndex) : ViewBase
                | companyDetails.ToForm().Large()
                    .Builder(e => e.CurrencyId, SelectCurrencyBuilder(factory))
                    .Builder(e => e.CountryId, SelectCountryBuilder(factory))
+                   .SubmitBuilder((saving) => new Button("Next").Icon(Icons.ArrowRight, Align.Right).Disabled(saving).Loading(saving))
             ;
-        
-        //todo ivy: how can we affect the save button to include an Icon and loading state? Builder? Replace the SubmitTitle thing?
     }
 }
 
@@ -174,7 +172,6 @@ public class RaiseStepView(IState<int> stepperIndex) : ViewBase
     {
         var factory = UseService<DataContextFactory>();
         var raiseDetails = UseState<RaiseDetails?>();
-        var saving = UseState(false);
         var loading = UseState(true);
         
         UseEffect(async () =>
@@ -203,6 +200,7 @@ public class RaiseStepView(IState<int> stepperIndex) : ViewBase
                | raiseDetails.ToForm().Large()
                    .PlaceHorizontal(e => e.RaiseTargetMin, e => e.RaiseTargetMax)
                    .Builder(e => e.StartupStageId, SelectStartupStageBuilder(factory))
+                   .SubmitBuilder((saving) => new Button("Next").Icon(Icons.ArrowRight, Align.Right).Disabled(saving).Loading(saving))
             ;
     }
 }
@@ -219,22 +217,18 @@ public class DeckStepView(IState<int> stepperIndex) : ViewBase
     {
         var factory = UseService<DataContextFactory>();
         var deckDetails = UseState(new DeckDetails());
-        var saving = UseState(false);
         
-        UseEffect(() =>
-        {
-            saving.Set(true);
-
-            //todo: Save to organisation
-            
-            saving.Set(false);
-            stepperIndex.Incr();
-        }, [deckDetails]);
+        // UseEffect(() =>
+        // {
+        //     stepperIndex.Incr();
+        // }, [deckDetails]);
         
         return Layout.Vertical()
                | Text.H2("Upload your deck")
-               | deckDetails.ToForm().Large()
+               | deckDetails.ToForm()
+                   .Large()
                    .Builder(e => e.File, FileUploadBuilder)
+                   .SubmitBuilder((saving) => new Button("Next").Icon(Icons.ArrowRight, Align.Right).Disabled(saving).Loading(saving))
             ;
     }
 }
