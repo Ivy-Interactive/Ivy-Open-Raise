@@ -7,7 +7,15 @@ public class DealEditSheet(IState<bool> isOpen, RefreshToken refreshToken, Guid 
     public override object? Build()
     {
         var factory = UseService<DataContextFactory>();
-        var deal = UseState(() => factory.CreateDbContext().Deals.FirstOrDefault(e => e.Id == dealId)!);
+        var deal = UseState<Deal?>();
+
+        UseEffect(async () =>
+        {
+            await using var db = factory.CreateDbContext();
+            deal.Set(await db.Deals.FirstOrDefaultAsync(e => e.Id == dealId));
+        });
+
+        if (deal.Value == null) return null;
 
         UseEffect(() =>
         {
