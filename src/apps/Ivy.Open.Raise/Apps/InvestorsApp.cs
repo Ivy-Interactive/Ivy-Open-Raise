@@ -55,13 +55,11 @@ public class InvestorsApp : ViewBase
                     return ValueTask.CompletedTask;
                 })
 
-                .Renderer(e => e.ContactsCount, new ButtonDisplayRenderer())
+                .Renderer(e => e.ContactsCount, new ButtonDisplayRenderer());
                 // .HandleCellAction(e => e.ContactsCount, record => //todo ivy: this should be of the correct type
                 // {
                 //     Console.WriteLine($"Here! {record.}");
                 // })
-                .Height(Size.Units(200)); //todo ivy: make height full when we have fixed the HeaderLayout issue.
-
         var header = Layout.Horizontal() | createBtn;
 
         return new HeaderLayout(header, dataTable).Scroll(Scroll.None);
