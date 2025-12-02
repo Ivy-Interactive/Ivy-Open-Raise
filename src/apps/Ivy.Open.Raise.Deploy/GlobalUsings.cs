@@ -14,6 +14,7 @@ global using Ivy.Views.Blades;
 global using Ivy.Views.Builders;
 global using Ivy.Views.Charts;
 global using Ivy.Views.Dashboards;
+global using Ivy.Views.DataTables;
 global using Ivy.Views.Forms;
 global using Ivy.Views.Tables;
 global using Ivy.Widgets.Inputs;

@@ -1,0 +1,34 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <IvyProjectPath Condition="'$(IVY_PROJECT_PATH)' != '' AND Exists('$(IVY_PROJECT_PATH)')">$(IVY_PROJECT_PATH)</IvyProjectPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.10" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.10" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.10" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.10" />
+    <PackageReference Include="Ivy" Version="1.*" Condition="'$(IvyProjectPath)' == '' AND !Exists('..\..\..\..\..\..\ivy-framework\Ivy\Ivy.csproj')" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\Ivy.Sliplane\Ivy.Sliplane.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(IvyProjectPath)' == '' AND Exists('..\..\..\..\..\..\ivy-framework\Ivy\Ivy.csproj')">
+    <ProjectReference Include="..\..\..\..\..\..\ivy-framework\Ivy\Ivy.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(IvyProjectPath)' != ''">
+    <ProjectReference Include="$(IvyProjectPath)" />
+  </ItemGroup>
+
+</Project>
+

@@ -1,5 +1,8 @@
 using System.Reflection;
 using Ivy.Open.Raise.Apps;
+using Ivy.Open.Raise.Apps.Settings;
+using Ivy.Sliplane.Auth;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.AI;
 using OpenAI;
 
@@ -9,6 +12,15 @@ var server = new Server();
 server.UseHotReload();
 #endif
 
+// Register Sliplane OAuth authentication provider
+server.Services.AddSliplaneAuth();
+
+// Use Sliplane auth provider
+server.UseAuth<SliplaneAuthProvider>();
+
+// Register HttpContextAccessor for accessing request-scoped services
+server.Services.AddHttpContextAccessor();
+
 server.AddAppsFromAssembly();
 server.AddConnectionsFromAssembly();
 
@@ -16,6 +28,8 @@ server.UseChrome<ChromeApp>();
 
 server.UseBuilder(builder =>
 {
+    // Add our own application controllers
+    // Note: Ivy Framework automatically adds its controllers (including WebhookController) in Server.cs after this
     builder.Services.AddControllers()
         .AddApplicationPart(Assembly.GetExecutingAssembly());
 });
