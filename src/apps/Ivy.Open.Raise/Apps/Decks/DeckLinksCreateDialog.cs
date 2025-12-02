@@ -23,7 +23,7 @@ public class DeckLinksCreateDialog(IState<bool> isOpen, RefreshToken refreshToke
         return deckLinkRequest
             .ToForm()
             .Builder(e => e.ContactId, e => e.ToAsyncSelectInput(QueryContacts(factory), LookupContact(factory), placeholder: "Select Contact"))
-            .ToDialog(isOpen, title: "Create Deck Link", submitTitle: "Create");
+            .ToDialog(isOpen, title: "New Link", submitTitle: "Create");
     }
 
     private void CreateDeckLink(DataContextFactory factory, DeckLinkCreateRequest request)

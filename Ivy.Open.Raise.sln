@@ -9,6 +9,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ivy.Open.Raise.Deploy", "sr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ivy", "..\Ivy-Framework\Ivy\Ivy.csproj", "{7F20583D-6A39-45FB-83CA-73693FA86CB9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ivy.Samples.Shared", "..\Ivy-Framework\Ivy.Samples.Shared\Ivy.Samples.Shared.csproj", "{9C17FC1B-1F85-464B-ABFA-6FB567967A95}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ivy.Samples", "..\Ivy-Framework\Ivy.Samples\Ivy.Samples.csproj", "{813C3B1A-7E47-4DC5-A4AC-075312CA0B38}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,6 +34,14 @@ Global
 		{7F20583D-6A39-45FB-83CA-73693FA86CB9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7F20583D-6A39-45FB-83CA-73693FA86CB9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7F20583D-6A39-45FB-83CA-73693FA86CB9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9C17FC1B-1F85-464B-ABFA-6FB567967A95}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9C17FC1B-1F85-464B-ABFA-6FB567967A95}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9C17FC1B-1F85-464B-ABFA-6FB567967A95}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9C17FC1B-1F85-464B-ABFA-6FB567967A95}.Release|Any CPU.Build.0 = Release|Any CPU
+		{813C3B1A-7E47-4DC5-A4AC-075312CA0B38}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{813C3B1A-7E47-4DC5-A4AC-075312CA0B38}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{813C3B1A-7E47-4DC5-A4AC-075312CA0B38}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{813C3B1A-7E47-4DC5-A4AC-075312CA0B38}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 	EndGlobalSection

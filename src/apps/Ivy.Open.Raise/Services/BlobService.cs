@@ -40,9 +40,12 @@ public sealed record BlobInfo(string ContainerName, string BlobName, string Cont
 public class BlobService : IBlobService
 {
     private readonly IAmazonS3 _s3Client;
+    private readonly string _endpoint;
 
     public BlobService(string endpoint, string accessKey, string secretKey)
     {
+        _endpoint = endpoint;
+
         var config = new AmazonS3Config
         {
             ServiceURL = endpoint,
@@ -221,16 +224,24 @@ public class BlobService : IBlobService
     public Task<string> GetDownloadUrlAsync(string containerName, string blobName, TimeSpan? expiresIn = null, CancellationToken cancellationToken = default)
     {
         var expiration = expiresIn ?? TimeSpan.FromHours(1);
+        var endpointUri = new Uri(_endpoint);
 
         var request = new GetPreSignedUrlRequest
         {
             BucketName = containerName,
             Key = blobName,
             Expires = DateTime.UtcNow.Add(expiration),
-            Protocol = Protocol.HTTP
+            Protocol = endpointUri.Scheme == "https" ? Protocol.HTTPS : Protocol.HTTP
         };
 
         var url = _s3Client.GetPreSignedURL(request);
+
+        // AWS SDK sometimes ignores Protocol setting with custom ServiceURL, force correct scheme
+        if (endpointUri.Scheme == "http" && url.StartsWith("https://"))
+        {
+            url = "http://" + url.Substring("https://".Length);
+        }
+
         return Task.FromResult(url);
     }
 }

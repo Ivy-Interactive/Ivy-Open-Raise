@@ -15,6 +15,7 @@ public class DeckDetailsBlade(Guid deckId) : ViewBase
         var deckVersionCount = this.UseState<int>();
         var currentVersion = this.UseState<DeckVersion?>();
         var (alertView, showAlert) = this.UseAlert();
+        var (deckEditView, showDeckEdit) = this.UseTrigger(isOpen => new DeckEditDialog(isOpen, refreshToken, deckId));
 
         this.UseEffect(async () =>
         {
@@ -53,57 +54,49 @@ public class DeckDetailsBlade(Guid deckId) : ViewBase
             }
         }
         
-        var dropDown = Icons.Ellipsis
+        var actions = Icons.Ellipsis
             .ToButton()
             .Ghost()
             .WithDropDown(
                 MenuItem.Default("Delete").Icon(Icons.Trash).HandleSelect(OnDelete),
-                MenuItem.Default("Edit").Icon(Icons.Pencil)
+                MenuItem.Default("Edit").Icon(Icons.Pencil).HandleSelect(showDeckEdit)
             );
-
-        //todo ivy: need a way to put the "..." in the title bar
-        
-        var editBtn = new Button("Edit")
-            .Variant(ButtonVariant.Outline)
-            .Icon(Icons.Pencil)
-            .ToTrigger((isOpen) => new DeckEditSheet(isOpen, refreshToken, deckId));
         
         var detailsCard = new Card(
             content: new
                 {
                     deckValue.Title,
                     Current = (currentVersion.Value != null ? 
-                        (object)(Layout.Vertical().Gap(0) | currentVersion.Value.Name //todo ivy: why is version name not aligned to the left?
-                                                          | new Button(currentVersion.Value.FileName).Inline().HandleClick(OnDownloadVersion)
-                                                          | Text.Muted(Ivy.Utils.FormatBytes(currentVersion.Value.FileSize))
+                        (object)(Layout.Vertical().Gap(0) 
+                            | Text.Inline(currentVersion.Value.Name) 
+                            | new Button(currentVersion.Value.FileName).Inline().HandleClick(OnDownloadVersion).Width(Size.Fit().Max(Size.Units(50)))
+                            | Text.Muted(Ivy.Utils.FormatBytes(currentVersion.Value.FileSize))
                             )
                         : Callout.Warning("There's no current version"))
                 }
                 .ToDetails()
-                .RemoveEmpty(),
-            
-            footer: Layout.Horizontal().Gap(2).Align(Align.Right)
-                    | dropDown
-                    | editBtn
+                .RemoveEmpty()
         )
             .Title("Deck Details")
-            .Width(Size.Units(100));
+            .Icon(actions)
+            .Width(Size.Units(100)); //todo: this should be on the blade level
 
         var relatedCard = new Card(
             new List(
-                new ListItem("Links", onClick: _ =>
-                {
-                    blades.Push(this, new DeckLinksBlade(deckId), "Links");
-                }, badge: deckLinksCount.Value.ToString("N0")),
-                new ListItem("Versions", onClick: _ =>
-                {
-                    blades.Push(this, new DeckVersionsBlade(deckId), "Versions");
-                }, badge: deckVersionCount.Value.ToString("N0"))
+                new ListItem(
+                    "Links", 
+                    onClick: _ => blades.Push(this, new DeckLinksBlade(deckId), "Links"), 
+                    badge: deckLinksCount.Value.ToString("N0")),
+                new ListItem(
+                    "Versions", 
+                    onClick: _ => blades.Push(this, new DeckVersionsBlade(deckId), "Versions"),
+                    badge: deckVersionCount.Value.ToString("N0"))
             ));
 
         return new Fragment()
                | (Layout.Vertical() | detailsCard | relatedCard)
                | alertView
+               | deckEditView
                ;
     }
 

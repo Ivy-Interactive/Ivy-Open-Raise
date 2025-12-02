@@ -12,8 +12,6 @@ public class InvestorsApp : ViewBase
         string InvestorType,
         string? Country,
         string? WebsiteUrl,
-        string? LinkedinUrl,
-        string? XUrl,
         string CheckSizeRange,
         int ContactsCount,
         DateTime CreatedAt,
@@ -22,86 +20,54 @@ public class InvestorsApp : ViewBase
 
     public override object? Build()
     {
+        //todo ivy: auto format column widths based on content?
+        
         var factory = UseService<DataContextFactory>();
         var refreshToken = this.UseRefreshToken();
 
-        var createBtn = Icons.Plus.ToButton(_ => { })
-                            .Outline()
-                            .Tooltip("Create Investor")
-                            .ToTrigger((isOpen) => new InvestorCreateDialog(isOpen, refreshToken));
+        var createBtn = new Button("New Investor")   
+            .Outline()
+            .Icon(Icons.Plus)
+            .ToTrigger((isOpen) => new InvestorCreateDialog(isOpen, refreshToken));
 
-        return
-            FetchInvestors(factory).ToDataTable()
-                .Header(i => i.Name, "Name")
-                .Header(i => i.InvestorType, "Type")
-                .Header(i => i.Country, "Country")
-                .Header(i => i.WebsiteUrl, "Website")
-                .Header(i => i.LinkedinUrl, "LinkedIn")
-                .Header(i => i.XUrl, "X (Twitter)")
-                .Header(i => i.CheckSizeRange, "Check Size")
-                .Header(i => i.ContactsCount, "Contacts")
-                .Header(i => i.CreatedAt, "Created")
-                .Header(i => i.UpdatedAt, "Updated")
-                .Header(i => i.Id, "ID")
+        var dataTable =
+            BuildInvestorQuery(factory)
+                .ToDataTable()
 
-                // Set column widths
-                .Width(i => i.Name, Size.Px(200))
-                .Width(i => i.InvestorType, Size.Px(120))
-                .Width(i => i.Country, Size.Px(120))
-                .Width(i => i.WebsiteUrl, Size.Px(150))
-                .Width(i => i.LinkedinUrl, Size.Px(150))
-                .Width(i => i.XUrl, Size.Px(150))
-                .Width(i => i.CheckSizeRange, Size.Px(160))
+                .Renderer(e => e.WebsiteUrl, new LinkDisplayRenderer())
+
                 .Width(i => i.ContactsCount, Size.Px(100))
-                .Width(i => i.CreatedAt, Size.Px(150))
-                .Width(i => i.UpdatedAt, Size.Px(150))
-                .Width(i => i.Id, Size.Px(100))
-
-                // Set alignment
-                .Align(i => i.Name, Align.Left)
-                .Align(i => i.InvestorType, Align.Left)
-                .Align(i => i.Country, Align.Left)
-                .Align(i => i.WebsiteUrl, Align.Left)
-                .Align(i => i.LinkedinUrl, Align.Left)
-                .Align(i => i.XUrl, Align.Left)
-                .Align(i => i.CheckSizeRange, Align.Left)
                 .Align(i => i.ContactsCount, Align.Center)
-                .Align(i => i.CreatedAt, Align.Left)
-                .Align(i => i.UpdatedAt, Align.Left)
-                .Align(i => i.Id, Align.Left)
 
-                // Hide ID column
-                .Hidden([i => i.Id])
+                .Hidden(i => i.Id, i => i.CreatedAt, i => i.UpdatedAt)
 
-                // Group columns
-                .Group(i => i.Name, "Basic Info")
-                .Group(i => i.InvestorType, "Basic Info")
-                .Group(i => i.Country, "Basic Info")
-                .Group(i => i.WebsiteUrl, "Social Links")
-                .Group(i => i.LinkedinUrl, "Social Links")
-                .Group(i => i.XUrl, "Social Links")
-                .Group(i => i.CheckSizeRange, "Investment Info")
-                .Group(i => i.ContactsCount, "Investment Info")
-                .Group(i => i.CreatedAt, "Timestamps")
-                .Group(i => i.UpdatedAt, "Timestamps")
-
-                // Configure DataTable
-                .Config(config =>
+                .RowActions(
+                    MenuItem.Default(Icons.Menu)
+                )
+                .HandleRowAction((e) =>
                 {
-                    config.AllowSorting = true;
-                    config.AllowFiltering = true;
-                    config.AllowLlmFiltering = true;
-                    config.AllowColumnReordering = true;
-                    config.AllowColumnResizing = true;
-                    config.AllowCopySelection = true;
-                    config.SelectionMode = SelectionModes.Cells;
-                    config.ShowIndexColumn = true;
-                    config.ShowGroups = true;
-                    config.ShowColumnTypeIcons = false;
-                });
+                    //this isn't the event type I was expecting
+                    Console.WriteLine(e.Value.EventName);
+                    Console.WriteLine(e.Value.ActionId);
+                    Console.WriteLine(e.Value.RowIndex);
+                    Console.WriteLine(e.Value.RowData);
+
+                    return ValueTask.CompletedTask;
+                })
+
+                .Renderer(e => e.ContactsCount, new ButtonDisplayRenderer())
+                // .HandleCellAction(e => e.ContactsCount, record => //todo ivy: this should be of the correct type
+                // {
+                //     Console.WriteLine($"Here! {record.}");
+                // })
+                .Height(Size.Units(200)); //todo ivy: make height full when we have fixed the HeaderLayout issue.
+
+        var header = Layout.Horizontal() | createBtn;
+
+        return new HeaderLayout(header, dataTable).Scroll(Scroll.None);
     }
 
-    private static IQueryable<InvestorRecord> FetchInvestors(DataContextFactory factory)
+    private static IQueryable<InvestorRecord> BuildInvestorQuery(DataContextFactory factory)
     {
         var db = factory.CreateDbContext();
 
@@ -110,15 +76,13 @@ public class InvestorsApp : ViewBase
             .Include(i => i.AddressCountry)
             .Include(i => i.Contacts)
             .Where(i => i.DeletedAt == null)
-            .OrderByDescending(i => i.CreatedAt)
+            .OrderByDescending(i => i.CreatedAt) //todo: will this work? 
             .Select(i => new InvestorRecord(
                 i.Id,
                 i.Name,
                 i.InvestorType.Name,
                 i.AddressCountry != null ? i.AddressCountry.Name : null,
                 i.WebsiteUrl,
-                i.LinkedinUrl,
-                i.XUrl,
                 i.CheckSizeMin.HasValue && i.CheckSizeMax.HasValue
                     ? $"${i.CheckSizeMin:N0} - ${i.CheckSizeMax:N0}"
                     : i.CheckSizeMin.HasValue

@@ -1,3 +1,5 @@
+using static Ivy.Open.Raise.Apps.Shared;
+
 namespace Ivy.Open.Raise.Apps.Decks;
 
 public class DeckVersionsCreateDialog(IState<bool> isOpen, RefreshToken refreshToken, Guid deckId) : ViewBase
@@ -8,7 +10,7 @@ public class DeckVersionsCreateDialog(IState<bool> isOpen, RefreshToken refreshT
         public string Name { get; private init; } = "";
 
         [Required]
-        public FileUpload<BlobInfo>? File { get; init; } = new();
+        public FileUpload<BlobInfo>? File { get; init; }
 
         public bool MakeCurrent { get; init; } = true;
 
@@ -36,16 +38,8 @@ public class DeckVersionsCreateDialog(IState<bool> isOpen, RefreshToken refreshT
 
         return versionRequest
             .ToForm()
-            .Builder(e => e.File, (s, v) =>
-            {
-                var blobService = v.UseService<IBlobService>();
-                var upload = v.UseUpload(BlobUploadHandler.Create(s, blobService, Constants.DeckBlobContainerName, CalculateBlobName))
-                    .MaxFileSize(Constants.MaxUploadFileSize)
-                    .Accept(FileTypes.Pdf);
-                return s.ToFileInput(upload);
-                string CalculateBlobName(FileUpload f) => f.Id + System.IO.Path.GetExtension(f.FileName);
-            })
-            .ToDialog(isOpen, title: "Create Version", submitTitle: "Create");
+            .Builder(e => e.File, FileUploadBuilder)
+            .ToDialog(isOpen, title: "New Version", submitTitle: "Create");
     }
 
     private void CreateDeckVersion(DataContextFactory factory, DeckVersionCreateRequest request)

@@ -36,7 +36,7 @@ public class InvestorContactsCreateDialog(IState<bool> isOpen, RefreshToken refr
             .Builder(e => e.Email, e => e.ToEmailInput())
             .Builder(e => e.LinkedinUrl, e => e.ToUrlInput())
             .Builder(e => e.XUrl, e => e.ToUrlInput())
-            .ToDialog(isOpen, title: "Create Contact", submitTitle: "Create");
+            .ToDialog(isOpen, title: "New Contact", submitTitle: "Create");
     }
 
     private Guid CreateContact(DataContextFactory factory, ContactCreateRequest request)

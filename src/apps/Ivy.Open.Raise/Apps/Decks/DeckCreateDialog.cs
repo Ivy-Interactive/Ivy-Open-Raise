@@ -1,3 +1,5 @@
+using static Ivy.Open.Raise.Apps.Shared;
+
 namespace Ivy.Open.Raise.Apps.Decks;
 
 public class DeckCreateDialog(IState<bool> isOpen, RefreshToken refreshToken) : ViewBase
@@ -8,7 +10,7 @@ public class DeckCreateDialog(IState<bool> isOpen, RefreshToken refreshToken) : 
         public string Title { get; init; } = "Deck";
         
         [Required]
-        public FileUpload<BlobInfo>? File { get; init; } = new();
+        public FileUpload<BlobInfo>? File { get; init; }
     }
 
     public override object? Build()
@@ -24,16 +26,8 @@ public class DeckCreateDialog(IState<bool> isOpen, RefreshToken refreshToken) : 
 
         return deckState
             .ToForm()
-            .Builder(e => e.File, (s, v) =>
-            {
-                var blobService = v.UseService<IBlobService>();
-                var upload = v.UseUpload(BlobUploadHandler.Create(s, blobService, Constants.DeckBlobContainerName, CalculateBlobName))
-                    .MaxFileSize(Constants.MaxUploadFileSize)
-                    .Accept(FileTypes.Pdf);
-                return s.ToFileInput(upload);
-                string CalculateBlobName(FileUpload f) => f.Id + System.IO.Path.GetExtension(f.FileName);
-            })
-            .ToDialog(isOpen, title: "Create Deck", submitTitle: "Create");
+            .Builder(e => e.File, FileUploadBuilder)
+            .ToDialog(isOpen, title: "New Deck", submitTitle: "Create");
     }
 
     private Guid CreateDeck(DataContextFactory factory, DeckCreateRequest request)
@@ -66,6 +60,7 @@ public class DeckCreateDialog(IState<bool> isOpen, RefreshToken refreshToken) : 
         
         var deckLink = new DeckLink()
         {
+            Id = Guid.NewGuid(),
             Secret = Utils.RandomKey(12),
             Reference = null!,
             ContactId = null,
