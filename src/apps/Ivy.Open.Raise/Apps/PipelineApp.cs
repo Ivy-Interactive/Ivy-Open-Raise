@@ -144,8 +144,14 @@ public class PipelineApp : ViewBase
         string toState,
         int targetIndex)
     {
+        // Determine the new DealStateOrder based on toState
+        var newDealStateOrder = items
+            .Where(i => i.DealState == toState)
+            .Select(i => i.DealStateOrder)
+            .FirstOrDefault();
+        
         var updatedList = items
-            .Select(i => i.Id == dealId ? i with { DealState = toState } : i)
+            .Select(i => i.Id == dealId ? i with { DealState = toState, DealStateOrder = newDealStateOrder } : i)
             .ToList();
             
         var movedItem = updatedList.FirstOrDefault(i => i.Id == dealId);
@@ -173,7 +179,7 @@ public class PipelineApp : ViewBase
             
         return [
             ..updatedList
-                .OrderBy(i => i.DealState)
+                .OrderBy(i => i.DealStateOrder)
                 .ThenBy(i => i.Order)
         ];
     }
