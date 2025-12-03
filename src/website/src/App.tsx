@@ -2,6 +2,7 @@ import Navbar from "./components/Navbar/Navbar";
 import Hero from "./components/Hero/Hero";
 import TrustSection from "./components/TrustSection/TrustSection";
 import AboutSection from "./components/AboutSection/AboutSection";
+import ProductFeatures from "./components/ProductFeatures/ProductFeatures";
 import Feature from "./components/Feature/Feature";
 import CalendlySection from "./components/CalendlySection/CalendlySection";
 import Footer from "./components/Footer/Footer";
@@ -30,6 +31,7 @@ function App() {
           { value: "500K+", label: "Deals Closed" },
         ]}
       />
+      <ProductFeatures />
       <Feature />
       <CalendlySection
         url="https://calendly.com/d/cv34-53t-7q5/ivy-demo-call-with-our-founding-growth-team?hide_gdpr_banner=1&background_color=ffffff&text_color=000000&primary_color=00cc92"

@@ -1,0 +1,255 @@
+.productFeatures {
+  background: #080808;
+  padding: 120px 24px;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    width: 800px;
+    height: 600px;
+    background: radial-gradient(ellipse at center, rgba(0, 204, 146, 0.08) 0%, transparent 70%);
+    top: 50%;
+    left: -200px;
+    transform: translateY(-50%);
+    pointer-events: none;
+  }
+
+  @media (max-width: 768px) {
+    padding: 80px 24px;
+  }
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 64px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  @media (max-width: 768px) {
+    margin-bottom: 48px;
+  }
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0, 204, 146, 0.1);
+  border: 1px solid rgba(0, 204, 146, 0.2);
+  border-radius: 100px;
+  padding: 8px 16px;
+  margin-bottom: 24px;
+}
+
+.badgeIcon {
+  font-size: 14px;
+}
+
+.badgeText {
+  color: var(--color-primary-teal);
+  font-family: "Inter", sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.title {
+  color: #fff;
+  font-family: "Inter", sans-serif;
+  font-size: 48px;
+  font-weight: 700;
+  letter-spacing: -1.5px;
+  line-height: 1.1;
+  margin: 0 0 20px 0;
+
+  @media (max-width: 768px) {
+    font-size: 32px;
+    letter-spacing: -0.5px;
+  }
+}
+
+.subtitle {
+  color: rgba(255, 255, 255, 0.5);
+  font-family: "Inter", sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 1.6;
+  margin: 0;
+  max-width: 560px;
+
+  @media (max-width: 768px) {
+    font-size: 16px;
+  }
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.featureTabs {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.featureTab {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 14px 24px;
+  border-radius: 100px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.12);
+  }
+
+  &.active {
+    background: rgba(0, 204, 146, 0.1);
+    border-color: rgba(0, 204, 146, 0.3);
+
+    .tabIcon {
+      color: var(--color-primary-teal);
+    }
+
+    .tabTitle {
+      color: #fff;
+    }
+  }
+}
+
+.tabIcon {
+  color: rgba(255, 255, 255, 0.5);
+  display: flex;
+  align-items: center;
+  transition: color 0.2s ease;
+}
+
+.tabTitle {
+  color: rgba(255, 255, 255, 0.7);
+  font-family: "Inter", sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+.featureContent {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr;
+  gap: 48px;
+  align-items: center;
+
+  @media (max-width: 968px) {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+}
+
+.featureInfo {
+  @media (max-width: 968px) {
+    text-align: center;
+  }
+}
+
+.featureTitle {
+  color: #fff;
+  font-family: "Inter", sans-serif;
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  margin: 0 0 16px 0;
+}
+
+.featureDescription {
+  color: rgba(255, 255, 255, 0.6);
+  font-family: "Inter", sans-serif;
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 1.6;
+  margin: 0 0 24px 0;
+}
+
+.featureHighlights {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  @media (max-width: 968px) {
+    align-items: center;
+  }
+}
+
+.highlight {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: rgba(255, 255, 255, 0.8);
+  font-family: "Inter", sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.checkmark {
+  color: var(--color-primary-teal);
+  font-weight: 700;
+}
+
+.featureImage {
+  position: relative;
+}
+
+.screenshot {
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.4);
+}
+
+.imagePlaceholder {
+  aspect-ratio: 16 / 10;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px dashed rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.placeholderIcon {
+  color: rgba(255, 255, 255, 0.2);
+  
+  svg {
+    width: 48px;
+    height: 48px;
+  }
+}
+
+.placeholderText {
+  color: rgba(255, 255, 255, 0.3);
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+}
+
