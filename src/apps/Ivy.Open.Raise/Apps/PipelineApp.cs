@@ -34,6 +34,7 @@ public class PipelineApp : ViewBase
                 idSelector: deal => deal.Id,
                 orderSelector: deal => deal.Order
             ) 
+            .ColumnWidth(Size.Units(35))
             .ColumnOrder(deal => deal.DealStateOrder)
             .CardBuilder(CardBuilder)
             .HandleMove(OnMove)
@@ -70,9 +71,11 @@ public class PipelineApp : ViewBase
             var content = details.ToDetails();
 
             return new Card(content)
+                .Small()
                 .Title(deal.InvestorName)
                 .Icon(dropDown)
                 .HandleClick(() => showEdit(deal.Id))
+                .Hover(CardHoverVariant.Pointer)
                 .Key(deal.Id);
         }
         

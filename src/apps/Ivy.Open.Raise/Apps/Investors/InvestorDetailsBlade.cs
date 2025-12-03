@@ -49,7 +49,6 @@ public class InvestorDetailsBlade(Guid investorId) : ViewBase
         var detailsCard = new Card(
             content: new
             {
-                investorValue.Id,
                 investorValue.Name,
                 InvestorType = investorValue.InvestorType.Name,
                 investorValue.WebsiteUrl,
@@ -61,9 +60,9 @@ public class InvestorDetailsBlade(Guid investorId) : ViewBase
                 AddressCountry = investorValue.AddressCountry?.Name,
                 investorValue.Thesis,
                 CheckSizeRange = $"{investorValue.CheckSizeMin} - {investorValue.CheckSizeMax}"
-            }.ToDetails()
-                .RemoveEmpty()
-                .Builder(e => e.Id, e => e.CopyToClipboard()),
+            }
+                .ToDetails()
+                .RemoveEmpty(),
             footer: Layout.Horizontal().Width(Size.Full()).Gap(1).Align(Align.Right)
                     | dropDown
                     | editBtn

@@ -9,58 +9,37 @@ public class AverageDealAmountMetricView(DateTime fromDate, DateTime toDate) : V
         async Task<MetricRecord> CalculateAverageDealAmount()
         {
             await using var db = factory.CreateDbContext();
-            
-            var currentPeriodDeals = await db.Deals
-                .Where(d => d.CreatedAt >= fromDate && d.CreatedAt <= toDate)
-                .ToListAsync();
-                
-            var currentAverageDealAmount = currentPeriodDeals
-                .Where(d => d.AmountFrom.HasValue && d.AmountTo.HasValue)
-                .Average(d => (double)((d.AmountFrom!.Value + d.AmountTo!.Value) / 2));
-            
-            var periodLength = toDate - fromDate;
-            var previousFromDate = fromDate.AddDays(-periodLength.TotalDays);
-            var previousToDate = fromDate.AddDays(-1);
-            
-            var previousPeriodDeals = await db.Deals
-                .Where(d => d.CreatedAt >= previousFromDate && d.CreatedAt <= previousToDate)
-                .ToListAsync();
-                
-            double? previousAverageDealAmount = null;
-            if (previousPeriodDeals.Any(d => d.AmountFrom.HasValue && d.AmountTo.HasValue))
-            {
-                previousAverageDealAmount = previousPeriodDeals
-                    .Where(d => d.AmountFrom.HasValue && d.AmountTo.HasValue)
-                    .Average(d => (double)((d.AmountFrom!.Value + d.AmountTo!.Value) / 2));
-            }
 
-            if (previousAverageDealAmount == null || previousAverageDealAmount == 0) 
-            {
-                return new MetricRecord(
-                    MetricFormatted: currentAverageDealAmount.ToString("C0"),
-                    TrendComparedToPreviousPeriod: null,
-                    GoalAchieved: null,
-                    GoalFormatted: null
-                );
-            }
+            var currency = (await db.OrganizationSettings.FirstOrDefaultAsync()).CurrencyId;
             
-            double? trend = (currentAverageDealAmount - previousAverageDealAmount.Value) / previousAverageDealAmount.Value;
-
-            var goal = previousAverageDealAmount.Value * 1.1;
-            double? goalAchievement = goal > 0 ? currentAverageDealAmount / goal : null;
+            var deals = await db.Deals
+                .Where(e => e.AmountFrom != null || e.AmountTo != null) 
+                .Select(e => new
+                {
+                    e.AmountFrom,
+                    e.AmountTo
+                })
+                .ToListAsync();
+            
+            var value = deals.Select(e => FromToFix(e.AmountFrom, e.AmountTo)).Average();
             
             return new MetricRecord(
-                MetricFormatted: currentAverageDealAmount.ToString("C0"),
-                TrendComparedToPreviousPeriod: trend,
-                GoalAchieved: goalAchievement,
-                GoalFormatted: goal.ToString("C0")
+                MetricFormatted: value.ToString("N0") + " " + currency
             );
         }
-
+        
         return new MetricView(
             "Average Deal Amount",
             Icons.DollarSign,
             CalculateAverageDealAmount
         );
+
+        double FromToFix(double? from, double? to)
+        {
+            if (from == null && to != null) return to.Value;
+            if (to == null && from != null) return from.Value;
+            if (from != null && to != null) return (from.Value + to.Value) / 2;
+            return 0;
+        }
     }
 }

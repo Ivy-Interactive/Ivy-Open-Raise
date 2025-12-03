@@ -1,6 +1,6 @@
 namespace Ivy.Open.Raise.Apps.Dashboard;
 
-public class TotalContactsMetricView(DateTime fromDate, DateTime toDate) : ViewBase
+public class TotalInvestorsMetricView(DateTime fromDate, DateTime toDate) : ViewBase
 {
     public override object? Build()
     {
@@ -10,11 +10,11 @@ public class TotalContactsMetricView(DateTime fromDate, DateTime toDate) : ViewB
         {
             await using var db = factory.CreateDbContext();
 
-            var investors = db.Contacts.AsNoTracking().Where(e => e.DeletedAt == null);
+            var contacts = db.Contacts.AsNoTracking().Where(e => e.DeletedAt == null);
             
-            var current = await investors.CountAsync();
+            var current = await contacts.CountAsync();
             
-            var previousPeriod = await investors.CountAsync();
+            var previousPeriod = await contacts.CountAsync();
 
             if (previousPeriod == 0)
             {
@@ -32,8 +32,8 @@ public class TotalContactsMetricView(DateTime fromDate, DateTime toDate) : ViewB
         }
 
         return new MetricView(
-            "Total Investors",
-            Icons.BriefcaseBusiness,
+            "Total Contacts",
+            Icons.PersonStanding,
             CalculateTotalInvestors
         );
     }

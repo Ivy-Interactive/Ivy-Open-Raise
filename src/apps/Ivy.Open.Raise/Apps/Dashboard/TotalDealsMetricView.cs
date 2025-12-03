@@ -6,49 +6,35 @@ public class TotalDealsMetricView(DateTime fromDate, DateTime toDate) : ViewBase
     {
         var factory = UseService<DataContextFactory>();
         
-        async Task<MetricRecord> CalculateTotalDeals()
+        async Task<MetricRecord> CalculateTotalInvestors()
         {
             await using var db = factory.CreateDbContext();
-            
-            var currentPeriodDeals = await db.Deals
-                .Where(d => d.CreatedAt >= fromDate && d.CreatedAt <= toDate)
-                .CountAsync();
-                
-            var periodLength = toDate - fromDate;
-            var previousFromDate = fromDate.AddDays(-periodLength.TotalDays);
-            var previousToDate = fromDate.AddDays(-1);
-            
-            var previousPeriodDeals = await db.Deals
-                .Where(d => d.CreatedAt >= previousFromDate && d.CreatedAt <= previousToDate)
-                .CountAsync();
 
-            if (previousPeriodDeals == 0)
+            var deals = db.Deals.AsNoTracking().Where(e => e.DeletedAt == null);
+            
+            var current = await deals.CountAsync();
+            
+            var previousPeriod = await deals.CountAsync();
+
+            if (previousPeriod == 0)
             {
                 return new MetricRecord(
-                    MetricFormatted: currentPeriodDeals.ToString("N0"),
-                    TrendComparedToPreviousPeriod: null,
-                    GoalAchieved: null,
-                    GoalFormatted: null
+                    MetricFormatted: current.ToString("N0")
                 );
             }
             
-            double? trend = ((double)currentPeriodDeals - previousPeriodDeals) / previousPeriodDeals;
-            
-            var goal = previousPeriodDeals * 1.1;
-            double? goalAchievement = goal > 0 ? currentPeriodDeals / goal : null;
+            double? trend = ((double)current - previousPeriod) / previousPeriod;
             
             return new MetricRecord(
-                MetricFormatted: currentPeriodDeals.ToString("N0"),
-                TrendComparedToPreviousPeriod: trend,
-                GoalAchieved: goalAchievement,
-                GoalFormatted: goal.ToString("N0")
+                MetricFormatted: current.ToString("N0"),
+                TrendComparedToPreviousPeriod: trend
             );
         }
 
         return new MetricView(
             "Total Deals",
-            Icons.Briefcase,
-            CalculateTotalDeals
+            Icons.PersonStanding,
+            CalculateTotalInvestors
         );
     }
 }

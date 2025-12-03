@@ -12,17 +12,29 @@ public class DashboardApp : ViewBase
         
         var metrics =
                 Layout.Grid().Columns(4)
-                | new TotalDealsMetricView(fromDate, toDate).Key(fromDate, toDate) | new TotalInteractionsMetricView(fromDate, toDate).Key(fromDate, toDate) | new TotalDeckViewsMetricView(fromDate, toDate).Key(fromDate, toDate) | new ActiveContactsMetricView(fromDate, toDate).Key(fromDate, toDate) | new DealsInProgressMetricView(fromDate, toDate).Key(fromDate, toDate) | new AverageDealAmountMetricView(fromDate, toDate).Key(fromDate, toDate) | new TotalInvestorsMetricView(fromDate, toDate).Key(fromDate, toDate) | new TotalDeckLinksCreatedMetricView(fromDate, toDate).Key(fromDate, toDate) 
+                | new TotalInvestorsMetricView(fromDate, toDate).Key(fromDate, toDate) 
+                | new TotalContactsMetricView(fromDate, toDate).Key(fromDate, toDate) 
+                | new TotalDealsMetricView(fromDate, toDate).Key(fromDate, toDate) 
+                | new TotalInteractionsMetricView(fromDate, toDate).Key(fromDate, toDate) 
+                | new TotalDeckViewsMetricView(fromDate, toDate).Key(fromDate, toDate) 
+                | new DealsInProgressMetricView(fromDate, toDate).Key(fromDate, toDate) 
+                | new AverageDealAmountMetricView(fromDate, toDate).Key(fromDate, toDate) 
             ;
             
         var charts = 
                 Layout.Grid().Columns(3)
-                | new DailyInteractionsLineChartView(fromDate, toDate).Key(fromDate, toDate) | new DealsByStatePieChartView(fromDate, toDate).Key(fromDate, toDate) | new DailyDeckViewsLineChartView(fromDate, toDate).Key(fromDate, toDate) | new InvestorTypesDistributionPieChartView(fromDate, toDate).Key(fromDate, toDate) | new DailyCreatedDealsLineChartView(fromDate, toDate).Key(fromDate, toDate) | new InteractionsByTypePieChartView(fromDate, toDate).Key(fromDate, toDate) 
+                | new DailyInteractionsLineChartView(fromDate, toDate).Key(fromDate, toDate) 
+                | new DealsByStatePieChartView(fromDate, toDate).Key(fromDate, toDate) 
+                | new DailyDeckViewsLineChartView(fromDate, toDate).Key(fromDate, toDate) 
+                | new InvestorTypesDistributionPieChartView(fromDate, toDate).Key(fromDate, toDate) 
+                | new DailyCreatedDealsLineChartView(fromDate, toDate).Key(fromDate, toDate) 
+                | new InteractionsByTypePieChartView(fromDate, toDate).Key(fromDate, toDate) 
             ;
 
         return 
-               Layout.Vertical().Width(Size.Full().Max(300))
+            Layout.TopCenter().Margin(0,10)
+               | (Layout.Vertical().Width(Size.Full().Max(250))
                             | metrics
-                            | charts;
+                            | charts);
     }
 }

@@ -19,6 +19,9 @@ public partial class DealState
     [Column("order")]
     public int Order { get; set; }
 
+    [Column("is_final")]
+    public bool IsFinal { get; set; } = false;
+
     [InverseProperty("DealState")]
     public virtual ICollection<Deal> Deals { get; set; } = new List<Deal>();
 }
