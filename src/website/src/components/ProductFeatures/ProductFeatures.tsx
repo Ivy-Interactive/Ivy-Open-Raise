@@ -2,13 +2,18 @@ import React, { useState } from "react";
 import styles from "./ProductFeatures.module.scss";
 import { LayoutDashboard, GitBranch, Users, Presentation } from "lucide-react";
 
+import dashboardImg from "@/assets/images/dashboard.png";
+import pipelineImg from "@/assets/images/pipelines.png";
+import investorsImg from "@/assets/images/investors.png";
+import decksImg from "@/assets/images/decks.png";
+
 interface Feature {
   id: string;
   icon: React.ReactNode;
   title: string;
   description: string;
   highlights: string[];
-  image?: string;
+  image: string;
 }
 
 const ProductFeatures: React.FC = () => {
@@ -25,6 +30,7 @@ const ProductFeatures: React.FC = () => {
         "Visualize investor types and deal states",
         "Daily and weekly performance charts",
       ],
+      image: dashboardImg,
     },
     {
       id: "pipeline",
@@ -38,6 +44,7 @@ const ProductFeatures: React.FC = () => {
         "Deal value tracking and forecasting",
         "Activity timeline for each deal",
       ],
+      image: pipelineImg,
     },
     {
       id: "investors",
@@ -51,6 +58,7 @@ const ProductFeatures: React.FC = () => {
         "Smart tags and filtering",
         "Contact information management",
       ],
+      image: investorsImg,
     },
     {
       id: "decks",
@@ -64,6 +72,7 @@ const ProductFeatures: React.FC = () => {
         "Download analytics",
         "Expiring links and access controls",
       ],
+      image: decksImg,
     },
   ];
 
@@ -121,22 +130,11 @@ const ProductFeatures: React.FC = () => {
             </div>
 
             <div className={styles.featureImage}>
-              {activeFeature.image ? (
-                <img
-                  src={activeFeature.image}
-                  alt={activeFeature.title}
-                  className={styles.screenshot}
-                />
-              ) : (
-                <div className={styles.imagePlaceholder}>
-                  <div className={styles.placeholderIcon}>
-                    {activeFeature.icon}
-                  </div>
-                  <span className={styles.placeholderText}>
-                    {activeFeature.title} Screenshot
-                  </span>
-                </div>
-              )}
+              <img
+                src={activeFeature.image}
+                alt={activeFeature.title}
+                className={styles.screenshot}
+              />
             </div>
           </div>
         </div>

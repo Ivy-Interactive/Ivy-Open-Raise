@@ -1,6 +1,5 @@
 import Navbar from "./components/Navbar/Navbar";
 import Hero from "./components/Hero/Hero";
-import TrustSection from "./components/TrustSection/TrustSection";
 import AboutSection from "./components/AboutSection/AboutSection";
 import ProductFeatures from "./components/ProductFeatures/ProductFeatures";
 import Feature from "./components/Feature/Feature";
@@ -21,7 +20,6 @@ function App() {
         secondaryCtaText="Book a Demo"
         githubUrl="https://github.com/Ivy-Interactive/Ivy-Open-Raise"
       />
-      <TrustSection />
       <AboutSection
         title="Our Platform is designed to give teams clear insights, real-time tracking, and powerful tools to close deals faster."
         stats={[
