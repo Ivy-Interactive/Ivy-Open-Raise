@@ -33,7 +33,6 @@ public class InvestorsApp : ViewBase
         var dataTable =
             BuildInvestorQuery(factory)
                 .ToDataTable()
-
                 .Renderer(e => e.WebsiteUrl, new LinkDisplayRenderer())
 
                 .Width(i => i.ContactsCount, Size.Px(100))

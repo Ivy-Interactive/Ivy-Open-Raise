@@ -1,3 +1,5 @@
+using System.Formats.Tar;
+
 namespace Ivy.Open.Raise.Apps.Decks;
 
 public class DeckVersionsBlade(Guid deckId) : ViewBase
@@ -53,13 +55,13 @@ public class DeckVersionsBlade(Guid deckId) : ViewBase
         if (deckVersions.Value == null) return null;
 
         var table = deckVersions.Value.Select(dv => new
-        {
-            __ = dv.IsPrimary ? Icons.Crown : Icons.None,
-            dv.Name,
-            FileName = (Layout.Vertical().Gap(0)
-                       | new Button(dv.FileName).Variant(ButtonVariant.Inline)
-                       | Text.Muted(Ivy.Utils.FormatBytes(dv.FileSize))),
-            _ = Layout.Horizontal().Gap(1)
+            {
+                __ = dv.IsPrimary ? Icons.Crown : Icons.None,
+                dv.Name,
+                FileName = (Layout.Vertical().Gap(0)
+                            | new Button(dv.FileName).Variant(ButtonVariant.Inline)
+                            | Text.Muted(Ivy.Utils.FormatBytes(dv.FileSize))),
+                _ = Layout.Horizontal().Gap(1)
                     | Icons.Ellipsis
                         .ToButton()
                         .Ghost()
@@ -68,12 +70,10 @@ public class DeckVersionsBlade(Guid deckId) : ViewBase
                             MenuItem.Default("Edit").Icon(Icons.Pencil).HandleSelect(() => showEdit(dv.Id)),
                             MenuItem.Default("Make Current").Icon(Icons.Crown).HandleSelect(OnMakeCurrent(dv.Id))
                         )
-        })
+            })
             .ToTable()
-            // .Width(e => e._, Size.Fit())
-            // .Width(e => e.__, Size.Fit())
-            // .Width(e => e.FileName, Size.Fraction(1))
-            .RemoveEmptyColumns();
+            .ColumnWidth(e => e._, Size.Fit())
+            .ColumnWidth(e => e.__, Size.Fit());
 
         var addBtn = new Button("New Version").Icon(Icons.Plus).Outline()
             .ToTrigger((isOpen) => new DeckVersionsCreateDialog(isOpen, refreshToken, deckId));

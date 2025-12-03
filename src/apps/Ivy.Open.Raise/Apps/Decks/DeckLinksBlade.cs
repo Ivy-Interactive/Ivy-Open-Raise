@@ -87,11 +87,11 @@ public class DeckLinksBlade(Guid deckId) : ViewBase
                             .HandleClick(OnCopy(dl.Secret))
                 })
                 .ToTable()
-                // //todo ivy: this isn't working
-                // .Width(Size.Units(100))
-                // .ColumnWidth(e => e.Reference, Size.Fraction(0.5f))
-                // .ColumnWidth(e => e.Contact, Size.Fraction(0.5f))
-                // .ColumnWidth(e => e.Views, Size.Fit())
+                .Width(Size.Units(120))
+                .ColumnWidth(e => e.Reference, Size.Fraction(0.5f))
+                .ColumnWidth(e => e.Contact, Size.Fraction(0.5f))
+                .ColumnWidth(e => e.Views, Size.Units(50))
+                .Align(e => e.Views, Align.Right) //todo ivy: not implemented
                 .ColumnWidth(e => e._, Size.Fit())
             ;
 
