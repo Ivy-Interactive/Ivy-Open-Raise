@@ -34,6 +34,7 @@ public class PipelineApp : ViewBase
                 idSelector: deal => deal.Id,
                 orderSelector: deal => deal.Order
             ) 
+            .ColumnWidth(Size.Units(35))
             .ColumnOrder(deal => deal.DealStateOrder)
             .CardBuilder(CardBuilder)
             .HandleMove(OnMove)
@@ -70,9 +71,11 @@ public class PipelineApp : ViewBase
             var content = details.ToDetails();
 
             return new Card(content)
+                .Small()
                 .Title(deal.InvestorName)
                 .Icon(dropDown)
                 .HandleClick(() => showEdit(deal.Id))
+                .Hover(CardHoverVariant.Pointer)
                 .Key(deal.Id);
         }
         
@@ -144,8 +147,14 @@ public class PipelineApp : ViewBase
         string toState,
         int targetIndex)
     {
+        // Determine the new DealStateOrder based on toState
+        var newDealStateOrder = items
+            .Where(i => i.DealState == toState)
+            .Select(i => i.DealStateOrder)
+            .FirstOrDefault();
+        
         var updatedList = items
-            .Select(i => i.Id == dealId ? i with { DealState = toState } : i)
+            .Select(i => i.Id == dealId ? i with { DealState = toState, DealStateOrder = newDealStateOrder } : i)
             .ToList();
             
         var movedItem = updatedList.FirstOrDefault(i => i.Id == dealId);
@@ -173,7 +182,7 @@ public class PipelineApp : ViewBase
             
         return [
             ..updatedList
-                .OrderBy(i => i.DealState)
+                .OrderBy(i => i.DealStateOrder)
                 .ThenBy(i => i.Order)
         ];
     }
