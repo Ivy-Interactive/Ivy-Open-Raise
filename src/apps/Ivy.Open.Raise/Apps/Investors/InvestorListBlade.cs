@@ -2,7 +2,7 @@ namespace Ivy.Open.Raise.Apps.Investors;
 
 public class InvestorListBlade : ViewBase
 {
-    private record InvestorListRecord(Guid Id, string Name);
+    private record InvestorListRecord(Guid Id, string Name, bool Deal);
 
     public override object? Build()
     {
@@ -31,30 +31,25 @@ public class InvestorListBlade : ViewBase
             blades.Pop(this);
         }).Ghost().Tooltip("New Investor").ToTrigger((isOpen) => new InvestorCreateDialog(isOpen, refreshToken));
         
-        // var showDataTableToggle = showDataTable.ToSelectInput([
-        //     new Option<bool>(null, false, icon: Icons.List),
-        //     new Option<bool>(null, true, icon: Icons.Table)
-        // ]).Variant(SelectInputs.Toggle).Small();
-        
         return new FilteredListView<InvestorListRecord>(
             fetchRecords: (filter) => FetchInvestors(factory, filter),
             createItem: CalculateCreateItem,
-            //toolButtons: Layout.Horizontal(createBtn, showDataTableToggle).Gap(0),
             toolButtons: createBtn,
             onFilterChanged: _ =>
             {
                 blades.Pop(this);
             }
         );
+
         ListItem CalculateCreateItem(InvestorListRecord record) =>
-            new(title: record.Name, subtitle: null, onClick: onItemClicked, tag: record);
+            new(title: record.Name, subtitle: null, badge: record.Deal ? "DEAL" : null, onClick: onItemClicked, tag: record);
     }
 
     private async Task<InvestorListRecord[]> FetchInvestors(DataContextFactory factory, string filter)
     {
         await using var db = factory.CreateDbContext();
 
-        var linq = db.Investors.Where(e => e.DeletedAt == null);
+        var linq = db.Investors.Include(e => e.Contacts).ThenInclude(f => f.Deals).Where(e => e.DeletedAt == null);
 
         if (!string.IsNullOrWhiteSpace(filter))
         {
@@ -65,7 +60,7 @@ public class InvestorListBlade : ViewBase
         return await linq
             .OrderByDescending(e => e.CreatedAt)
             .Take(50)
-            .Select(e => new InvestorListRecord(e.Id, e.Name))
+            .Select(e => new InvestorListRecord(e.Id, e.Name, e.Contacts.Any() && e.Contacts.Any(c => c.Deals.Any(d => d.DeletedAt == null))))
             .ToArrayAsync();
     }
 }

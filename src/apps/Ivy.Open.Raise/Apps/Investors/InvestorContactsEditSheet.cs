@@ -22,9 +22,10 @@ public class InvestorContactsEditSheet(IState<bool> isOpen, RefreshToken refresh
             .Builder(e => e.Email, e => e.ToEmailInput())
             .Builder(e => e.LinkedinUrl, e => e.ToUrlInput())
             .Builder(e => e.XUrl, e => e.ToUrlInput())
-            .Place(e => e.FirstName, e => e.LastName)
-            .Group("Contact Details", e => e.Email, e => e.Title, e => e.LinkedinUrl, e => e.XUrl)
+            .PlaceHorizontal(e => e.FirstName, e => e.LastName)
             .Remove(e => e.Id, e => e.CreatedAt, e => e.UpdatedAt, e => e.DeletedAt, e => e.InvestorId)
+            .Label(e => e.LinkedinUrl, "LinkedIn Profile")
+            .Label(e => e.XUrl, "X Profile")
             .HandleSubmit(OnSubmit)
             .ToSheet(isOpen, "Edit Contact");
 
@@ -35,7 +36,7 @@ public class InvestorContactsEditSheet(IState<bool> isOpen, RefreshToken refresh
             modifiedContact.UpdatedAt = DateTime.UtcNow;
             db.Contacts.Update(modifiedContact);
             await db.SaveChangesAsync();
-            refreshToken.Refresh();
+            //refreshToken.Refresh(); //this isn't working
         }
     }
 }
