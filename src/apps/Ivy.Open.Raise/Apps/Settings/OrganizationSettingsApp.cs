@@ -63,9 +63,11 @@ public class OrganizationSettingsApp : ViewBase
             .Remove(e => e.Id)
             .HandleSubmit(OnSubmit);
 
-        return Layout.Vertical()
-            | Text.H1("Settings")
-            | form;
+        return 
+            Layout.TopCenter()
+                | (Layout.Vertical().Width(Size.Full().Max(Size.Units(150)))
+                    | Text.H1("Settings")
+                    | form);
 
         async Task OnSubmit(OrganizationSetting? modifiedSettings)
         {
