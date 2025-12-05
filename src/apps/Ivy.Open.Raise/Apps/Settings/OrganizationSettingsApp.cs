@@ -10,6 +10,7 @@ public class OrganizationSettingsApp : ViewBase
         var factory = UseService<DataContextFactory>();
         var client = UseService<IClientProvider>();
         var settings = UseState<OrganizationSetting?>();
+        var globals = UseService<GlobalService>();
         var loading = UseState(true);
 
         UseEffect(async () =>
@@ -75,6 +76,7 @@ public class OrganizationSettingsApp : ViewBase
             await using var db = factory.CreateDbContext();
             db.OrganizationSettings.Update(modifiedSettings);
             await db.SaveChangesAsync();
+            await globals.RefreshAsync();
             client.Toast("Organization settings updated.");
         }
     }

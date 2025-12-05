@@ -102,6 +102,7 @@ public class CompanyStepView(IState<int> stepperIndex) : ViewBase
         var factory = UseService<DataContextFactory>();
         var details = UseState<CompanyDetails?>();
         var loading = UseState(true);
+        var globals = UseService<GlobalService>();
 
         UseEffect(async () =>
         {
@@ -141,7 +142,8 @@ public class CompanyStepView(IState<int> stepperIndex) : ViewBase
             settings.Cofounders = details.Cofounders;
 
             await context.SaveChangesAsync();
-
+            await globals.RefreshAsync();
+            
             stepperIndex.Incr();
         }
     }
