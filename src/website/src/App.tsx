@@ -14,14 +14,7 @@ function App() {
   return (
     <div className="App">
       <Navbar />
-      <Hero
-        badge="Explore Our New AI Features"
-        title={`Smarter Fundraising for\nFaster Startup Growth`}
-        description="Track your fundraising performance in real-time, manage investor pipelines effortlessly, and gain insights that help you close deals faster."
-        primaryCtaText="View on GitHub"
-        secondaryCtaText="Book a Demo"
-        githubUrl="https://github.com/Ivy-Interactive/Ivy-Open-Raise"
-      />
+      <Hero />
       <AboutSection />
       <OpenSourceSection />
       <ProductFeatures />

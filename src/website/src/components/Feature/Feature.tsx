@@ -8,6 +8,7 @@ import {
   Server,
   Sparkles,
   Code,
+  ArrowRight,
 } from "lucide-react";
 
 interface FeatureCardProps {
@@ -40,7 +41,7 @@ const features: FeatureCardProps[] = [
   {
     icon: <User size={28} />,
     title: "Investor Profiles & Timeline",
-    description: "All context in one place — not scattered across tools.",
+    description: "All context in one place, not scattered across tools.",
   },
   {
     icon: <Link size={28} />,
@@ -77,7 +78,7 @@ const Feature: React.FC = () => {
       <div className={styles.container}>
         <div className={styles.header}>
           <div className={styles.badge}>
-            <span className={styles.badgeText}>POWERFUL FEATURES</span>
+            <span className={styles.badgeText}>FEATURES</span>
           </div>
           <h2 className={styles.sectionTitle}>
             Everything you need to
@@ -89,6 +90,18 @@ const Feature: React.FC = () => {
           {features.map((feature, index) => (
             <FeatureCard key={index} {...feature} />
           ))}
+          <div className={styles.ctaCard}>
+            <h3 className={styles.ctaCardTitle}>Ready to get started?</h3>
+            <a
+              href="https://github.com/Ivy-Interactive/Ivy-Open-Raise"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.ctaCardButton}
+            >
+              Deploy from GitHub
+              <ArrowRight size={18} />
+            </a>
+          </div>
         </div>
       </div>
     </section>

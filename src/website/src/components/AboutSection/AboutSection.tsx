@@ -5,18 +5,22 @@ import { MessageSquare, ClipboardList, Mail, Clock } from "lucide-react";
 const painPoints = [
   {
     icon: <MessageSquare size={20} />,
+    title: "Scattered Conversations",
     text: "Investor conversations get scattered across emails, DMs, spreadsheets, and memory.",
   },
   {
     icon: <ClipboardList size={20} />,
+    title: "Wrong CRM",
     text: "CRMs built for sales don't capture investor signals.",
   },
   {
     icon: <Mail size={20} />,
+    title: "Blind Outreach",
     text: "Decks are sent with no visibility into who actually opened them.",
   },
   {
     icon: <Clock size={20} />,
+    title: "Disconnected Tools",
     text: "Deck tools track views but ignore relationships.",
   },
 ];
@@ -30,13 +34,16 @@ const AboutSection: React.FC = () => {
         </div>
 
         <h2 className={styles.title}>
-          Fundraising is a relationship workflow, not a sales funnel.
+          Fundraising is a relationship workflow, <br /> not a sales funnel.
         </h2>
 
         <div className={styles.painPoints}>
           {painPoints.map((point, index) => (
             <div key={index} className={styles.painPoint}>
-              <span className={styles.icon}>{point.icon}</span>
+              <div className={styles.iconTitleRow}>
+                <span className={styles.icon}>{point.icon}</span>
+                <h3 className={styles.pointTitle}>{point.title}</h3>
+              </div>
               <p className={styles.pointText}>{point.text}</p>
             </div>
           ))}

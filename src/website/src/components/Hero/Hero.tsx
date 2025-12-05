@@ -2,34 +2,49 @@ import React from "react";
 import styles from "./Hero.module.scss";
 import { ArrowRight, Github } from "lucide-react";
 import dashboardImg from "@/assets/images/open-raise.png";
+import { useGitHubRelease } from "@/hooks/useGitHubRelease";
 
 interface HeroProps {
-  badge?: string;
-  badgeLink?: string;
   title?: string;
   description?: string;
-  primaryCtaText?: string;
-  secondaryCtaText?: string;
   githubUrl?: string;
 }
 
 const Hero: React.FC<HeroProps> = ({
-  badge = "Explore Our New AI Features",
-  badgeLink = "#",
-  title = "Smarter Fundraising for\nFaster Startup Growth",
-  description = "Track your fundraising performance in real-time, manage investor pipelines effortlessly, and gain insights that help you close deals faster.",
-  primaryCtaText = "View on GitHub",
-  secondaryCtaText = "Book a Demo",
+  title = "Fundraising CRM you can reshape, not rent.",
+  description = "A simple, open-source system for structuring investor conversations, managing your pipeline, and understanding which parts of your pitch actually create interest without licenses, plugins, or lock-in.",
   githubUrl = "https://github.com/Ivy-Interactive/Ivy-Open-Raise",
 }) => {
+  const { release, loading } = useGitHubRelease(
+    "Ivy-Interactive/Ivy-Open-Raise"
+  );
+
   return (
     <section className={styles.hero}>
       <div className={styles.container}>
         <div className={styles.content}>
-          <a href={badgeLink} className={styles.badge}>
-            <span className={styles.badgeLabel}>News</span>
-            <span className={styles.badgeText}>{badge}</span>
-          </a>
+          {!loading && release && (
+            <a
+              href={release.html_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.badge}
+            >
+              <span className={styles.badgeLabel}>{release.tag_name}</span>
+              <span className={styles.badgeText}>View release notes</span>
+            </a>
+          )}
+          {!loading && !release && (
+            <a
+              href={githubUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.badge}
+            >
+              <span className={styles.badgeLabel}>Latest</span>
+              <span className={styles.badgeText}>View on GitHub</span>
+            </a>
+          )}
 
           <h1 className={styles.title}>
             {title.split("\n").map((line, i) => (
@@ -50,8 +65,11 @@ const Hero: React.FC<HeroProps> = ({
               className={styles.primaryCta}
             >
               <Github size={18} />
-              {primaryCtaText}
+              Deploy from GitHub
               <ArrowRight size={18} />
+            </a>
+            <a href="#" className={styles.secondaryCta}>
+              Try hosted version (48h free)
             </a>
           </div>
         </div>

@@ -21,7 +21,7 @@
   align-items: center;
   gap: 8px;
   background: rgba(0, 204, 146, 0.1);
-  border: 1px solid rgba(0, 204, 146, 0.2);
+  border: 1px solid rgba(0, 204, 146, 0.25);
   border-radius: 100px;
   padding: 8px 16px;
   margin-bottom: 24px;
@@ -57,27 +57,22 @@
   text-align: center;
 }
 
-.stepNumber {
-  width: 56px;
-  height: 56px;
-  background: linear-gradient(
-    135deg,
-    rgba(0, 204, 146, 0.2) 0%,
-    rgba(0, 204, 146, 0.05) 100%
-  );
-  border: 1px solid rgba(0, 204, 146, 0.3);
-  border-radius: 50%;
+.iconTitleRow {
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.stepNumber {
+  flex-shrink: 0;
   font-size: 24px;
   font-weight: 700;
   color: var(--color-primary-teal);
-  margin-bottom: 24px;
 }
 
 .stepTitle {
-  margin-bottom: 12px;
+  margin: 0;
 }
 
 .stepDescription {

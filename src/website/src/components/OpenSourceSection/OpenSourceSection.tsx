@@ -1,6 +1,6 @@
 import React from "react";
 import styles from "./OpenSourceSection.module.scss";
-import { Database, Infinity, Scale } from "lucide-react";
+import { Database, Infinity, Scale, Github, ArrowRight } from "lucide-react";
 
 const benefits = [
   {
@@ -22,7 +22,7 @@ const benefits = [
 
 const OpenSourceSection: React.FC = () => {
   return (
-    <section className={styles.openSourceSection}>
+    <section className={styles.openSourceSection} id="open-source">
       <div className={styles.container}>
         <div className={styles.badge}>
           <span className={styles.badgeText}>OPEN SOURCE</span>
@@ -34,19 +34,32 @@ const OpenSourceSection: React.FC = () => {
 
         <p className={styles.description}>
           Open-source gives founders control over data, workflows, and the
-          evolution of their tools. No seat limits, no upgrade walls — just
+          evolution of their tools. No seat limits, no upgrade walls, just
           freedom.
         </p>
 
         <div className={styles.benefits}>
           {benefits.map((benefit, index) => (
             <div key={index} className={styles.benefit}>
-              <div className={styles.iconWrapper}>{benefit.icon}</div>
-              <h3 className={styles.benefitTitle}>{benefit.title}</h3>
+              <div className={styles.iconTitleRow}>
+                <span className={styles.icon}>{benefit.icon}</span>
+                <h3 className={styles.benefitTitle}>{benefit.title}</h3>
+              </div>
               <p className={styles.benefitDescription}>{benefit.description}</p>
             </div>
           ))}
         </div>
+
+        <a
+          href="https://github.com/Ivy-Interactive/Ivy-Open-Raise"
+          target="_blank"
+          rel="noopener noreferrer"
+          className={styles.githubCta}
+        >
+          <Github size={18} />
+          View on GitHub
+          <ArrowRight size={18} />
+        </a>
       </div>
     </section>
   );

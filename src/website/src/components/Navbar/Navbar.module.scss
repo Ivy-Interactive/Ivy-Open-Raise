@@ -6,7 +6,7 @@
   z-index: 1000;
   background: rgba(8, 8, 8, 0.8);
   backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .container {
@@ -83,7 +83,7 @@
   width: 40px;
   height: 40px;
   background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.13);
   border-radius: 100px;
   color: #fff;
   text-decoration: none;
@@ -91,7 +91,7 @@
 
   &:hover {
     background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.2);
   }
 }
 
@@ -133,7 +133,7 @@
   flex-direction: column;
   padding: 16px 24px 24px;
   background: rgba(8, 8, 8, 0.98);
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
 
   @media (max-width: 768px) {
     display: flex;
@@ -147,7 +147,7 @@
   font-size: 16px;
   font-weight: 500;
   padding: 12px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   transition: color 0.2s ease;
 
   &:hover {
@@ -168,7 +168,7 @@
   justify-content: center;
   gap: 8px;
   background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.13);
   color: #fff;
   text-decoration: none;
   padding: 14px 20px;

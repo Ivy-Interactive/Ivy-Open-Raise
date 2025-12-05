@@ -23,7 +23,7 @@ const ProductFeatures: React.FC = () => {
       icon: <LayoutDashboard size={24} />,
       title: "Dashboard",
       description:
-        "Get a complete overview of your fundraising progress with real-time metrics and beautiful visualizations.",
+        "Get a complete overview of your fundraising progress with real-time metrics and clear visualizations.",
       highlights: [
         "Track total deals, interactions, and deck views",
         "Monitor investor engagement metrics",
@@ -37,7 +37,7 @@ const ProductFeatures: React.FC = () => {
       icon: <GitBranch size={24} />,
       title: "Pipeline",
       description:
-        "Manage your entire fundraising pipeline with an intuitive kanban-style board that keeps deals moving forward.",
+        "Manage your entire fundraising pipeline with a simple kanban-style board that keeps deals moving forward.",
       highlights: [
         "Drag-and-drop deal management",
         "Customizable pipeline stages",
@@ -53,7 +53,7 @@ const ProductFeatures: React.FC = () => {
       description:
         "Build and manage relationships with your investor network. Track interactions and never miss a follow-up.",
       highlights: [
-        "Comprehensive investor profiles",
+        "Complete investor profiles",
         "Interaction history and notes",
         "Smart tags and filtering",
         "Contact information management",
@@ -79,7 +79,7 @@ const ProductFeatures: React.FC = () => {
   const [activeFeature, setActiveFeature] = useState(features[0]);
 
   return (
-    <section className={styles.productFeatures} id="features">
+    <section className={styles.productFeatures} id="product">
       <div className={styles.container}>
         <div className={styles.header}>
           <div className={styles.badge}>
@@ -87,13 +87,13 @@ const ProductFeatures: React.FC = () => {
             <span className={styles.badgeText}>Product Features</span>
           </div>
           <h2 className={styles.title}>
-            Everything you need to
-            <br />
-            manage your fundraise
+            A fundraising workflow that adapts
+            <br /> to how you already work.
           </h2>
           <p className={styles.subtitle}>
-            Four powerful modules designed to streamline your fundraising
-            process from first pitch to final close.
+            Open Race gives founders a clean, flexible system for managing
+            investors, conversations, and pitch engagement without restructuring
+            their workflow around a SaaS tool.
           </p>
         </div>
 
@@ -144,4 +144,3 @@ const ProductFeatures: React.FC = () => {
 };
 
 export default ProductFeatures;
-

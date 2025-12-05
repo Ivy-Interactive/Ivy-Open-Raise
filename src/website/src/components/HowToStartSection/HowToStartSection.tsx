@@ -22,7 +22,7 @@ const steps = [
 
 const HowToStartSection: React.FC = () => {
   return (
-    <section className={styles.howToStartSection}>
+    <section className={styles.howToStartSection} id="get-started">
       <div className={styles.container}>
         <div className={styles.badge}>
           <span className={styles.badgeText}>GET STARTED</span>
@@ -33,8 +33,10 @@ const HowToStartSection: React.FC = () => {
         <div className={styles.steps}>
           {steps.map((step) => (
             <div key={step.number} className={styles.step}>
-              <div className={styles.stepNumber}>{step.number}</div>
-              <h3 className={styles.stepTitle}>{step.title}</h3>
+              <div className={styles.iconTitleRow}>
+                <span className={styles.stepNumber}>{step.number}</span>
+                <h3 className={styles.stepTitle}>{step.title}</h3>
+              </div>
               <p className={styles.stepDescription}>{step.description}</p>
             </div>
           ))}

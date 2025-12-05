@@ -14,9 +14,11 @@ const Navbar: React.FC<NavbarProps> = ({
 
   const navLinks = [
     { label: "Home", href: "#" },
-    { label: "About", href: "#about" },
+    { label: "Why Tools Fail", href: "#about" },
+    { label: "Open Source", href: "#open-source" },
+    { label: "Product", href: "#product" },
     { label: "Features", href: "#features" },
-    { label: "Contact", href: "#contact" },
+    { label: "Get Started", href: "#get-started" },
   ];
 
   const handleNavClick = (
