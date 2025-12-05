@@ -92,9 +92,10 @@
 }
 
 .description {
+  /* Hero paragraph - special styling, overrides global p styles */
   color: #fff;
   font-family: "Inter", sans-serif;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 400;
   line-height: 1.6;
   margin: 0 0 40px 0;

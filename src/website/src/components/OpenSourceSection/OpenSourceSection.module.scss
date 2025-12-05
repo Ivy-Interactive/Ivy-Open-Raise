@@ -1,8 +1,6 @@
-.feature {
+.openSourceSection {
   background: #0a0a0a;
   padding: 120px 24px;
-  position: relative;
-  overflow: hidden;
 
   @media (max-width: 768px) {
     padding: 80px 24px;
@@ -10,23 +8,12 @@
 }
 
 .container {
-  max-width: 1200px;
+  max-width: 1100px;
   margin: 0 auto;
-  width: 100%;
-  position: relative;
-  z-index: 1;
-}
-
-.header {
-  text-align: center;
-  margin-bottom: 64px;
   display: flex;
   flex-direction: column;
   align-items: center;
-
-  @media (max-width: 768px) {
-    margin-bottom: 48px;
-  }
+  text-align: center;
 }
 
 .badge {
@@ -47,45 +34,43 @@
   letter-spacing: 1px;
 }
 
-.sectionTitle {
-  text-align: center;
+.title {
+  max-width: 700px;
+  margin-bottom: 24px;
 }
 
-.featuresGrid {
+.description {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 16px;
+  line-height: 1.6;
+  max-width: 600px;
+  margin-bottom: 64px;
+}
+
+.benefits {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
+  gap: 48px;
+  width: 100%;
 
-  @media (max-width: 1024px) {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
-  }
-
-  @media (max-width: 640px) {
+  @media (max-width: 768px) {
     grid-template-columns: 1fr;
-    gap: 16px;
+    gap: 32px;
   }
 }
 
-.featureCard {
-  text-align: left;
+.benefit {
   display: flex;
   flex-direction: column;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 16px;
-  padding: 28px;
+  align-items: center;
+  text-align: center;
 }
 
 .iconWrapper {
   width: 56px;
   height: 56px;
-  background: linear-gradient(
-    135deg,
-    rgba(0, 204, 146, 0.15) 0%,
-    rgba(0, 204, 146, 0.05) 100%
-  );
-  border: 1px solid rgba(0, 204, 146, 0.2);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 14px;
   display: flex;
   align-items: center;
@@ -97,11 +82,11 @@
   }
 }
 
-.featureTitle {
-  margin-bottom: 10px;
+.benefitTitle {
+  margin-bottom: 8px;
 }
 
-.featureDescription {
-  font-size: 16px;
+.benefitDescription {
   color: rgba(255, 255, 255, 0.5);
+  font-size: 16px;
 }

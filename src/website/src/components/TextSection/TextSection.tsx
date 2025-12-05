@@ -21,7 +21,7 @@ const TextSection: React.FC<TextSectionProps> = ({
       <div className={styles.container}>
         <div className={`${styles.content} ${styles[alignment]}`}>
           {title && <h2 className={styles.title}>{title}</h2>}
-          {subtitle && <h3 className={styles.subtitle}>{subtitle}</h3>}
+          {subtitle && <p className={styles.subtitle}>{subtitle}</p>}
           {content && (
             <div className={styles.textContent}>
               {content.split("\n").map((paragraph, index) => (

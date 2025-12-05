@@ -1,51 +1,56 @@
 import React from "react";
 import styles from "./AboutSection.module.scss";
+import { MessageSquare, ClipboardList, Mail, Clock } from "lucide-react";
 
-interface Stat {
-  value: string;
-  label: string;
-}
+const painPoints = [
+  {
+    icon: <MessageSquare size={20} />,
+    text: "Investor conversations get scattered across emails, DMs, spreadsheets, and memory.",
+  },
+  {
+    icon: <ClipboardList size={20} />,
+    text: "CRMs built for sales don't capture investor signals.",
+  },
+  {
+    icon: <Mail size={20} />,
+    text: "Decks are sent with no visibility into who actually opened them.",
+  },
+  {
+    icon: <Clock size={20} />,
+    text: "Deck tools track views but ignore relationships.",
+  },
+];
 
-interface AboutSectionProps {
-  title?: string;
-  description?: string;
-  stats?: Stat[];
-}
-
-const AboutSection: React.FC<AboutSectionProps> = ({
-  title = "Our Platform is designed to give teams clear insights, real-time tracking, and powerful tools to close deals faster.",
-  description,
-  stats = [
-    { value: "25M+", label: "Active Users" },
-    { value: "$50B+", label: "Revenue" },
-    { value: "300%", label: "Faster Sales" },
-    { value: "500K+", label: "Deals Closed" },
-  ],
-}) => {
+const AboutSection: React.FC = () => {
   return (
     <section className={styles.aboutSection} id="about">
       <div className={styles.container}>
         <div className={styles.badge}>
-          <span className={styles.badgeIcon}>ⓘ</span>
-          <span className={styles.badgeText}>About Us</span>
+          <span className={styles.badgeText}>WHY TRADITIONAL TOOLS FAIL</span>
         </div>
 
-        <h2 className={styles.title}>{title}</h2>
+        <h2 className={styles.title}>
+          Fundraising is a relationship workflow, not a sales funnel.
+        </h2>
 
-        {description && <p className={styles.description}>{description}</p>}
-
-        <div className={styles.stats}>
-          {stats.map((stat, index) => (
-            <div key={index} className={styles.statItem}>
-              <span className={styles.statValue}>{stat.value}</span>
-              <span className={styles.statLabel}>{stat.label}</span>
+        <div className={styles.painPoints}>
+          {painPoints.map((point, index) => (
+            <div key={index} className={styles.painPoint}>
+              <span className={styles.icon}>{point.icon}</span>
+              <p className={styles.pointText}>{point.text}</p>
             </div>
           ))}
         </div>
+
+        <div className={styles.divider} />
+
+        <blockquote className={styles.quote}>
+          "Founders lose momentum not because they lack activity, but because
+          context slips away."
+        </blockquote>
       </div>
     </section>
   );
 };
 
 export default AboutSection;
-

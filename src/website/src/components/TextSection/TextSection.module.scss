@@ -49,32 +49,13 @@
 }
 
 .title {
-  color: var(--color-text-white);
-  font-family: "Inter", sans-serif;
-  font-size: 48px;
-  font-weight: 700;
-  letter-spacing: -1px;
-  line-height: 1.2;
-  margin: 0 0 16px 0;
-
-  @media (max-width: 768px) {
-    font-size: 32px;
-    letter-spacing: -0.5px;
-  }
+  /* Inherits from global h2 styles */
+  display: block;
 }
 
 .subtitle {
-  color: var(--color-gray-400);
-  font-family: "Inter", sans-serif;
-  font-size: 20px;
-  font-weight: 500;
-  letter-spacing: -0.3px;
-  line-height: 1.5;
-  margin: 0 0 24px 0;
-
-  @media (max-width: 768px) {
-    font-size: 18px;
-  }
+  /* Inherits from global p styles */
+  display: block;
 }
 
 .textContent {
@@ -82,22 +63,8 @@
 }
 
 .paragraph {
-  color: var(--color-gray-300);
-  font-family: "Inter", sans-serif;
-  font-size: 18px;
-  font-weight: 400;
-  letter-spacing: -0.2px;
-  line-height: 1.6;
-  margin: 0 0 20px 0;
-
-  &:last-child {
-    margin-bottom: 0;
-  }
-
-  @media (max-width: 768px) {
-    font-size: 16px;
-    letter-spacing: -0.1px;
-  }
+  /* Inherits from global p styles */
+  display: block;
 }
 
 // Animation for fade-in effect

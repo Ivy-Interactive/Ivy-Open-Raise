@@ -67,32 +67,14 @@
 }
 
 .title {
-  color: #fff;
-  font-family: "Inter", sans-serif;
-  font-size: 48px;
-  font-weight: 700;
-  letter-spacing: -1.5px;
-  line-height: 1.1;
-  margin: 0 0 20px 0;
-
-  @media (max-width: 768px) {
-    font-size: 32px;
-    letter-spacing: -0.5px;
-  }
+  /* Inherits from global h2 styles */
+  /* Empty class to allow global h2 styles to apply */
+  display: block;
 }
 
 .subtitle {
-  color: rgba(255, 255, 255, 0.5);
-  font-family: "Inter", sans-serif;
-  font-size: 18px;
-  font-weight: 400;
-  line-height: 1.6;
-  margin: 0;
+  /* Inherits from global p styles */
   max-width: 560px;
-
-  @media (max-width: 768px) {
-    font-size: 16px;
-  }
 }
 
 .content {
@@ -172,21 +154,14 @@
 }
 
 .featureTitle {
-  color: #fff;
-  font-family: "Inter", sans-serif;
-  font-size: 32px;
-  font-weight: 700;
-  letter-spacing: -0.5px;
-  margin: 0 0 16px 0;
+  /* Inherits from global h3 styles */
+  /* Empty class to allow global h3 styles to apply */
+  display: block;
 }
 
 .featureDescription {
-  color: rgba(255, 255, 255, 0.6);
-  font-family: "Inter", sans-serif;
-  font-size: 17px;
-  font-weight: 400;
-  line-height: 1.6;
-  margin: 0 0 24px 0;
+  /* Inherits from global p styles */
+  margin-bottom: 24px;
 }
 
 .featureHighlights {
