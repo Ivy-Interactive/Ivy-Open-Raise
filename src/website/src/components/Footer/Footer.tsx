@@ -25,9 +25,9 @@ const Footer: React.FC<FooterProps> = ({
             Open Race was created by the Ivy team to explore how a real
             fundraising process can be built using our own framework. It
             demonstrates Ivy's ability to support pipelines, analytics,
-            onboarding flows, and logic, the same building blocks teams need
-            for their internal tools and custom applications. Open Race is both
-            a useful product and a live example of what Ivy enables.
+            onboarding flows, and logic, the same building blocks teams need for
+            their internal tools and custom applications. Open Race is both a
+            useful product and a live example of what Ivy enables.
           </p>
           <div className={styles.ivyCtaGroup}>
             <a
@@ -56,7 +56,7 @@ const Footer: React.FC<FooterProps> = ({
               View on GitHub
             </a>
             <a
-              href="https://ivy.app/docs"
+              href="https://docs.ivy.app"
               target="_blank"
               rel="noopener noreferrer"
               className={styles.ivySecondaryCta}
