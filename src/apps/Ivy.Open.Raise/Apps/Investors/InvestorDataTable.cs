@@ -41,15 +41,8 @@ public class InvestorDataTable : ViewBase
                 )
                 .HandleRowAction((e) =>
                 {
-                    //this isn't the event type I was expecting
-                    Console.WriteLine(e.Value.EventName);
-                    Console.WriteLine(e.Value.ActionId);
-                    Console.WriteLine(e.Value.RowIndex);
-                    Console.WriteLine(e.Value.RowData);
-
                     return ValueTask.CompletedTask;
                 })
-
                 .Renderer(e => e.ContactsCount, new ButtonDisplayRenderer())
                 // .HandleCellAction(e => e.ContactsCount, record => //todo ivy: this should be of the correct type
                 // {
