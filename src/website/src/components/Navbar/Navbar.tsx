@@ -14,31 +14,18 @@ const Navbar: React.FC<NavbarProps> = ({
 
   const navLinks = [
     { label: "Home", href: "#" },
-    { label: "About", href: "#about" },
+    { label: "Why Tools Fail", href: "#about" },
+    { label: "Open Source", href: "#open-source" },
+    { label: "Product", href: "#product" },
     { label: "Features", href: "#features" },
-
-    { label: "Contact", href: "#contact" },
+    { label: "Get Started", href: "#get-started" },
   ];
-
-  const scrollToCalendly = () => {
-    const calendlySection = document.getElementById("calendly");
-    if (calendlySection) {
-      calendlySection.scrollIntoView({ behavior: "smooth" });
-    }
-    setIsMenuOpen(false);
-  };
 
   const handleNavClick = (
     e: React.MouseEvent<HTMLAnchorElement>,
-    href: string,
-    label: string
+    href: string
   ) => {
     e.preventDefault();
-
-    if (label === "Contact") {
-      scrollToCalendly();
-      return;
-    }
 
     if (href === "#") {
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -65,7 +52,7 @@ const Navbar: React.FC<NavbarProps> = ({
               key={link.label}
               href={link.href}
               className={styles.navLink}
-              onClick={(e) => handleNavClick(e, link.href, link.label)}
+              onClick={(e) => handleNavClick(e, link.href)}
             >
               {link.label}
             </a>
@@ -81,9 +68,6 @@ const Navbar: React.FC<NavbarProps> = ({
           >
             <Github size={18} />
           </a>
-          <button className={styles.getStartedBtn} onClick={scrollToCalendly}>
-            Book a demo
-          </button>
         </div>
 
         <button
@@ -101,7 +85,7 @@ const Navbar: React.FC<NavbarProps> = ({
               key={link.label}
               href={link.href}
               className={styles.mobileNavLink}
-              onClick={(e) => handleNavClick(e, link.href, link.label)}
+              onClick={(e) => handleNavClick(e, link.href)}
             >
               {link.label}
             </a>
@@ -116,12 +100,6 @@ const Navbar: React.FC<NavbarProps> = ({
               <Github size={18} />
               GitHub
             </a>
-            <button
-              className={styles.mobileGetStarted}
-              onClick={scrollToCalendly}
-            >
-              Book a demo
-            </button>
           </div>
         </div>
       )}

@@ -1,6 +1,10 @@
-.aboutSection {
+.howToStartSection {
   background: #111111;
   padding: 120px 24px;
+
+  @media (max-width: 768px) {
+    padding: 80px 24px;
+  }
 }
 
 .container {
@@ -31,70 +35,49 @@
 }
 
 .title {
-  margin-bottom: 48px;
+  margin-bottom: 64px;
 }
 
-.painPoints {
+.steps {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 32px 64px;
-  text-align: left;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 48px;
   width: 100%;
-  max-width: 900px;
 
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
-    gap: 24px;
+    gap: 40px;
   }
 }
 
-.painPoint {
+.step {
   display: flex;
   flex-direction: column;
+  align-items: center;
+  text-align: center;
 }
 
 .iconTitleRow {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
 }
 
-.icon {
+.stepNumber {
   flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  svg {
-    color: var(--color-primary-teal);
-  }
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--color-primary-teal);
 }
 
-.pointTitle {
+.stepTitle {
   margin: 0;
 }
 
-.pointText {
-  color: rgba(255, 255, 255, 0.6);
+.stepDescription {
+  color: rgba(255, 255, 255, 0.5);
   font-size: 16px;
   line-height: 1.6;
-  margin: 0;
-  padding-left: 32px;
-}
-
-.divider {
-  height: 1px;
-  background: rgba(255, 255, 255, 0.13);
-  margin: 48px 0;
-  width: 100%;
-}
-
-.quote {
-  font-style: italic;
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 16px;
-  line-height: 1.6;
-  margin: 0;
-  max-width: 700px;
+  max-width: 280px;
 }

@@ -1,6 +1,10 @@
-.aboutSection {
-  background: #111111;
+.openSourceSection {
+  background: #0a0a0a;
   padding: 120px 24px;
+
+  @media (max-width: 768px) {
+    padding: 80px 24px;
+  }
 }
 
 .container {
@@ -31,26 +35,35 @@
 }
 
 .title {
-  margin-bottom: 48px;
+  margin-bottom: 24px;
 }
 
-.painPoints {
+.description {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 16px;
+  line-height: 1.6;
+  max-width: 600px;
+  margin-bottom: 64px;
+}
+
+.benefits {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 32px 64px;
-  text-align: left;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 48px;
   width: 100%;
-  max-width: 900px;
+  margin-bottom: 48px;
 
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
-    gap: 24px;
+    gap: 32px;
   }
 }
 
-.painPoint {
+.benefit {
   display: flex;
   flex-direction: column;
+  align-items: center;
+  text-align: center;
 }
 
 .iconTitleRow {
@@ -71,30 +84,30 @@
   }
 }
 
-.pointTitle {
+.benefitTitle {
   margin: 0;
 }
 
-.pointText {
-  color: rgba(255, 255, 255, 0.6);
+.benefitDescription {
+  color: rgba(255, 255, 255, 0.5);
   font-size: 16px;
-  line-height: 1.6;
-  margin: 0;
-  padding-left: 32px;
 }
 
-.divider {
-  height: 1px;
-  background: rgba(255, 255, 255, 0.13);
-  margin: 48px 0;
-  width: 100%;
-}
+.githubCta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--color-primary-teal);
+  color: #000;
+  padding: 14px 28px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
 
-.quote {
-  font-style: italic;
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 16px;
-  line-height: 1.6;
-  margin: 0;
-  max-width: 700px;
+  &:hover {
+    background: #00e6a0;
+    transform: translateY(-2px);
+  }
 }
