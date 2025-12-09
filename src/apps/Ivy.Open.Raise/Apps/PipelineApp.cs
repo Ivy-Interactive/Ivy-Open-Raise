@@ -54,29 +54,32 @@ public class PipelineApp : ViewBase
         
         object CardBuilder(DealRecord deal)
         {
-            var dropDown = Icons.Ellipsis
-                .ToButton()
-                .Ghost()
-                .WithDropDown(
-                    MenuItem.Default("Delete").Icon(Icons.Trash).HandleSelect(() => OnDelete(deal.Id))
-                );
-            
-            var details = new
+            return new MemoizedFuncView((_) =>
             {
-                Amount = deal.AmountFormatted(),
-                Contact = deal.ContactName,
-                Owner = deal.OwnerName
-            };
+                var dropDown = Icons.Ellipsis
+                    .ToButton()
+                    .Ghost()
+                    .WithDropDown(
+                        MenuItem.Default("Delete").Icon(Icons.Trash).HandleSelect(() => OnDelete(deal.Id))
+                    );
+            
+                var details = new
+                {
+                    Amount = deal.AmountFormatted(),
+                    Contact = deal.ContactName,
+                    Owner = deal.OwnerName
+                };
 
-            var content = details.ToDetails();
+                var content = details.ToDetails();
 
-            return new Card(content)
-                .Small()
-                .Title(deal.InvestorName)
-                .Icon(dropDown)
-                .HandleClick(() => showEdit(deal.Id))
-                .Hover(CardHoverVariant.Pointer)
-                .Key(deal.Id);
+                return new Card(content)
+                    .Small()
+                    .Title(deal.InvestorName)
+                    .Icon(dropDown)
+                    .HandleClick(() => showEdit(deal.Id))
+                    .Hover(CardHoverVariant.Pointer)
+                    .Key(deal.Id);
+            }, [deal.Id]);
         }
         
         void OnDelete(Guid cardId)
@@ -141,6 +144,7 @@ public class PipelineApp : ViewBase
         });
     }
     
+    //todo ivy: maybe make it so that the Kanban handles the local changes for move and delete? 
     ImmutableArray<DealRecord> MoveDealLocally(
         ImmutableArray<DealRecord> items,
         Guid dealId,
