@@ -14,6 +14,7 @@ public class PipelineApp : ViewBase
         var (editView, showEdit) = this.UseTrigger((IState<bool> isOpen, Guid linkId) 
             => new DealEditSheet(isOpen, refreshToken, linkId));
         var (alertView, showAlert) = this.UseAlert();
+        var isDeleting = UseState(false);
         
         UseEffect(async () =>
         {
@@ -76,7 +77,11 @@ public class PipelineApp : ViewBase
                     .Small()
                     .Title(deal.InvestorName)
                     .Icon(dropDown)
-                    .HandleClick(() => showEdit(deal.Id))
+                    .HandleClick(() =>
+                    {
+                        if (isDeleting.Value) return;
+                        showEdit(deal.Id);
+                    })
                     .Hover(CardHoverVariant.Pointer)
                     .Key(deal.Id);
             }, [deal.Id]);
@@ -84,6 +89,7 @@ public class PipelineApp : ViewBase
         
         void OnDelete(Guid cardId)
         {
+            isDeleting.Set(true);
             showAlert("Are you sure you want to delete this deal?", (result) =>
             {
                 if (result.IsOk())
@@ -91,6 +97,7 @@ public class PipelineApp : ViewBase
                     deals.Set([..deals.Value.Where(d => d.Id != cardId)]);
                     _ = DeleteDeal(factory, cardId); //fire and forget
                 }
+                isDeleting.Set(false);
             }, "Delete Deal");
         }
         
