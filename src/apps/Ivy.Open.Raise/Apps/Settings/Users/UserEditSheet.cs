@@ -15,7 +15,7 @@ public class UserEditSheet(IState<bool> isOpen, RefreshToken refreshToken, Guid 
             loading.Set(false);
         });
 
-        if (loading.Value) return new Loading();
+        if (loading.Value) return null;
 
         return user
             .ToForm()

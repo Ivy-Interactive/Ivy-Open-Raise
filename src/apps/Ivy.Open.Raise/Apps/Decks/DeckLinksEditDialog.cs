@@ -15,7 +15,7 @@ public class DeckLinksEditDialog(IState<bool> isOpen, RefreshToken refreshToken,
             loading.Set(false);
         });
 
-        if (loading.Value) return new Loading();
+        if (loading.Value) return null;
 
         return details
             .ToForm()

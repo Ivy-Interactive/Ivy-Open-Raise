@@ -15,7 +15,7 @@ public class StartupVerticalEditSheet(IState<bool> isOpen, RefreshToken refreshT
             loading.Set(false);
         });
 
-        if (loading.Value) return new Loading();
+        if (loading.Value) return null;
 
         return details
             .ToForm()

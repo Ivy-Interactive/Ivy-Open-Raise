@@ -15,7 +15,7 @@ public class InvestorContactsEditSheet(IState<bool> isOpen, RefreshToken refresh
             loading.Set(false);
         });
 
-        if (loading.Value) return new Loading();
+        if (loading.Value) return null;
 
         return details
             .ToForm()

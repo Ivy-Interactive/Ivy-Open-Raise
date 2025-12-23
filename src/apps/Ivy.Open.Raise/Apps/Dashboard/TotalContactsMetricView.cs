@@ -1,6 +1,6 @@
 namespace Ivy.Open.Raise.Apps.Dashboard;
 
-public class TotalInvestorsMetricView(DateTime fromDate, DateTime toDate) : ViewBase
+public class TotalContactsMetricView(DateTime fromDate, DateTime toDate) : ViewBase
 {
     public override object? Build()
     {

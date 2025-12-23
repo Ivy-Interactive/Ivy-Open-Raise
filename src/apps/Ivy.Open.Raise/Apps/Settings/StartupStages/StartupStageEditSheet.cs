@@ -15,7 +15,7 @@ public class StartupStageEditSheet(IState<bool> isOpen, RefreshToken refreshToke
             loading.Set(false);
         });
 
-        if (loading.Value) return new Loading();
+        if (loading.Value) return null;
 
         return startupStage
             .ToForm()

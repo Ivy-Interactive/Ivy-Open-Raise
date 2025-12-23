@@ -17,7 +17,7 @@ public class InvestorEditSheet(IState<bool> isOpen, RefreshToken refreshToken, G
             loading.Set(false);
         });
 
-        if (loading.Value) return new Loading();
+        if (loading.Value) return null;
 
         return investor
             .ToForm()

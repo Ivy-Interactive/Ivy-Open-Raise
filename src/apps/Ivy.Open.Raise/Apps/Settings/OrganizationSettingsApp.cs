@@ -20,7 +20,7 @@ public class OrganizationSettingsApp : ViewBase
             loading.Set(false);
         });
 
-        if (loading.Value) return new Loading();
+        if (loading.Value) return null;
 
         if (settings.Value == null) return Callout.Warning("Missing Organization Settings.");
 

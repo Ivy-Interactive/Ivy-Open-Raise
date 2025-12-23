@@ -15,7 +15,7 @@ public class DeckVersionsEditDialog(IState<bool> isOpen, RefreshToken refreshTok
             loading.Set(false);
         });
 
-        if (loading.Value) return new Loading();
+        if (loading.Value) return null;
 
         return deckVersion
             .ToForm()

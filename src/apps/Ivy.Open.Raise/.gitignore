@@ -4,3 +4,4 @@ obj/
 .idea/**/*
 **/.idea/*
 .ivy/
+/dump.ljson
