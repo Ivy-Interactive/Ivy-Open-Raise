@@ -1,4 +1,4 @@
-using System.Formats.Tar;
+using Ivy.Hooks;
 
 namespace Ivy.Open.Raise.Apps.Decks;
 
@@ -7,54 +7,52 @@ public class DeckVersionsBlade(Guid deckId) : ViewBase
     public override object? Build()
     {
         var factory = UseService<DataContextFactory>();
-        var refreshToken = this.UseRefreshToken();
-        var deckVersions = this.UseState<DeckVersion[]?>();
-        var (alertView, showAlert) = this.UseAlert();
-        var (editView, showEdit) = this.UseTrigger((IState<bool> isOpen, Guid versionId) 
+        var queryService = UseService<IQueryService>();
+        var refreshToken = UseRefreshToken();
+        var (editView, showEdit) = UseTrigger((IState<bool> isOpen, Guid versionId)
             => new DeckVersionsEditDialog(isOpen, refreshToken, versionId));
 
-        this.UseEffect(async () =>
+        var versionsQuery = UseQuery(
+            key: (nameof(DeckVersionsBlade), deckId),
+            fetcher: async ct =>
+            {
+                await using var db = factory.CreateDbContext();
+                return await db.DeckVersions
+                    .Where(dv => dv.DeckId == deckId && dv.DeletedAt == null)
+                    .OrderByDescending(dv => dv.CreatedAt)
+                    .ToArrayAsync(ct);
+            },
+            tags: [(typeof(DeckVersion[]), deckId)]
+        );
+
+        if (versionsQuery.Loading) return Text.Muted("Loading...");
+
+        var deckVersions = versionsQuery.Value ?? [];
+
+        MenuItem CreateDeleteBtn(Guid id) => MenuItem.Default("Delete")
+            .Icon(Icons.Trash)
+            .HandleSelect(async () =>
+            {
+                await DeleteAsync(factory, id);
+                versionsQuery.Mutator.Revalidate();
+            });
+
+        async ValueTask OnMakeCurrent(Guid id)
         {
             await using var db = factory.CreateDbContext();
-            deckVersions.Set(await db.DeckVersions
+            var versions = await db.DeckVersions
                 .Where(dv => dv.DeckId == deckId && dv.DeletedAt == null)
-                .OrderByDescending(dv => dv.CreatedAt).ToArrayAsync());
-        }, [EffectTrigger.AfterInit(), refreshToken]);
-
-        Action OnDelete(Guid id)
-        {
-            return () =>
+                .ToListAsync();
+            foreach (var version in versions)
             {
-                showAlert("Are you sure you want to delete this version?", result =>
-                {
-                    if (result.IsOk())
-                    {
-                        Delete(factory, id);
-                        refreshToken.Refresh();
-                    }
-                }, "Delete Version");
-            };
-        }
-        
-        Action OnMakeCurrent(Guid id)
-        {
-            return () =>
-            {
-                var db = factory.CreateDbContext();
-                var versions = db.DeckVersions.Where(dv => dv.DeckId == deckId && dv.DeletedAt == null).ToList();
-                foreach (var version in versions)
-                {
-                    version.IsPrimary = version.Id == id;
-                }
-
-                db.SaveChanges();
-                refreshToken.Refresh();
-            };
+                version.IsPrimary = version.Id == id;
+            }
+            await db.SaveChangesAsync();
+            versionsQuery.Mutator.Revalidate();
+            queryService.RevalidateByTag((typeof(Deck), deckId));
         }
 
-        if (deckVersions.Value == null) return null;
-
-        var table = deckVersions.Value.Select(dv => new
+        var table = deckVersions.Select(dv => new
             {
                 __ = dv.IsPrimary ? Icons.Crown : Icons.None,
                 dv.Name,
@@ -66,9 +64,9 @@ public class DeckVersionsBlade(Guid deckId) : ViewBase
                         .ToButton()
                         .Ghost()
                         .WithDropDown(
-                            MenuItem.Default("Delete").Icon(Icons.Trash).HandleSelect(OnDelete(dv.Id)),
+                            CreateDeleteBtn(dv.Id),
                             MenuItem.Default("Edit").Icon(Icons.Pencil).HandleSelect(() => showEdit(dv.Id)),
-                            MenuItem.Default("Make Current").Icon(Icons.Crown).HandleSelect(OnMakeCurrent(dv.Id))
+                            MenuItem.Default("Make Current").Icon(Icons.Crown).HandleSelect(() => OnMakeCurrent(dv.Id))
                         )
             })
             .ToTable()
@@ -79,16 +77,16 @@ public class DeckVersionsBlade(Guid deckId) : ViewBase
             .ToTrigger((isOpen) => new DeckVersionsCreateDialog(isOpen, refreshToken, deckId));
 
         return new Fragment()
-               | BladeHelper.WithHeader(addBtn, table)
-               | alertView
+               | new BladeHeader(addBtn)
+               | table
                | editView;
     }
 
-    public void Delete(DataContextFactory factory, Guid versionId)
+    private async Task DeleteAsync(DataContextFactory factory, Guid versionId)
     {
-        using var db = factory.CreateDbContext();
-        var deckVersion = db.DeckVersions.Single(dv => dv.Id == versionId);
+        await using var db = factory.CreateDbContext();
+        var deckVersion = await db.DeckVersions.SingleAsync(dv => dv.Id == versionId);
         deckVersion.DeletedAt = DateTime.UtcNow;
-        db.SaveChanges();
+        await db.SaveChangesAsync();
     }
 }

@@ -1,3 +1,4 @@
+using Ivy.Hooks;
 using static Ivy.Open.Raise.Apps.Shared;
 
 namespace Ivy.Open.Raise.Apps.Decks;
@@ -18,18 +19,20 @@ public class DeckVersionsCreateDialog(IState<bool> isOpen, RefreshToken refreshT
     public override object? Build()
     {
         var factory = UseService<DataContextFactory>();
-        var request = UseState<DeckVersionCreateRequest?>();
-        var loading = UseState(true);
 
-        UseEffect(async () =>
-        {
-            await using var db = factory.CreateDbContext();
-            var count = await db.DeckVersions.CountAsync(e => e.DeckId == deckId);
-            request.Set(new DeckVersionCreateRequest { Name = $"Version {count + 1}" });
-            loading.Set(false);
-        });
+        var countQuery = UseQuery(
+            key: (nameof(DeckVersionsCreateDialog), deckId),
+            fetcher: async ct =>
+            {
+                await using var db = factory.CreateDbContext();
+                return await db.DeckVersions.CountAsync(e => e.DeckId == deckId, ct);
+            }
+        );
 
-        if (loading.Value) return null;
+        if (countQuery.Loading)
+            return null;
+
+        var request = UseState(() => new DeckVersionCreateRequest { Name = $"Version {countQuery.Value + 1}" });
 
         return request
             .ToForm()

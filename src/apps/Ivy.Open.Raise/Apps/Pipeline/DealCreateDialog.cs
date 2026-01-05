@@ -32,9 +32,9 @@ public class DealCreateDialog(IState<bool> isOpen, RefreshToken refreshToken) : 
         return details
             .ToForm()
             .Label(e => e.DealStateId, "State")
-            .Builder(e => e.ContactId, e => e.ToAsyncSelectInput(QueryContacts(factory), LookupContact(factory), placeholder: "Select Contact"))
-            .Builder(e => e.DealStateId, e => e.ToAsyncSelectInput(QueryDealStates(factory), LookupDealState(factory), placeholder: "Select Deal State"))
-            .Builder(e => e.OwnerId, e => e.ToAsyncSelectInput(QueryUsers(factory), LookupUser(factory), placeholder: "Select Owner"))
+            .Builder(e => e.ContactId, e => e.ToAsyncSelectInput(UseContactSearch, UseContactLookup, placeholder: "Select Contact"))
+            .Builder(e => e.DealStateId, e => e.ToAsyncSelectInput(UseDealStateSearch, UseDealStateLookup, placeholder: "Select Deal State"))
+            .Builder(e => e.OwnerId, e => e.ToAsyncSelectInput(UseUserSearch, UseUserLookup, placeholder: "Select Owner"))
             .Place(e => e.Amount, e => e.ContactId, e => e.DealStateId)
             .HandleSubmit(OnSubmit)
             .ToDialog(isOpen, title: "New Deal", submitTitle: "Create");

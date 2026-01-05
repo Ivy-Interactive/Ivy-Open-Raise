@@ -1,3 +1,4 @@
+using Ivy.Hooks;
 using Ivy.Open.Raise.Apps.Pipeline;
 
 namespace Ivy.Open.Raise.Apps;
@@ -8,32 +9,34 @@ public class PipelineApp : ViewBase
     public override object? Build()
     {
         var factory = UseService<DataContextFactory>();
-        var refreshToken = this.UseRefreshToken();
+        var refreshToken = UseRefreshToken();
         var deals = UseState<ImmutableArray<DealRecord>>();
-        var isLoading = UseState(true);
-        var (editView, showEdit) = this.UseTrigger((IState<bool> isOpen, Guid linkId) 
+        var (editView, showEdit) = UseTrigger((IState<bool> isOpen, Guid linkId)
             => new DealEditSheet(isOpen, refreshToken, linkId));
-        var (alertView, showAlert) = this.UseAlert();
-        
-        UseEffect(async () =>
-        {
-            isLoading.Set(true);
-            var fetchedDeals = await FetchDeals(factory);
-            deals.Set(fetchedDeals);
-            isLoading.Set(false);
-        }, [EffectTrigger.AfterInit(), refreshToken]);
-        
-        if(isLoading.Value) return Text.Muted("Loading...");
-        
+
+        var dealsQuery = UseQuery(
+            key: nameof(PipelineApp),
+            fetcher: async ct => await FetchDeals(factory, ct),
+            tags: [typeof(Deal[])]
+        );
+
+        // Use query value when local state is empty/default
+        var currentDeals = deals.Value.IsDefaultOrEmpty && dealsQuery.Value != null
+            ? dealsQuery.Value
+            : deals.Value;
+
+        if (dealsQuery.Loading && currentDeals.IsDefaultOrEmpty)
+            return Text.Muted("Loading...");
+
         var createBtn = new Button("New Deal").Icon(Icons.Plus).Outline()
             .ToTrigger((isOpen) => new DealCreateDialog(isOpen, refreshToken));
 
-        var kanban = deals.Value
+        var kanban = currentDeals
             .ToKanban(
                 groupBySelector: deal => deal.DealState,
                 idSelector: deal => deal.Id,
                 orderSelector: deal => deal.Order
-            ) 
+            )
             .ColumnWidth(Size.Units(35))
             .ColumnOrder(deal => deal.DealStateOrder)
             .CardBuilder(CardBuilder)
@@ -43,26 +46,35 @@ public class PipelineApp : ViewBase
         var header = Layout.Horizontal() | createBtn;
 
         var body = new HeaderLayout(
-            header, 
+            header,
             kanban
         ).Scroll(Scroll.None);
 
         return new Fragment()
                | body
-               | editView
-               | alertView;
-        
+               | editView;
+
         object CardBuilder(DealRecord deal)
         {
             return new MemoizedFuncView((_) =>
             {
+                var deleteBtn = MenuItem.Default("Delete")
+                    .Icon(Icons.Trash)
+                    .HandleSelect(async () =>
+                    {
+                        var source = deals.Value.IsDefaultOrEmpty
+                            ? dealsQuery.Value
+                            : deals.Value;
+                        deals.Set([..source.Where(d => d.Id != deal.Id)]);
+                        await DeleteDeal(factory, deal.Id);
+                        dealsQuery.Mutator.Revalidate();
+                    });
+
                 var dropDown = Icons.Ellipsis
                     .ToButton()
                     .Ghost()
-                    .WithDropDown(
-                        MenuItem.Default("Delete").Icon(Icons.Trash).HandleSelect(() => OnDelete(deal.Id))
-                    );
-            
+                    .WithDropDown(deleteBtn);
+
                 var details = new
                 {
                     Amount = deal.AmountFormatted(),
@@ -81,24 +93,15 @@ public class PipelineApp : ViewBase
                     .Key(deal.Id);
             }, [deal.Id]);
         }
-        
-        void OnDelete(Guid cardId)
-        {
-            showAlert("Are you sure you want to delete this deal?", (result) =>
-            {
-                if (result.IsOk())
-                { 
-                    deals.Set([..deals.Value.Where(d => d.Id != cardId)]);
-                    _ = DeleteDeal(factory, cardId); //fire and forget
-                }
-            }, "Delete Deal");
-        }
-        
+
         void OnMove((object? cardId, string toState, int? targetIndex) moveData)
         {
             if (!Guid.TryParse(moveData.cardId?.ToString(), out var dealId)) return;
-            deals.Set(MoveDealLocally(deals.Value, dealId, moveData.toState, moveData.targetIndex ?? 0));
-            _ = MoveDeal(factory, dealId, moveData.toState, moveData.targetIndex ?? 0); // fire and forget
+            var source = deals.Value.IsDefaultOrEmpty
+                ? dealsQuery.Value
+                : deals.Value;
+            deals.Set(MoveDealLocally(source, dealId, moveData.toState, moveData.targetIndex ?? 0));
+            _ = MoveDeal(factory, dealId, moveData.toState, moveData.targetIndex ?? 0);
         }
     }
 
@@ -143,66 +146,64 @@ public class PipelineApp : ViewBase
             await tx.CommitAsync();
         });
     }
-    
-    //todo ivy: maybe make it so that the Kanban handles the local changes for move and delete? 
+
     ImmutableArray<DealRecord> MoveDealLocally(
         ImmutableArray<DealRecord> items,
         Guid dealId,
         string toState,
         int targetIndex)
     {
-        // Determine the new DealStateOrder based on toState
         var newDealStateOrder = items
             .Where(i => i.DealState == toState)
             .Select(i => i.DealStateOrder)
             .FirstOrDefault();
-        
+
         var updatedList = items
             .Select(i => i.Id == dealId ? i with { DealState = toState, DealStateOrder = newDealStateOrder } : i)
             .ToList();
-            
+
         var movedItem = updatedList.FirstOrDefault(i => i.Id == dealId);
         if (movedItem is null)
             return items;
-            
+
         var group = updatedList
             .Where(i => i.DealState == movedItem.DealState)
             .OrderBy(i => i.Order)
             .ToList();
-            
+
         group.RemoveAll(i => i.Id == dealId);
         targetIndex = Math.Clamp(targetIndex, 0, group.Count);
         group.Insert(targetIndex, movedItem);
-            
+
         for (int k = 0; k < group.Count; k++)
             group[k] = group[k] with { Order = k };
-            
+
         var byId = group.ToDictionary(g => g.Id);
         for (int i = 0; i < updatedList.Count; i++)
         {
             if (byId.TryGetValue(updatedList[i].Id, out var gitem))
                 updatedList[i] = gitem;
         }
-            
+
         return [
             ..updatedList
                 .OrderBy(i => i.DealStateOrder)
                 .ThenBy(i => i.Order)
         ];
     }
-    
+
     private async Task DeleteDeal(DataContextFactory factory, Guid dealId)
     {
         await using var db = factory.CreateDbContext();
-        
+
         var deal = await db.Deals.SingleOrDefaultAsync(d => d.Id == dealId);
         if (deal == null) return;
-        
+
         deal.DeletedAt = DateTime.UtcNow;
         await db.SaveChangesAsync();
     }
-    
-    private async Task<ImmutableArray<DealRecord>> FetchDeals(DataContextFactory factory)
+
+    private async Task<ImmutableArray<DealRecord>> FetchDeals(DataContextFactory factory, CancellationToken ct)
     {
         await using var db = factory.CreateDbContext();
 
@@ -229,10 +230,10 @@ public class PipelineApp : ViewBase
                     NextAction = d.NextAction
                 })
                 .OrderBy(e => e.DealStateOrder).ThenBy(e => e.Order)
-                .ToArrayAsync())
+                .ToArrayAsync(ct))
         ];
     }
-    
+
     private record DealRecord
     {
         public Guid Id { get; init; }
@@ -256,13 +257,13 @@ public class PipelineApp : ViewBase
             if (AmountFrom.HasValue)
             {
                 amount = Ivy.Utils.FormatNumber(AmountFrom.Value, 1);
-                
+
                 if (AmountTo.HasValue && AmountTo.Value != AmountFrom.Value)
                 {
                     amount = $"{amount} - {Ivy.Utils.FormatNumber(AmountFrom.Value, 1)}";
                 }
             }
-            
+
             return amount;
         }
     }

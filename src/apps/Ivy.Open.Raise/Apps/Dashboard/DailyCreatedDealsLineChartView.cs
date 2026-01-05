@@ -8,7 +8,7 @@ public class DailyCreatedDealsLineChartView(DateTime startDate, DateTime endDate
         var chart = UseState<object?>((object?)null!);
         var exception = UseState<Exception?>((Exception?)null!);
 
-        this.UseEffect(async () =>
+        UseEffect(async () =>
         {
             try
             {

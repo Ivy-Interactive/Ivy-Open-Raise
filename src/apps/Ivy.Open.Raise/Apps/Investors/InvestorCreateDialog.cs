@@ -25,8 +25,8 @@ public class InvestorCreateDialog(IState<bool> isOpen, RefreshToken refreshToken
             .ToForm()
             .Label(e => e.AddressCountryId, "Country")
             .Label(e => e.InvestorTypeId, "Type")
-            .Builder(e => e.AddressCountryId, e => e.ToAsyncSelectInput(QueryCountries(factory), LookupCountry(factory), placeholder: "Select Country"))
-            .Builder(e => e.InvestorTypeId, e => e.ToAsyncSelectInput(QueryInvestorTypes(factory), LookupInvestorType(factory), placeholder: "Select Type"))
+            .Builder(e => e.AddressCountryId, e => e.ToAsyncSelectInput(UseCountrySearch, UseCountryLookup, placeholder: "Select Country"))
+            .Builder(e => e.InvestorTypeId, e => e.ToAsyncSelectInput(UseInvestorTypeSearch, UseInvestorTypeLookup, placeholder: "Select Type"))
             .HandleSubmit(OnSubmit)
             .ToDialog(isOpen, title: "New Investor", submitTitle: "Create");
 

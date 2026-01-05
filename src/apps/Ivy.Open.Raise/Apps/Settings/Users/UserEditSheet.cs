@@ -1,3 +1,5 @@
+using Ivy.Hooks;
+
 namespace Ivy.Open.Raise.Apps.Settings.Users;
 
 public class UserEditSheet(IState<bool> isOpen, RefreshToken refreshToken, Guid userId) : ViewBase
@@ -5,24 +7,24 @@ public class UserEditSheet(IState<bool> isOpen, RefreshToken refreshToken, Guid 
     public override object? Build()
     {
         var factory = UseService<DataContextFactory>();
-        var user = UseState<User?>();
-        var loading = UseState(true);
+        var queryService = UseService<IQueryService>();
 
-        UseEffect(async () =>
-        {
-            await using var context = factory.CreateDbContext();
-            user.Set(await context.Users.FirstOrDefaultAsync(e => e.Id == userId));
-            loading.Set(false);
-        });
+        var userQuery = UseQuery(
+            key: (nameof(UserEditSheet), userId),
+            fetcher: async ct =>
+            {
+                await using var db = factory.CreateDbContext();
+                return await db.Users.FirstOrDefaultAsync(e => e.Id == userId, ct);
+            },
+            tags: [(typeof(User), userId)]
+        );
 
-        if (loading.Value) return null;
+        if (userQuery.Loading || userQuery.Value == null)
+            return Skeleton.Form().ToSheet(isOpen, "Edit User");
 
-        return user
+        return userQuery.Value
             .ToForm()
             .Builder(e => e.Email, e => e.ToEmailInput())
-            .Builder(e => e.FirstName, e => e.ToTextAreaInput())
-            .Builder(e => e.LastName, e => e.ToTextAreaInput())
-            .Builder(e => e.Title, e => e.ToTextAreaInput())
             .Builder(e => e.CalendarUrl, e => e.ToUrlInput())
             .Builder(e => e.ProfilePictureUrl, e => e.ToUrlInput())
             .Builder(e => e.LinkedinUrl, e => e.ToUrlInput())
@@ -38,6 +40,7 @@ public class UserEditSheet(IState<bool> isOpen, RefreshToken refreshToken, Guid 
             modifiedUser.UpdatedAt = DateTime.UtcNow;
             db.Users.Update(modifiedUser);
             await db.SaveChangesAsync();
+            queryService.RevalidateByTag((typeof(User), userId));
             refreshToken.Refresh();
         }
     }

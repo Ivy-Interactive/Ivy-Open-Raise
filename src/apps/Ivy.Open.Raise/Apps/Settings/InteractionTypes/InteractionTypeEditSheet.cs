@@ -1,3 +1,5 @@
+using Ivy.Hooks;
+
 namespace Ivy.Open.Raise.Apps.Settings.InteractionTypes;
 
 public class InteractionTypeEditSheet(IState<bool> isOpen, RefreshToken refreshToken, int interactionTypeId) : ViewBase
@@ -5,19 +7,22 @@ public class InteractionTypeEditSheet(IState<bool> isOpen, RefreshToken refreshT
     public override object? Build()
     {
         var factory = UseService<DataContextFactory>();
-        var details = UseState<InteractionType?>();
-        var loading = UseState(true);
+        var queryService = UseService<IQueryService>();
 
-        UseEffect(async () =>
-        {
-            await using var context = factory.CreateDbContext();
-            details.Set(await context.InteractionTypes.FirstOrDefaultAsync(e => e.Id == interactionTypeId));
-            loading.Set(false);
-        });
+        var interactionTypeQuery = UseQuery(
+            key: (nameof(InteractionTypeEditSheet), interactionTypeId),
+            fetcher: async ct =>
+            {
+                await using var db = factory.CreateDbContext();
+                return await db.InteractionTypes.FirstOrDefaultAsync(e => e.Id == interactionTypeId, ct);
+            },
+            tags: [(typeof(InteractionType), interactionTypeId)]
+        );
 
-        if (loading.Value) return null;
+        if (interactionTypeQuery.Loading || interactionTypeQuery.Value == null)
+            return Skeleton.Form().ToSheet(isOpen, "Edit Interaction Type");
 
-        return details
+        return interactionTypeQuery.Value
             .ToForm()
             .Remove(e => e.Id)
             .HandleSubmit(OnSubmit)
@@ -29,6 +34,7 @@ public class InteractionTypeEditSheet(IState<bool> isOpen, RefreshToken refreshT
             await using var db = factory.CreateDbContext();
             db.InteractionTypes.Update(modifiedInteractionType);
             await db.SaveChangesAsync();
+            queryService.RevalidateByTag((typeof(InteractionType), interactionTypeId));
             refreshToken.Refresh();
         }
     }

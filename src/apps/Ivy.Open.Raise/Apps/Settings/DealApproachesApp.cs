@@ -7,6 +7,6 @@ public class DealApproachesApp : ViewBase
 {
     public override object? Build()
     {
-        return this.UseBlades(() => new DealApproachListBlade(), "Search");
+        return UseBlades(() => new DealApproachListBlade(), "Search");
     }
 }

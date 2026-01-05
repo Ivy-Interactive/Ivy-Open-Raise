@@ -4,11 +4,11 @@ public class DailyDeckViewsLineChartView(DateTime startDate, DateTime endDate) :
 {
     public override object? Build()
     {
-        var factory = this.UseService<DataContextFactory>();
-        var chart = this.UseState<object?>((object?)null!);
-        var exception = this.UseState<Exception?>((Exception?)null!);
+        var factory = UseService<DataContextFactory>();
+        var chart = UseState<object?>((object?)null!);
+        var exception = UseState<Exception?>((Exception?)null!);
 
-        this.UseEffect(async () =>
+        UseEffect(async () =>
         {
             try
             {

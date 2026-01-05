@@ -1,4 +1,5 @@
-﻿using Ivy.Core.Helpers;
+using Ivy.Core.Helpers;
+using Ivy.Hooks;
 using static Ivy.Open.Raise.Apps.Shared;
 
 namespace Ivy.Open.Raise.Apps;
@@ -14,7 +15,7 @@ public class OnboardingApp : ViewBase
         new("4", selectedIndex>3 ? Icons.Check : null, "Deck"),
         //new("5", null, "Invite Team"),
     ];
-    
+
     private object GetStepViews(IState<int> stepperIndex) => stepperIndex.Value switch
     {
         0 => new WelcomeStepView(stepperIndex),
@@ -23,18 +24,18 @@ public class OnboardingApp : ViewBase
         3 => new DeckStepView(stepperIndex),
         _ => throw new ArgumentOutOfRangeException()
     };
-    
+
     public override object? Build()
     {
         var stepperIndex = UseState(0);
         var steps = GetSteps(stepperIndex.Value);
-        
+
         return Layout.TopCenter() |
                (Layout.Vertical().Margin(0, 20).Width(150)
                 | new Stepper(OnSelect, stepperIndex.Value, steps).Width(Size.Full())
                 | GetStepViews(stepperIndex)
                );
-        
+
         ValueTask OnSelect(Event<Stepper, int> e)
         {
             stepperIndex.Set(e.Value);
@@ -69,7 +70,7 @@ public record CompanyDetails
             Cofounders = settings.Cofounders
         };
     }
-    
+
     [Required]
     [Display(Name = "What is your company's name?")]
     public string? StartupName  { get; set; }
@@ -77,7 +78,7 @@ public record CompanyDetails
     [Required]
     [Display(Name = "Where are you based?")] //todo: eh what? - why is this cutofff
     public int CountryId { get; set; }
-    
+
     [Required]
     [Display(Name = "What currency are you raising in?")]
     public string CurrencyId { get; set; }
@@ -85,7 +86,7 @@ public record CompanyDetails
     [Url]
     [Display(Name = "Do you have a website?")]
     public string? StartupWebsite { get; set; }
-    
+
     [DataType(DataType.Date)]
     [Display(Name = "When did you incorporate your company?")]
     public DateTime? StartupDateOfIncorporation { get; set; }
@@ -100,26 +101,30 @@ public class CompanyStepView(IState<int> stepperIndex) : ViewBase
     public override object? Build()
     {
         var factory = UseService<DataContextFactory>();
-        var details = UseState<CompanyDetails?>();
-        var loading = UseState(true);
-        var globals = UseService<GlobalService>();
+        var queryService = UseService<IQueryService>();
 
-        UseEffect(async () =>
-        {
-            await using var context = factory.CreateDbContext();
-            var settings = await context.OrganizationSettings
-                .FirstOrDefaultAsync() ?? throw new InvalidOperationException("Organization settings not found.");
-            details.Set(CompanyDetails.From(settings));
-            loading.Set(false);
-        });
-        
-        if (loading.Value) return Text.Muted("Loading...");
+        var settingsQuery = UseQuery(
+            key: nameof(CompanyStepView),
+            fetcher: async ct =>
+            {
+                await using var db = factory.CreateDbContext();
+                var settings = await db.OrganizationSettings.FirstOrDefaultAsync(ct)
+                    ?? throw new InvalidOperationException("Organization settings not found.");
+                return CompanyDetails.From(settings);
+            },
+            tags: [typeof(OrganizationSetting)]
+        );
+
+        if (settingsQuery.Loading || settingsQuery.Value == null)
+            return Text.Muted("Loading...");
+
+        var details = UseState(() => settingsQuery.Value);
 
         return Layout.Vertical()
                | Text.H2("Tell us about your startup")
                | details.ToForm().Large()
-                   .Builder(e => e.CurrencyId, SelectCurrencyBuilder(factory))
-                   .Builder(e => e.CountryId, SelectCountryBuilder(factory))
+                   .Builder(e => e.CurrencyId, SelectCurrencyBuilder)
+                   .Builder(e => e.CountryId, SelectCountryBuilder)
                    .SubmitBuilder((saving) => new Button("Next").Icon(Icons.ArrowRight, Align.Right).Disabled(saving).Loading(saving))
                    .HandleSubmit(OnSubmit)
             ;
@@ -142,8 +147,8 @@ public class CompanyStepView(IState<int> stepperIndex) : ViewBase
             settings.Cofounders = details.Cofounders;
 
             await context.SaveChangesAsync();
-            await globals.RefreshAsync();
-            
+            queryService.RevalidateByTag(typeof(OrganizationSetting));
+
             stepperIndex.Incr();
         }
     }
@@ -161,7 +166,7 @@ public record RaiseDetails
             StartupStageId = settings.StartupStageId
         };
     }
-    
+
     [Required]
     [Display(Name = "Minimum Amount")]
     public int RaiseTargetMin { get; set; }
@@ -169,11 +174,11 @@ public record RaiseDetails
     [Required]
     [Display(Name = "Maximum Amount")]
     public int RaiseTargetMax { get; set; }
-    
+
     [Required]
     [Display(Name = "Minimal Ticket Size")]
     public int RaiseTicketSize { get; set; }
-    
+
     [Required]
     [Display(Name = "What stage are you at?")]
     public int StartupStageId { get; set; }
@@ -184,30 +189,33 @@ public class RaiseStepView(IState<int> stepperIndex) : ViewBase
     public override object? Build()
     {
         var factory = UseService<DataContextFactory>();
-        var details = UseState<RaiseDetails?>();
-        var currency = UseState<string>("");
-        var loading = UseState(true);
-        
-        UseEffect(async () =>
-        {
-            await using var context = factory.CreateDbContext();
-            var settings = await context.OrganizationSettings
-                .FirstOrDefaultAsync() ?? throw new InvalidOperationException("Organization settings not found.");
-            details.Set(RaiseDetails.From(settings));
-            currency.Set(settings.CurrencyId);
-            loading.Set(false);
-        });
-        
-        if (loading.Value) return Text.Muted("Loading...");
+
+        var settingsQuery = UseQuery(
+            key: nameof(RaiseStepView),
+            fetcher: async ct =>
+            {
+                await using var db = factory.CreateDbContext();
+                var settings = await db.OrganizationSettings.FirstOrDefaultAsync(ct)
+                    ?? throw new InvalidOperationException("Organization settings not found.");
+                return (details: RaiseDetails.From(settings), currency: settings.CurrencyId);
+            },
+            tags: [typeof(OrganizationSetting)]
+        );
+
+        if (settingsQuery.Loading || settingsQuery.Value.details == null)
+            return Text.Muted("Loading...");
+
+        var details = UseState(() => settingsQuery.Value.details);
+        var currency = settingsQuery.Value.currency;
 
         return Layout.Vertical()
                | Text.H2("How much are you raising?")
                | details.ToForm().Large()
                    .PlaceHorizontal(e => e.RaiseTargetMin, e => e.RaiseTargetMax)
-                   .Builder(e => e.StartupStageId, SelectStartupStageBuilder(factory))
-                   .Builder(e => e.RaiseTargetMin, e => e.ToMoneyInput(currency: currency.Value))
-                   .Builder(e => e.RaiseTargetMax, e => e.ToMoneyInput(currency: currency.Value))
-                   .Builder(e => e.RaiseTicketSize, e => e.ToMoneyInput(currency: currency.Value))
+                   .Builder(e => e.StartupStageId, SelectStartupStageBuilder)
+                   .Builder(e => e.RaiseTargetMin, e => e.ToMoneyInput(currency: currency))
+                   .Builder(e => e.RaiseTargetMax, e => e.ToMoneyInput(currency: currency))
+                   .Builder(e => e.RaiseTicketSize, e => e.ToMoneyInput(currency: currency))
                    .SubmitBuilder((saving) => new Button("Next").Icon(Icons.ArrowRight, Align.Right).Disabled(saving).Loading(saving))
                    .HandleSubmit(OnSubmit)
             ;

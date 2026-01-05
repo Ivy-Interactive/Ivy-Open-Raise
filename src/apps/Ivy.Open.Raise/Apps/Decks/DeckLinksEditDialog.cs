@@ -1,3 +1,5 @@
+using Ivy.Hooks;
+
 namespace Ivy.Open.Raise.Apps.Decks;
 
 public class DeckLinksEditDialog(IState<bool> isOpen, RefreshToken refreshToken, Guid deckLinkId) : ViewBase
@@ -5,21 +7,24 @@ public class DeckLinksEditDialog(IState<bool> isOpen, RefreshToken refreshToken,
     public override object? Build()
     {
         var factory = UseService<DataContextFactory>();
-        var details = UseState<DeckLink?>();
-        var loading = UseState(true);
+        var queryService = UseService<IQueryService>();
 
-        UseEffect(async () =>
-        {
-            await using var context = factory.CreateDbContext();
-            details.Set(await context.DeckLinks.FirstOrDefaultAsync(e => e.Id == deckLinkId));
-            loading.Set(false);
-        });
+        var query = UseQuery(
+            key: (nameof(DeckLinksEditDialog), deckLinkId),
+            fetcher: async ct =>
+            {
+                await using var db = factory.CreateDbContext();
+                return await db.DeckLinks.FirstOrDefaultAsync(e => e.Id == deckLinkId, ct);
+            },
+            tags: [(typeof(DeckLink), deckLinkId)]
+        );
 
-        if (loading.Value) return null;
+        if (query.Loading || query.Value == null)
+            return Skeleton.Form().ToDialog(isOpen, "Edit Deck Link");
 
-        return details
+        return query.Value
             .ToForm()
-            .Builder(e => e.ContactId, e => e.ToAsyncSelectInput(Shared.QueryContacts(factory), Shared.LookupContact(factory), placeholder: "Select Contact"))
+            .Builder(e => e.ContactId, e => e.ToAsyncSelectInput(Shared.UseContactSearch, Shared.UseContactLookup, placeholder: "Select Contact"))
             .Remove(e => e.Id, e => e.DeckId, e => e.CreatedAt, e => e.UpdatedAt, e => e.DeletedAt, e => e.Secret)
             .HandleSubmit(OnSubmit)
             .ToDialog(isOpen, "Edit Deck Link");
@@ -31,6 +36,7 @@ public class DeckLinksEditDialog(IState<bool> isOpen, RefreshToken refreshToken,
             modifiedDeckLink.UpdatedAt = DateTime.UtcNow;
             db.DeckLinks.Update(modifiedDeckLink);
             await db.SaveChangesAsync();
+            queryService.RevalidateByTag((typeof(DeckLink), deckLinkId));
             refreshToken.Refresh();
         }
     }

@@ -1,23 +1,36 @@
+using Ivy.Hooks;
+
 namespace Ivy.Open.Raise.Apps.Decks;
 
 public class DeckListBlade : ViewBase
 {
-    private record DeckListRecord(Guid Id, string Title);
+    public record DeckListRecord(Guid Id, string Title);
 
     public override object? Build()
     {
-        var blades = UseContext<IBladeController>();
+        var blades = UseContext<IBladeService>();
         var factory = UseService<DataContextFactory>();
-        var refreshToken = this.UseRefreshToken();
+        var refreshToken = UseRefreshToken();
+
+        var filter = UseState("");
+        var throttledFilter = UseState("");
+
+        UseEffect(() =>
+        {
+            throttledFilter.Set(filter.Value);
+            blades.Pop(this);
+        }, [filter.Throttle(TimeSpan.FromMilliseconds(250)).ToTrigger()]);
 
         UseEffect(() =>
         {
             if (refreshToken.ReturnValue is Guid deckId)
             {
-                blades.Pop(this, true);
+                blades.Pop(this);
                 blades.Push(this, new DeckDetailsBlade(deckId));
             }
         }, [refreshToken]);
+
+        var decksQuery = UseDeckList(Context, throttledFilter.Value);
 
         var onItemClicked = new Action<Event<ListItem>>(e =>
         {
@@ -30,36 +43,48 @@ public class DeckListBlade : ViewBase
             blades.Pop(this);
         }).Ghost().Tooltip("New Deck").ToTrigger((isOpen) => new DeckCreateDialog(isOpen, refreshToken));
 
-        return new FilteredListView<DeckListRecord>(
-            fetchRecords: (filter) => FetchDecks(factory, filter),
-            createItem: CalculateCreateItem,
-            toolButtons: createBtn,
-            onFilterChanged: _ =>
-            {
-                blades.Pop(this);
-            }
-        );
+        var items = (decksQuery.Value ?? [])
+            .Select(record => new ListItem(
+                title: record.Title,
+                subtitle: null,
+                onClick: onItemClicked,
+                tag: record))
+            .ToArray();
 
-        ListItem CalculateCreateItem(DeckListRecord record) =>
-            new(title: record.Title, subtitle: null, onClick: onItemClicked, tag: record);
+        var header = Layout.Horizontal().Gap(1)
+                     | filter.ToSearchInput().Placeholder("Search").Width(Size.Grow())
+                     | createBtn;
+
+        return new Fragment()
+               | new BladeHeader(header)
+               | (decksQuery.Loading ? Text.Muted("Loading...") : new List(items));
     }
 
-    private async Task<DeckListRecord[]> FetchDecks(DataContextFactory factory, string filter)
+    public static QueryResult<DeckListRecord[]> UseDeckList(IViewContext context, string filter)
     {
-        await using var db = factory.CreateDbContext();
+        var factory = context.UseService<DataContextFactory>();
+        return context.UseQuery(
+            key: (nameof(UseDeckList), filter),
+            fetcher: async ct =>
+            {
+                await using var db = factory.CreateDbContext();
 
-        var linq = db.Decks.Where(e => e.DeletedAt == null);
+                var linq = db.Decks.Where(e => e.DeletedAt == null);
 
-        if (!string.IsNullOrWhiteSpace(filter))
-        {
-            filter = filter.Trim();
-            linq = linq.Where(e => e.Title.Contains(filter));
-        }
+                if (!string.IsNullOrWhiteSpace(filter))
+                {
+                    var trimmed = filter.Trim();
+                    linq = linq.Where(e => e.Title.Contains(trimmed));
+                }
 
-        return await linq
-            .OrderByDescending(e => e.CreatedAt)
-            .Take(50)
-            .Select(e => new DeckListRecord(e.Id, e.Title))
-            .ToArrayAsync();
+                return await linq
+                    .OrderByDescending(e => e.CreatedAt)
+                    .Take(50)
+                    .Select(e => new DeckListRecord(e.Id, e.Title))
+                    .ToArrayAsync(ct);
+            },
+            tags: [typeof(Deck[])],
+            options: new QueryOptions { KeepPrevious = true }
+        );
     }
 }

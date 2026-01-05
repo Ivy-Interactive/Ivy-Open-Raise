@@ -1,3 +1,5 @@
+using Ivy.Hooks;
+
 namespace Ivy.Open.Raise.Apps.Settings.InvestorTypes;
 
 public class InvestorTypeEditSheet(IState<bool> isOpen, RefreshToken refreshToken, int investorTypeId) : ViewBase
@@ -5,19 +7,22 @@ public class InvestorTypeEditSheet(IState<bool> isOpen, RefreshToken refreshToke
     public override object? Build()
     {
         var factory = UseService<DataContextFactory>();
-        var investorType = UseState<InvestorType?>();
-        var loading = UseState(true);
+        var queryService = UseService<IQueryService>();
 
-        UseEffect(async () =>
-        {
-            await using var context = factory.CreateDbContext();
-            investorType.Set(await context.InvestorTypes.FirstOrDefaultAsync(e => e.Id == investorTypeId));
-            loading.Set(false);
-        });
+        var investorTypeQuery = UseQuery(
+            key: (nameof(InvestorTypeEditSheet), investorTypeId),
+            fetcher: async ct =>
+            {
+                await using var db = factory.CreateDbContext();
+                return await db.InvestorTypes.FirstOrDefaultAsync(e => e.Id == investorTypeId, ct);
+            },
+            tags: [(typeof(InvestorType), investorTypeId)]
+        );
 
-        if (loading.Value) return null;
+        if (investorTypeQuery.Loading || investorTypeQuery.Value == null)
+            return Skeleton.Form().ToSheet(isOpen, "Edit Investor Type");
 
-        return investorType
+        return investorTypeQuery.Value
             .ToForm()
             .Remove(e => e.Id)
             .Place(e => e.Name)
@@ -30,6 +35,7 @@ public class InvestorTypeEditSheet(IState<bool> isOpen, RefreshToken refreshToke
             await using var db = factory.CreateDbContext();
             db.InvestorTypes.Update(modifiedInvestorType);
             await db.SaveChangesAsync();
+            queryService.RevalidateByTag((typeof(InvestorType), investorTypeId));
             refreshToken.Refresh();
         }
     }

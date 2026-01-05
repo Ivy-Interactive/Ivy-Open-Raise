@@ -7,6 +7,6 @@ public class InteractionTypesApp : ViewBase
 {
     public override object? Build()
     {
-        return this.UseBlades(() => new InteractionTypeListBlade(), "Search");
+        return UseBlades(() => new InteractionTypeListBlade(), "Search");
     }
 }

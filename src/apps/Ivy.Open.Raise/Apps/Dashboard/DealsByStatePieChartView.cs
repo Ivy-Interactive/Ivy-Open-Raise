@@ -8,7 +8,7 @@ public class DealsByStatePieChartView(DateTime fromDate, DateTime toDate) : View
         var chart = UseState<object?>(() => null);
         var exception = UseState<Exception?>(() => null);
 
-        this.UseEffect(async () =>
+        UseEffect(async () =>
         {
             try
             {

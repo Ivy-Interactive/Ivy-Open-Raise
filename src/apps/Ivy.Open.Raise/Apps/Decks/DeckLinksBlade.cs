@@ -1,25 +1,26 @@
+using Ivy.Hooks;
+
 namespace Ivy.Open.Raise.Apps.Decks;
 
 public class DeckLinksBlade(Guid deckId) : ViewBase
 {
     public record DeckLinkDto(Guid Id, string? Reference, string? ContactName, string? InvestorName, int Views, string Secret);
-    
+
     public override object? Build()
     {
-        var args = UseService<AppArgs>();
+        var args = UseService<Ivy.Apps.AppContext>();
         var factory = UseService<DataContextFactory>();
-        var refreshToken = this.UseRefreshToken();
-        var deckLinks = UseState<DeckLinkDto[]?>();
+        var refreshToken = UseRefreshToken();
         var client = UseService<IClientProvider>();
-        var (alertView, showAlert) = this.UseAlert();
-        var (editView, showEdit) = this.UseTrigger((IState<bool> isOpen, Guid linkId) 
+        var (editView, showEdit) = UseTrigger((IState<bool> isOpen, Guid linkId)
             => new DeckLinksEditDialog(isOpen, refreshToken, linkId));
-        
-        UseEffect(async () =>
-        {
-            await using var db = factory.CreateDbContext();
-            deckLinks.Set(
-                await db.DeckLinks
+
+        var linksQuery = UseQuery(
+            key: (nameof(DeckLinksBlade), deckId),
+            fetcher: async ct =>
+            {
+                await using var db = factory.CreateDbContext();
+                return await db.DeckLinks
                     .Include(dl => dl.Contact).ThenInclude(c => c.Investor)
                     .Include(dl => dl.DeckLinkViews)
                     .Where(dl => dl.DeckId == deckId && dl.DeletedAt == null)
@@ -31,38 +32,31 @@ public class DeckLinksBlade(Guid deckId) : ViewBase
                         dl.DeckLinkViews.Count(),
                         dl.Secret
                     ))
-                    .ToArrayAsync()
-            );
-        }, [EffectTrigger.AfterInit(), refreshToken]);
+                    .ToArrayAsync(ct);
+            },
+            tags: [(typeof(DeckLink[]), deckId)]
+        );
 
-        Action OnDelete(Guid id)
-        {
-            return () =>
+        if (linksQuery.Loading) return Text.Muted("Loading...");
+
+        var deckLinks = linksQuery.Value ?? [];
+
+        MenuItem CreateDeleteBtn(Guid id) => MenuItem.Default("Delete")
+            .Icon(Icons.Trash)
+            .HandleSelect(async () =>
             {
-                showAlert("Are you sure you want to delete this deck link?", result =>
-                {
-                    if (result.IsOk())
-                    {
-                        Delete(factory, id);
-                        refreshToken.Refresh();
-                    }
-                }, "Delete Deck Link");
-            };
-        }
-        
-        Action OnCopy(string secret)
+                await DeleteAsync(factory, id);
+                linksQuery.Mutator.Revalidate();
+            });
+
+        void OnCopy(string secret)
         {
-            return () =>
-            {
-                var link = $"{args.Scheme}://{args.Host}/links/{secret}";
-                client.CopyToClipboard(link);
-                client.Toast($"{link} copied to clipboard");
-            };
+            var link = $"{args.Scheme}://{args.Host}/links/{secret}";
+            client.CopyToClipboard(link);
+            client.Toast($"{link} copied to clipboard");
         }
 
-        if (deckLinks.Value == null) return null;
-
-        var table = deckLinks.Value.Select(dl => new
+        var table = deckLinks.Select(dl => new
                 {
                     dl.Reference,
                     Contact =
@@ -77,21 +71,21 @@ public class DeckLinksBlade(Guid deckId) : ViewBase
                             .ToButton()
                             .Ghost()
                             .WithDropDown(
-                                MenuItem.Default("Delete").Icon(Icons.Trash).HandleSelect(OnDelete(dl.Id)),
+                                CreateDeleteBtn(dl.Id),
                                 MenuItem.Default("Edit").Icon(Icons.Pencil).HandleSelect(() => showEdit(dl.Id))
                             )
                         | Icons.Clipboard
                             .ToButton()
                             .Outline()
                             .Tooltip("Copy Link")
-                            .HandleClick(OnCopy(dl.Secret))
+                            .HandleClick(() => OnCopy(dl.Secret))
                 })
                 .ToTable()
                 .Width(Size.Units(120))
                 .ColumnWidth(e => e.Reference, Size.Fraction(0.5f))
                 .ColumnWidth(e => e.Contact, Size.Fraction(0.5f))
                 .ColumnWidth(e => e.Views, Size.Units(50))
-                .Align(e => e.Views, Align.Right) //todo ivy: not implemented
+                .Align(e => e.Views, Align.Right)
                 .ColumnWidth(e => e._, Size.Fit())
             ;
 
@@ -99,17 +93,17 @@ public class DeckLinksBlade(Guid deckId) : ViewBase
             .ToTrigger((isOpen) => new DeckLinksCreateDialog(isOpen, refreshToken, deckId));
 
         return new Fragment()
-               | BladeHelper.WithHeader(addBtn, table)
-               | alertView
+               | new BladeHeader(addBtn)
+               | table
                | editView
             ;
     }
 
-    private void Delete(DataContextFactory factory, Guid deckLinkId)
+    private async Task DeleteAsync(DataContextFactory factory, Guid deckLinkId)
     {
-        using var db = factory.CreateDbContext();
-        var deckLink = db.DeckLinks.Single(dl => dl.Id == deckLinkId);
+        await using var db = factory.CreateDbContext();
+        var deckLink = await db.DeckLinks.SingleAsync(dl => dl.Id == deckLinkId);
         deckLink.DeletedAt = DateTime.UtcNow;
-        db.SaveChanges();
+        await db.SaveChangesAsync();
     }
 }

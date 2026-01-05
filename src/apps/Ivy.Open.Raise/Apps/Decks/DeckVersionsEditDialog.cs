@@ -1,3 +1,5 @@
+using Ivy.Hooks;
+
 namespace Ivy.Open.Raise.Apps.Decks;
 
 public class DeckVersionsEditDialog(IState<bool> isOpen, RefreshToken refreshToken, Guid versionId) : ViewBase
@@ -5,19 +7,22 @@ public class DeckVersionsEditDialog(IState<bool> isOpen, RefreshToken refreshTok
     public override object? Build()
     {
         var factory = UseService<DataContextFactory>();
-        var deckVersion = UseState<DeckVersion?>();
-        var loading = UseState(true);
+        var queryService = UseService<IQueryService>();
 
-        UseEffect(async () =>
-        {
-            await using var context = factory.CreateDbContext();
-            deckVersion.Set(await context.DeckVersions.FirstOrDefaultAsync(e => e.Id == versionId));
-            loading.Set(false);
-        });
+        var versionQuery = UseQuery(
+            key: (nameof(DeckVersionsEditDialog), versionId),
+            fetcher: async ct =>
+            {
+                await using var db = factory.CreateDbContext();
+                return await db.DeckVersions.FirstOrDefaultAsync(e => e.Id == versionId, ct);
+            },
+            tags: [(typeof(DeckVersion), versionId)]
+        );
 
-        if (loading.Value) return null;
+        if (versionQuery.Loading || versionQuery.Value == null)
+            return Skeleton.Form().ToDialog(isOpen, "Edit Version");
 
-        return deckVersion
+        return versionQuery.Value
             .ToForm()
             .Remove(e => e.Id, e => e.DeckId, e => e.BlobName, e => e.ContentType, e => e.FileSize, e => e.FileName, e => e.CreatedAt, e => e.UpdatedAt, e => e.DeletedAt)
             .HandleSubmit(OnSubmit)
@@ -30,6 +35,7 @@ public class DeckVersionsEditDialog(IState<bool> isOpen, RefreshToken refreshTok
             modifiedDeckVersion.UpdatedAt = DateTime.UtcNow;
             db.DeckVersions.Update(modifiedDeckVersion);
             await db.SaveChangesAsync();
+            queryService.RevalidateByTag((typeof(DeckVersion), versionId));
             refreshToken.Refresh();
         }
     }

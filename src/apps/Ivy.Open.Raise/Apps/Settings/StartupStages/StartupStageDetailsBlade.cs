@@ -1,44 +1,45 @@
+using Ivy.Hooks;
+
 namespace Ivy.Open.Raise.Apps.Settings.StartupStages;
 
 public class StartupStageDetailsBlade(int startupStageId) : ViewBase
 {
     public override object? Build()
     {
-        var factory = this.UseService<DataContextFactory>();
-        var blades = this.UseContext<IBladeController>();
-        var refreshToken = this.UseRefreshToken();
-        var startupStage = this.UseState<StartupStage?>();
-        var organizationSettingsCount = this.UseState<int>();
-        var (alertView, showAlert) = this.UseAlert();
+        var factory = UseService<DataContextFactory>();
+        var blades = UseContext<IBladeService>();
+        var queryService = UseService<IQueryService>();
+        var refreshToken = UseRefreshToken();
 
-        this.UseEffect(async () =>
-        {
-            var db = factory.CreateDbContext();
-            startupStage.Set(await db.StartupStages.SingleOrDefaultAsync(e => e.Id == startupStageId));
-            organizationSettingsCount.Set(await db.OrganizationSettings.CountAsync(e => e.StartupStageId == startupStageId));
-        }, [EffectTrigger.AfterInit(), refreshToken]);
-
-        if (startupStage.Value == null) return null;
-
-        var startupStageValue = startupStage.Value;
-
-        void OnDelete()
-        {
-            showAlert("Are you sure you want to delete this startup stage?", result =>
+        var query = UseQuery(
+            key: (nameof(StartupStageDetailsBlade), startupStageId),
+            fetcher: async ct =>
             {
-                if (result.IsOk())
-                {
-                    Delete(factory);
-                    blades.Pop(refresh: true);
-                }
-            }, "Delete Startup Stage");
-        };
+                await using var db = factory.CreateDbContext();
+                var startupStage = await db.StartupStages.SingleOrDefaultAsync(e => e.Id == startupStageId, ct);
+                var organizationSettingsCount = await db.OrganizationSettings.CountAsync(e => e.StartupStageId == startupStageId, ct);
+                return (startupStage, organizationSettingsCount);
+            },
+            tags: [(typeof(StartupStage), startupStageId)]
+        );
+
+        if (query.Loading) return Skeleton.Card();
+        if (query.Value.startupStage == null)
+            return new Callout($"Startup stage '{startupStageId}' not found.").Variant(CalloutVariant.Warning);
+
+        var startupStageValue = query.Value.startupStage;
+        var organizationSettingsCount = query.Value.organizationSettingsCount;
 
         var dropDown = Icons.Ellipsis
             .ToButton()
             .Ghost()
             .WithDropDown(
-                MenuItem.Default("Delete").Disabled(organizationSettingsCount.Value>0).Icon(Icons.Trash).HandleSelect(OnDelete)
+                MenuItem.Default("Delete").Disabled(organizationSettingsCount > 0).Icon(Icons.Trash).HandleSelect(async () =>
+                {
+                    await DeleteAsync(factory);
+                    queryService.RevalidateByTag(typeof(StartupStage[]));
+                    blades.Pop();
+                })
             );
 
         var editBtn = new Button("Edit")
@@ -58,23 +59,26 @@ public class StartupStageDetailsBlade(int startupStageId) : ViewBase
         ).Title("Startup Stage Details");
 
         return new Fragment()
-               | (Layout.Vertical() | detailsCard)
-               | alertView;
+               | new BladeHeader(Text.Literal(startupStageValue.Name))
+               | (Layout.Vertical() | detailsCard);
     }
 
-    private void Delete(DataContextFactory dbFactory)
+    private async Task DeleteAsync(DataContextFactory dbFactory)
     {
-        using var db = dbFactory.CreateDbContext();
+        await using var db = dbFactory.CreateDbContext();
 
-        var connectedOrganizationSettingsCount = db.OrganizationSettings.Count(e => e.StartupStageId == startupStageId);
+        var connectedOrganizationSettingsCount = await db.OrganizationSettings.CountAsync(e => e.StartupStageId == startupStageId);
 
         if (connectedOrganizationSettingsCount > 0)
         {
             throw new InvalidOperationException($"Cannot delete startup stage with {connectedOrganizationSettingsCount} connected organization setting(s).");
         }
 
-        var startupStage = db.StartupStages.FirstOrDefault(e => e.Id == startupStageId)!;
-        db.StartupStages.Remove(startupStage);
-        db.SaveChanges();
+        var startupStage = await db.StartupStages.FirstOrDefaultAsync(e => e.Id == startupStageId);
+        if (startupStage != null)
+        {
+            db.StartupStages.Remove(startupStage);
+            await db.SaveChangesAsync();
+        }
     }
 }

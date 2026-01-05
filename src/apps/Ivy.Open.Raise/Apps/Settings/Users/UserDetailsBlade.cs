@@ -1,3 +1,5 @@
+using Ivy.Hooks;
+
 namespace Ivy.Open.Raise.Apps.Settings.Users;
 
 public class UserDetailsBlade(Guid userId) : ViewBase
@@ -5,42 +7,39 @@ public class UserDetailsBlade(Guid userId) : ViewBase
     public override object? Build()
     {
         var factory = UseService<DataContextFactory>();
-        var blades = UseContext<IBladeController>();
-        var refreshToken = this.UseRefreshToken();
-        var user = UseState<User?>();
-        var dealCount = UseState<int>();
-        var interactionCount = UseState<int>();
-        var (alertView, showAlert) = this.UseAlert();
+        var blades = UseContext<IBladeService>();
+        var queryService = UseService<IQueryService>();
+        var refreshToken = UseRefreshToken();
 
-        UseEffect(async () =>
-        {
-            await using var db = factory.CreateDbContext();
-            user.Set(await db.Users.SingleOrDefaultAsync(e => e.Id == userId));
-            dealCount.Set(await db.Deals.CountAsync(e => e.OwnerId == userId));
-            interactionCount.Set(await db.Interactions.CountAsync(e => e.UserId == userId));
-        }, [EffectTrigger.AfterInit(), refreshToken]);
-
-        if (user.Value == null) return null;
-
-        var userValue = user.Value;
-
-        void OnDelete()
-        {
-            showAlert("Are you sure you want to delete this user?", result =>
+        var query = UseQuery(
+            key: (nameof(UserDetailsBlade), userId),
+            fetcher: async ct =>
             {
-                if (result.IsOk())
-                {
-                    Delete(factory);
-                    blades.Pop(refresh: true);
-                }
-            }, "Delete User");
-        };
+                await using var db = factory.CreateDbContext();
+                var user = await db.Users.SingleOrDefaultAsync(e => e.Id == userId, ct);
+                var dealCount = await db.Deals.CountAsync(e => e.OwnerId == userId, ct);
+                var interactionCount = await db.Interactions.CountAsync(e => e.UserId == userId, ct);
+                return (user, dealCount, interactionCount);
+            },
+            tags: [(typeof(User), userId)]
+        );
+
+        if (query.Loading) return Skeleton.Card();
+        if (query.Value.user == null)
+            return new Callout($"User '{userId}' not found.").Variant(CalloutVariant.Warning);
+
+        var userValue = query.Value.user;
 
         var dropDown = Icons.Ellipsis
             .ToButton()
             .Ghost()
             .WithDropDown(
-                MenuItem.Default("Delete").Icon(Icons.Trash).HandleSelect(OnDelete)
+                MenuItem.Default("Delete").Icon(Icons.Trash).HandleSelect(async () =>
+                {
+                    await DeleteAsync(factory);
+                    queryService.RevalidateByTag(typeof(User[]));
+                    blades.Pop();
+                })
             );
 
         var editBtn = new Button("Edit")
@@ -65,15 +64,18 @@ public class UserDetailsBlade(Guid userId) : ViewBase
         ).Title("User Details");
 
         return new Fragment()
-               | (Layout.Vertical() | detailsCard)
-               | alertView;
+               | new BladeHeader(Text.Literal($"{userValue.FirstName} {userValue.LastName}"))
+               | (Layout.Vertical() | detailsCard);
     }
 
-    private void Delete(DataContextFactory dbFactory)
+    private async Task DeleteAsync(DataContextFactory dbFactory)
     {
-        using var db = dbFactory.CreateDbContext();
-        var user = db.Users.FirstOrDefault(e => e.Id == userId)!;
-        db.Users.Remove(user);
-        db.SaveChanges();
+        await using var db = dbFactory.CreateDbContext();
+        var user = await db.Users.FirstOrDefaultAsync(e => e.Id == userId);
+        if (user != null)
+        {
+            db.Users.Remove(user);
+            await db.SaveChangesAsync();
+        }
     }
 }

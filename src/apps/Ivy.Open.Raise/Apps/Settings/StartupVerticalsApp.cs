@@ -7,6 +7,6 @@ public class StartupVerticalsApp : ViewBase
 {
     public override object? Build()
     {
-        return this.UseBlades(() => new StartupVerticalListBlade(), "Search");
+        return UseBlades(() => new StartupVerticalListBlade(), "Search");
     }
 }

@@ -7,6 +7,6 @@ public class DecksApp : ViewBase
 {
     public override object? Build()
     {
-        return this.UseBlades(() => new DeckListBlade(), "Search");
+        return UseBlades(() => new DeckListBlade(), "Search");
     }
 }

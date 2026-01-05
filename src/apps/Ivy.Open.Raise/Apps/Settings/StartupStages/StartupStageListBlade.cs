@@ -1,23 +1,35 @@
+using Ivy.Hooks;
+
 namespace Ivy.Open.Raise.Apps.Settings.StartupStages;
 
 public class StartupStageListBlade : ViewBase
 {
-    private record StartupStageListRecord(int Id, string Name);
+    public record StartupStageListRecord(int Id, string Name);
 
     public override object? Build()
     {
-        var blades = UseContext<IBladeController>();
-        var factory = UseService<DataContextFactory>();
-        var refreshToken = this.UseRefreshToken();
+        var blades = UseContext<IBladeService>();
+        var refreshToken = UseRefreshToken();
+
+        var filter = UseState("");
+        var throttledFilter = UseState("");
+
+        UseEffect(() =>
+        {
+            throttledFilter.Set(filter.Value);
+            blades.Pop(this);
+        }, [filter.Throttle(TimeSpan.FromMilliseconds(250)).ToTrigger()]);
 
         UseEffect(() =>
         {
             if (refreshToken.ReturnValue is int startupStageId)
             {
-                blades.Pop(this, true);
+                blades.Pop(this);
                 blades.Push(this, new StartupStageDetailsBlade(startupStageId));
             }
         }, [refreshToken]);
+
+        var startupStagesQuery = UseStartupStageList(Context, throttledFilter.Value);
 
         var onItemClicked = new Action<Event<ListItem>>(e =>
         {
@@ -25,41 +37,52 @@ public class StartupStageListBlade : ViewBase
             blades.Push(this, new StartupStageDetailsBlade(startupStage.Id), startupStage.Name);
         });
 
-        ListItem CreateItem(StartupStageListRecord record) =>
-            new(title: record.Name, onClick: onItemClicked, tag: record);
-
         var createBtn = Icons.Plus.ToButton(_ =>
         {
             blades.Pop(this);
         }).Ghost().Tooltip("New Startup Stage").ToTrigger((isOpen) => new StartupStageCreateDialog(isOpen, refreshToken));
 
-        return new FilteredListView<StartupStageListRecord>(
-            fetchRecords: (filter) => FetchStartupStages(factory, filter),
-            createItem: CreateItem,
-            toolButtons: createBtn,
-            onFilterChanged: _ =>
-            {
-                blades.Pop(this);
-            }
-        );
+        var items = (startupStagesQuery.Value ?? [])
+            .Select(record => new ListItem(
+                title: record.Name,
+                onClick: onItemClicked,
+                tag: record))
+            .ToArray();
+
+        var header = Layout.Horizontal().Gap(1)
+                     | filter.ToSearchInput().Placeholder("Search").Width(Size.Grow())
+                     | createBtn;
+
+        return new Fragment()
+               | new BladeHeader(header)
+               | (startupStagesQuery.Loading ? Text.Muted("Loading...") : new List(items));
     }
 
-    private async Task<StartupStageListRecord[]> FetchStartupStages(DataContextFactory factory, string filter)
+    public static QueryResult<StartupStageListRecord[]> UseStartupStageList(IViewContext context, string filter)
     {
-        await using var db = factory.CreateDbContext();
+        var factory = context.UseService<DataContextFactory>();
+        return context.UseQuery(
+            key: (nameof(UseStartupStageList), filter),
+            fetcher: async ct =>
+            {
+                await using var db = factory.CreateDbContext();
 
-        var linq = db.StartupStages.AsQueryable();
+                var linq = db.StartupStages.AsQueryable();
 
-        if (!string.IsNullOrWhiteSpace(filter))
-        {
-            filter = filter.Trim();
-            linq = linq.Where(e => e.Name.Contains(filter));
-        }
+                if (!string.IsNullOrWhiteSpace(filter))
+                {
+                    var trimmed = filter.Trim();
+                    linq = linq.Where(e => e.Name.Contains(trimmed));
+                }
 
-        return await linq
-            .OrderBy(e => e.Id)
-            .Take(50)
-            .Select(e => new StartupStageListRecord(e.Id, e.Name))
-            .ToArrayAsync();
+                return await linq
+                    .OrderBy(e => e.Id)
+                    .Take(50)
+                    .Select(e => new StartupStageListRecord(e.Id, e.Name))
+                    .ToArrayAsync(ct);
+            },
+            tags: [typeof(StartupStage[])],
+            options: new QueryOptions { KeepPrevious = true }
+        );
     }
 }

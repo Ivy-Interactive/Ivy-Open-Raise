@@ -1,3 +1,5 @@
+using Ivy.Hooks;
+
 namespace Ivy.Open.Raise.Apps.Settings.StartupStages;
 
 public class StartupStageEditSheet(IState<bool> isOpen, RefreshToken refreshToken, int startupStageId) : ViewBase
@@ -5,19 +7,22 @@ public class StartupStageEditSheet(IState<bool> isOpen, RefreshToken refreshToke
     public override object? Build()
     {
         var factory = UseService<DataContextFactory>();
-        var startupStage = UseState<StartupStage?>();
-        var loading = UseState(true);
+        var queryService = UseService<IQueryService>();
 
-        UseEffect(async () =>
-        {
-            await using var context = factory.CreateDbContext();
-            startupStage.Set(await context.StartupStages.FirstOrDefaultAsync(e => e.Id == startupStageId));
-            loading.Set(false);
-        });
+        var startupStageQuery = UseQuery(
+            key: (nameof(StartupStageEditSheet), startupStageId),
+            fetcher: async ct =>
+            {
+                await using var db = factory.CreateDbContext();
+                return await db.StartupStages.FirstOrDefaultAsync(e => e.Id == startupStageId, ct);
+            },
+            tags: [(typeof(StartupStage), startupStageId)]
+        );
 
-        if (loading.Value) return null;
+        if (startupStageQuery.Loading || startupStageQuery.Value == null)
+            return Skeleton.Form().ToSheet(isOpen, "Edit Startup Stage");
 
-        return startupStage
+        return startupStageQuery.Value
             .ToForm()
             .Remove(e => e.Id)
             .Place(e => e.Name)
@@ -30,6 +35,7 @@ public class StartupStageEditSheet(IState<bool> isOpen, RefreshToken refreshToke
             await using var db = factory.CreateDbContext();
             db.StartupStages.Update(modifiedStartupStage);
             await db.SaveChangesAsync();
+            queryService.RevalidateByTag((typeof(StartupStage), startupStageId));
             refreshToken.Refresh();
         }
     }

@@ -8,7 +8,7 @@ public class InteractionsByTypePieChartView(DateTime fromDate, DateTime toDate) 
         var chart = UseState<object?>((object?)null!);
         var exception = UseState<Exception?>((Exception?)null!);
 
-        this.UseEffect(async () =>
+        UseEffect(async () =>
         {
             try
             {

@@ -1,3 +1,5 @@
+using Ivy.Hooks;
+
 namespace Ivy.Open.Raise.Apps.Investors;
 
 public class InvestorContactsEditSheet(IState<bool> isOpen, RefreshToken refreshToken, Guid contactId) : ViewBase
@@ -5,19 +7,22 @@ public class InvestorContactsEditSheet(IState<bool> isOpen, RefreshToken refresh
     public override object? Build()
     {
         var factory = UseService<DataContextFactory>();
-        var details = UseState<Contact?>();
-        var loading = UseState(true);
+        var queryService = UseService<IQueryService>();
 
-        UseEffect(async () =>
-        {
-            await using var context = factory.CreateDbContext();
-            details.Set(await context.Contacts.FirstOrDefaultAsync(e => e.Id == contactId));
-            loading.Set(false);
-        });
+        var contactQuery = UseQuery(
+            key: (nameof(InvestorContactsEditSheet), contactId),
+            fetcher: async ct =>
+            {
+                await using var db = factory.CreateDbContext();
+                return await db.Contacts.FirstOrDefaultAsync(e => e.Id == contactId, ct);
+            },
+            tags: [(typeof(Contact), contactId)]
+        );
 
-        if (loading.Value) return null;
+        if (contactQuery.Loading || contactQuery.Value == null)
+            return Skeleton.Form().ToSheet(isOpen, "Edit Contact");
 
-        return details
+        return contactQuery.Value
             .ToForm()
             .Builder(e => e.Email, e => e.ToEmailInput())
             .Builder(e => e.LinkedinUrl, e => e.ToUrlInput())
@@ -36,7 +41,8 @@ public class InvestorContactsEditSheet(IState<bool> isOpen, RefreshToken refresh
             modifiedContact.UpdatedAt = DateTime.UtcNow;
             db.Contacts.Update(modifiedContact);
             await db.SaveChangesAsync();
-            //refreshToken.Refresh(); //this isn't working
+            queryService.RevalidateByTag((typeof(Contact), contactId));
+            refreshToken.Refresh();
         }
     }
 }

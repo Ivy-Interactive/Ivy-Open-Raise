@@ -7,6 +7,6 @@ public class StartupStagesApp : ViewBase
 {
     public override object? Build()
     {
-        return this.UseBlades(() => new StartupStageListBlade(), "Search");
+        return UseBlades(() => new StartupStageListBlade(), "Search");
     }
 }

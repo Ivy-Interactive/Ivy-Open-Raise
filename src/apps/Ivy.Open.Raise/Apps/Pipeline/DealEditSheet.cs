@@ -1,3 +1,4 @@
+using Ivy.Hooks;
 using static Ivy.Open.Raise.Apps.Shared;
 
 namespace Ivy.Open.Raise.Apps.Pipeline;
@@ -7,23 +8,26 @@ public class DealEditSheet(IState<bool> isOpen, RefreshToken refreshToken, Guid 
     public override object? Build()
     {
         var factory = UseService<DataContextFactory>();
-        var details = UseState<Deal?>();
-        var loading = UseState(true);
+        var queryService = UseService<IQueryService>();
 
-        UseEffect(async () =>
-        {
-            await using var context = factory.CreateDbContext();
-            details.Set(await context.Deals.FirstOrDefaultAsync(e => e.Id == dealId));
-            loading.Set(false);
-        });
+        var query = UseQuery(
+            key: (nameof(DealEditSheet), dealId),
+            fetcher: async ct =>
+            {
+                await using var db = factory.CreateDbContext();
+                return await db.Deals.FirstOrDefaultAsync(e => e.Id == dealId, ct);
+            },
+            tags: [(typeof(Deal), dealId)]
+        );
 
-        if (loading.Value) return null;
+        if (query.Loading || query.Value == null)
+            return Skeleton.Form().ToSheet(isOpen, "Edit Deal");
 
-        return details
+        return query.Value
             .ToForm()
-            .Builder(e => e.ContactId, e => e.ToAsyncSelectInput(QueryContacts(factory), LookupContact(factory), placeholder: "Select Contact"))
-            .Builder(e => e.DealStateId, e => e.ToAsyncSelectInput(QueryDealStates(factory), LookupDealState(factory), placeholder: "Select Deal State"))
-            .Builder(e => e.DealApproachId, e => e.ToAsyncSelectInput(QueryDealApproaches(factory), LookupDealApproach(factory), placeholder: "Select Deal Approach"))
+            .Builder(e => e.ContactId, e => e.ToAsyncSelectInput(UseContactSearch, UseContactLookup, placeholder: "Select Contact"))
+            .Builder(e => e.DealStateId, e => e.ToAsyncSelectInput(UseDealStateSearch, UseDealStateLookup, placeholder: "Select Deal State"))
+            .Builder(e => e.DealApproachId, e => e.ToAsyncSelectInput(UseDealApproachSearch, UseDealApproachLookup, placeholder: "Select Deal Approach"))
             .Remove(e => e.OwnerId)
             .Builder(e => e.AmountFrom, e => e.ToMoneyInput().Currency("USD")) //todo: should be from settings
             .Builder(e => e.AmountTo, e => e.ToMoneyInput().Currency("USD"))
@@ -47,6 +51,7 @@ public class DealEditSheet(IState<bool> isOpen, RefreshToken refreshToken, Guid 
             modifiedDeal.UpdatedAt = DateTime.UtcNow;
             db.Deals.Update(modifiedDeal);
             await db.SaveChangesAsync();
+            queryService.RevalidateByTag((typeof(Deal), dealId));
             refreshToken.Refresh();
         }
     }

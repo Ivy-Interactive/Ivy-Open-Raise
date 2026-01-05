@@ -1,3 +1,4 @@
+using Ivy.Hooks;
 using static Ivy.Open.Raise.Apps.Shared;
 
 namespace Ivy.Open.Raise.Apps.Settings;
@@ -9,31 +10,29 @@ public class OrganizationSettingsApp : ViewBase
     {
         var factory = UseService<DataContextFactory>();
         var client = UseService<IClientProvider>();
-        var settings = UseState<OrganizationSetting?>();
-        var globals = UseService<GlobalService>();
-        var loading = UseState(true);
+        var queryService = UseService<IQueryService>();
 
-        UseEffect(async () =>
-        {
-            await using var context = factory.CreateDbContext();
-            settings.Set(await context.OrganizationSettings.FirstOrDefaultAsync());
-            loading.Set(false);
-        });
+        var settingsQuery = Context.UseOrganizationSettings();
 
-        if (loading.Value) return null;
+        if (settingsQuery.Loading)
+            return Skeleton.Form();
 
-        if (settings.Value == null) return Callout.Warning("Missing Organization Settings.");
+        if (settingsQuery.Value == null)
+            return Callout.Warning("Missing Organization Settings.");
+
+        var settings = UseState(() => settingsQuery.Value);
+        var currency = settingsQuery.Value.CurrencyId;
 
         var form = settings
             .ToForm()
             .Builder(e => e.OutreachBody, e => e.ToTextAreaInput().Height(30))
             .Builder(e => e.ElevatorPitch, e => e.ToTextAreaInput().Height(30))
-            .Builder(e => e.CurrencyId, SelectCurrencyBuilder(factory))
-            .Builder(e => e.CountryId, SelectCountryBuilder(factory))
-            .Builder(e => e.StartupStageId, SelectStartupStageBuilder(factory))
-            .Builder(e => e.RaiseTargetMin, e => e.ToMoneyInput().Currency(settings.Value.CurrencyId))
-            .Builder(e => e.RaiseTargetMax, e => e.ToMoneyInput().Currency(settings.Value.CurrencyId))
-            .Builder(e => e.RaiseTicketSize, e => e.ToMoneyInput().Currency(settings.Value.CurrencyId))
+            .Builder(e => e.CurrencyId, SelectCurrencyBuilder)
+            .Builder(e => e.CountryId, SelectCountryBuilder)
+            .Builder(e => e.StartupStageId, SelectStartupStageBuilder)
+            .Builder(e => e.RaiseTargetMin, e => e.ToMoneyInput().Currency(currency))
+            .Builder(e => e.RaiseTargetMax, e => e.ToMoneyInput().Currency(currency))
+            .Builder(e => e.RaiseTicketSize, e => e.ToMoneyInput().Currency(currency))
             .Place(e => e.OutreachSubject, e => e.OutreachBody)
             .Label(e => e.StartupDateOfIncorporation, "Date of Incorporation")
             .Label(e => e.StartupLinkedinUrl, "LinkedIn URL")
@@ -64,7 +63,7 @@ public class OrganizationSettingsApp : ViewBase
             .Remove(e => e.Id)
             .HandleSubmit(OnSubmit);
 
-        return 
+        return
             Layout.TopCenter()
                 | (Layout.Vertical().Width(Size.Full().Max(Size.Units(150)))
                     | Text.H1("Settings")
@@ -76,7 +75,7 @@ public class OrganizationSettingsApp : ViewBase
             await using var db = factory.CreateDbContext();
             db.OrganizationSettings.Update(modifiedSettings);
             await db.SaveChangesAsync();
-            await globals.RefreshAsync();
+            queryService.RevalidateByTag(typeof(OrganizationSetting));
             client.Toast("Organization settings updated.");
         }
     }

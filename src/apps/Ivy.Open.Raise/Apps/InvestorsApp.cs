@@ -7,6 +7,6 @@ public class InvestorsApp : ViewBase
 {
     public override object? Build()
     {
-        return this.UseBlades(() => new InvestorListBlade(), "Search");
+        return UseBlades(() => new InvestorListBlade(), "Search");
     }
 }

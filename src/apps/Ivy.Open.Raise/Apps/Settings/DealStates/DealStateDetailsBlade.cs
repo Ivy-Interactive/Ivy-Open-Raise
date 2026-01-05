@@ -1,44 +1,45 @@
+using Ivy.Hooks;
+
 namespace Ivy.Open.Raise.Apps.Settings.DealStates;
 
 public class DealStateDetailsBlade(int dealStateId) : ViewBase
 {
     public override object? Build()
     {
-        var factory = this.UseService<DataContextFactory>();
-        var blades = this.UseContext<IBladeController>();
-        var refreshToken = this.UseRefreshToken();
-        var dealState = this.UseState<DealState?>();
-        var dealCount = this.UseState<int>();
-        var (alertView, showAlert) = this.UseAlert();
+        var factory = UseService<DataContextFactory>();
+        var blades = UseContext<IBladeService>();
+        var queryService = UseService<IQueryService>();
+        var refreshToken = UseRefreshToken();
 
-        this.UseEffect(async () =>
-        {
-            var db = factory.CreateDbContext();
-            dealState.Set(await db.DealStates.SingleOrDefaultAsync(e => e.Id == dealStateId));
-            dealCount.Set(await db.Deals.CountAsync(e => e.DealStateId == dealStateId));
-        }, [EffectTrigger.AfterInit(), refreshToken]);
-
-        if (dealState.Value == null) return null;
-
-        var dealStateValue = dealState.Value;
-
-        void OnDelete()
-        {
-            showAlert("Are you sure you want to delete this deal state?", result =>
+        var dealStateQuery = UseQuery(
+            key: (nameof(DealStateDetailsBlade), dealStateId),
+            fetcher: async ct =>
             {
-                if (result.IsOk())
-                {
-                    Delete(factory);
-                    blades.Pop(refresh: true);
-                }
-            }, "Delete Deal State");
-        };
+                await using var db = factory.CreateDbContext();
+                var dealState = await db.DealStates.SingleOrDefaultAsync(e => e.Id == dealStateId, ct);
+                var dealCount = await db.Deals.CountAsync(e => e.DealStateId == dealStateId, ct);
+                return (dealState, dealCount);
+            },
+            tags: [(typeof(DealState), dealStateId)]
+        );
+
+        if (dealStateQuery.Loading) return Skeleton.Card();
+        if (dealStateQuery.Value.dealState == null)
+            return new Callout($"Deal state '{dealStateId}' not found.").Variant(CalloutVariant.Warning);
+
+        var dealStateValue = dealStateQuery.Value.dealState;
+        var dealCount = dealStateQuery.Value.dealCount;
 
         var dropDown = Icons.Ellipsis
             .ToButton()
             .Ghost()
             .WithDropDown(
-                MenuItem.Default("Delete").Disabled(dealCount.Value>0).Icon(Icons.Trash).HandleSelect(OnDelete)
+                MenuItem.Default("Delete").Disabled(dealCount > 0).Icon(Icons.Trash).HandleSelect(async () =>
+                {
+                    await DeleteAsync(factory);
+                    queryService.RevalidateByTag(typeof(DealState[]));
+                    blades.Pop();
+                })
             );
 
         var editBtn = new Button("Edit")
@@ -59,23 +60,26 @@ public class DealStateDetailsBlade(int dealStateId) : ViewBase
         ).Title("Deal State Details");
 
         return new Fragment()
-               | (Layout.Vertical() | detailsCard)
-               | alertView;
+               | new BladeHeader(Text.Literal(dealStateValue.Name))
+               | (Layout.Vertical() | detailsCard);
     }
 
-    private void Delete(DataContextFactory dbFactory)
+    private async Task DeleteAsync(DataContextFactory dbFactory)
     {
-        using var db = dbFactory.CreateDbContext();
+        await using var db = dbFactory.CreateDbContext();
 
-        var connectedDealsCount = db.Deals.Count(e => e.DealStateId == dealStateId);
+        var connectedDealsCount = await db.Deals.CountAsync(e => e.DealStateId == dealStateId);
 
         if (connectedDealsCount > 0)
         {
             throw new InvalidOperationException($"Cannot delete deal state with {connectedDealsCount} connected deal(s).");
         }
 
-        var dealState = db.DealStates.FirstOrDefault(e => e.Id == dealStateId)!;
-        db.DealStates.Remove(dealState);
-        db.SaveChanges();
+        var dealState = await db.DealStates.FirstOrDefaultAsync(e => e.Id == dealStateId);
+        if (dealState != null)
+        {
+            db.DealStates.Remove(dealState);
+            await db.SaveChangesAsync();
+        }
     }
 }

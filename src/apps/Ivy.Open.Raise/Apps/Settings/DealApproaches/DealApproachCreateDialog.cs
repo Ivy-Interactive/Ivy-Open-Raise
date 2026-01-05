@@ -15,7 +15,6 @@ public class DealApproachCreateDialog(IState<bool> isOpen, RefreshToken refreshT
 
         return details
             .ToForm()
-            .Builder(e => e.Name, e => e.ToTextAreaInput())
             .HandleSubmit(OnSubmit)
             .ToDialog(isOpen, title: "New Deal Approach", submitTitle: "Create");
 

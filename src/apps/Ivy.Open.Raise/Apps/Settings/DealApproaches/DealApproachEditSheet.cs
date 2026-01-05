@@ -1,3 +1,5 @@
+using Ivy.Hooks;
+
 namespace Ivy.Open.Raise.Apps.Settings.DealApproaches;
 
 public class DealApproachEditSheet(IState<bool> isOpen, RefreshToken refreshToken, int dealApproachId) : ViewBase
@@ -5,19 +7,22 @@ public class DealApproachEditSheet(IState<bool> isOpen, RefreshToken refreshToke
     public override object? Build()
     {
         var factory = UseService<DataContextFactory>();
-        var dealApproach = UseState<DealApproach?>();
-        var loading = UseState(true);
+        var queryService = UseService<IQueryService>();
 
-        UseEffect(async () =>
-        {
-            await using var context = factory.CreateDbContext();
-            dealApproach.Set(await context.DealApproaches.FirstOrDefaultAsync(e => e.Id == dealApproachId));
-            loading.Set(false);
-        });
+        var dealApproachQuery = UseQuery(
+            key: (nameof(DealApproachEditSheet), dealApproachId),
+            fetcher: async ct =>
+            {
+                await using var db = factory.CreateDbContext();
+                return await db.DealApproaches.FirstOrDefaultAsync(e => e.Id == dealApproachId, ct);
+            },
+            tags: [(typeof(DealApproach), dealApproachId)]
+        );
 
-        if (loading.Value) return null;
+        if (dealApproachQuery.Loading || dealApproachQuery.Value == null)
+            return Skeleton.Form().ToSheet(isOpen, "Edit Deal Approach");
 
-        return dealApproach
+        return dealApproachQuery.Value
             .ToForm()
             .Remove(e => e.Id)
             .HandleSubmit(OnSubmit)
@@ -29,6 +34,7 @@ public class DealApproachEditSheet(IState<bool> isOpen, RefreshToken refreshToke
             await using var db = factory.CreateDbContext();
             db.DealApproaches.Update(modifiedDealApproach);
             await db.SaveChangesAsync();
+            queryService.RevalidateByTag((typeof(DealApproach), dealApproachId));
             refreshToken.Refresh();
         }
     }

@@ -1,23 +1,35 @@
+using Ivy.Hooks;
+
 namespace Ivy.Open.Raise.Apps.Settings.DealApproaches;
 
 public class DealApproachListBlade : ViewBase
 {
-    private record DealApproachListRecord(int Id, string Name);
+    public record DealApproachListRecord(int Id, string Name);
 
     public override object? Build()
     {
-        var blades = UseContext<IBladeController>();
-        var factory = UseService<DataContextFactory>();
-        var refreshToken = this.UseRefreshToken();
+        var blades = UseContext<IBladeService>();
+        var refreshToken = UseRefreshToken();
+
+        var filter = UseState("");
+        var throttledFilter = UseState("");
+
+        UseEffect(() =>
+        {
+            throttledFilter.Set(filter.Value);
+            blades.Pop(this);
+        }, [filter.Throttle(TimeSpan.FromMilliseconds(250)).ToTrigger()]);
 
         UseEffect(() =>
         {
             if (refreshToken.ReturnValue is int dealApproachId)
             {
-                blades.Pop(this, true);
+                blades.Pop(this);
                 blades.Push(this, new DealApproachDetailsBlade(dealApproachId));
             }
         }, [refreshToken]);
+
+        var dealApproachesQuery = UseDealApproachList(Context, throttledFilter.Value);
 
         var onItemClicked = new Action<Event<ListItem>>(e =>
         {
@@ -25,41 +37,52 @@ public class DealApproachListBlade : ViewBase
             blades.Push(this, new DealApproachDetailsBlade(dealApproach.Id), dealApproach.Name);
         });
 
-        ListItem CreateItem(DealApproachListRecord record) =>
-            new(title: record.Name, onClick: onItemClicked, tag: record);
-
         var createBtn = Icons.Plus.ToButton(_ =>
         {
             blades.Pop(this);
         }).Ghost().Tooltip("New Deal Approach").ToTrigger((isOpen) => new DealApproachCreateDialog(isOpen, refreshToken));
 
-        return new FilteredListView<DealApproachListRecord>(
-            fetchRecords: (filter) => FetchDealApproaches(factory, filter),
-            createItem: CreateItem,
-            toolButtons: createBtn,
-            onFilterChanged: _ =>
-            {
-                blades.Pop(this);
-            }
-        );
+        var items = (dealApproachesQuery.Value ?? [])
+            .Select(record => new ListItem(
+                title: record.Name,
+                onClick: onItemClicked,
+                tag: record))
+            .ToArray();
+
+        var header = Layout.Horizontal().Gap(1)
+                     | filter.ToSearchInput().Placeholder("Search").Width(Size.Grow())
+                     | createBtn;
+
+        return new Fragment()
+               | new BladeHeader(header)
+               | (dealApproachesQuery.Loading ? Text.Muted("Loading...") : new List(items));
     }
 
-    private async Task<DealApproachListRecord[]> FetchDealApproaches(DataContextFactory factory, string filter)
+    public static QueryResult<DealApproachListRecord[]> UseDealApproachList(IViewContext context, string filter)
     {
-        await using var db = factory.CreateDbContext();
+        var factory = context.UseService<DataContextFactory>();
+        return context.UseQuery(
+            key: (nameof(UseDealApproachList), filter),
+            fetcher: async ct =>
+            {
+                await using var db = factory.CreateDbContext();
 
-        var linq = db.DealApproaches.AsQueryable();
+                var linq = db.DealApproaches.AsQueryable();
 
-        if (!string.IsNullOrWhiteSpace(filter))
-        {
-            filter = filter.Trim();
-            linq = linq.Where(e => e.Name.Contains(filter));
-        }
+                if (!string.IsNullOrWhiteSpace(filter))
+                {
+                    var trimmed = filter.Trim();
+                    linq = linq.Where(e => e.Name.Contains(trimmed));
+                }
 
-        return await linq
-            .OrderByDescending(e => e.Id)
-            .Take(50)
-            .Select(e => new DealApproachListRecord(e.Id, e.Name))
-            .ToArrayAsync();
+                return await linq
+                    .OrderByDescending(e => e.Id)
+                    .Take(50)
+                    .Select(e => new DealApproachListRecord(e.Id, e.Name))
+                    .ToArrayAsync(ct);
+            },
+            tags: [typeof(DealApproach[])],
+            options: new QueryOptions { KeepPrevious = true }
+        );
     }
 }

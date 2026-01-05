@@ -1,3 +1,5 @@
+using Ivy.Hooks;
+
 namespace Ivy.Open.Raise.Apps.Decks;
 
 public class DeckEditDialog(IState<bool> isOpen, RefreshToken refreshToken, Guid deckId) : ViewBase
@@ -5,19 +7,22 @@ public class DeckEditDialog(IState<bool> isOpen, RefreshToken refreshToken, Guid
     public override object? Build()
     {
         var factory = UseService<DataContextFactory>();
-        var deck = UseState<Deck?>();
-        var loading = UseState(true);
-        
-        UseEffect(async () =>
-        {
-            await using var context = factory.CreateDbContext();
-            deck.Set(context.Decks.FirstOrDefault(e => e.Id == deckId));
-            loading.Set(false);
-        });
+        var queryService = UseService<IQueryService>();
 
-        if (loading.Value) return null;
+        var deckQuery = UseQuery(
+            key: (nameof(DeckEditDialog), deckId),
+            fetcher: async ct =>
+            {
+                await using var db = factory.CreateDbContext();
+                return await db.Decks.FirstOrDefaultAsync(e => e.Id == deckId, ct);
+            },
+            tags: [(typeof(Deck), deckId)]
+        );
 
-        return deck
+        if (deckQuery.Loading || deckQuery.Value == null)
+            return Skeleton.Form().ToDialog(isOpen, "Edit Deck");
+
+        return deckQuery.Value
             .ToForm()
             .Remove(e => e.Id, e => e.CreatedAt, e => e.UpdatedAt, e => e.DeletedAt)
             .HandleSubmit(OnSubmit)
@@ -30,6 +35,7 @@ public class DeckEditDialog(IState<bool> isOpen, RefreshToken refreshToken, Guid
             modifiedDeck.UpdatedAt = DateTime.UtcNow;
             db.Decks.Update(modifiedDeck);
             await db.SaveChangesAsync();
+            queryService.RevalidateByTag((typeof(Deck), deckId));
             refreshToken.Refresh();
         }
     }

@@ -8,7 +8,7 @@ public class InvestorTypesDistributionPieChartView(DateTime fromDate, DateTime t
         var chart = UseState<object?>();
         var exception = UseState<Exception?>();
 
-        this.UseEffect(async () =>
+        UseEffect(async () =>
         {
             try
             {

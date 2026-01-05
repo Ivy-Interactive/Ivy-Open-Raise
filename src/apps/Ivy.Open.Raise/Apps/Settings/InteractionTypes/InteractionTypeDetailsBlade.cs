@@ -1,44 +1,45 @@
+using Ivy.Hooks;
+
 namespace Ivy.Open.Raise.Apps.Settings.InteractionTypes;
 
 public class InteractionTypeDetailsBlade(int interactionTypeId) : ViewBase
 {
     public override object? Build()
     {
-        var factory = this.UseService<DataContextFactory>();
-        var blades = this.UseContext<IBladeController>();
-        var refreshToken = this.UseRefreshToken();
-        var interactionType = this.UseState<InteractionType?>();
-        var interactionCount = this.UseState<int>();
-        var (alertView, showAlert) = this.UseAlert();
+        var factory = UseService<DataContextFactory>();
+        var blades = UseContext<IBladeService>();
+        var queryService = UseService<IQueryService>();
+        var refreshToken = UseRefreshToken();
 
-        this.UseEffect(async () =>
-        {
-            var db = factory.CreateDbContext();
-            interactionType.Set(await db.InteractionTypes.SingleOrDefaultAsync(e => e.Id == interactionTypeId));
-            interactionCount.Set(await db.Interactions.CountAsync(e => e.InteractionType == interactionTypeId));
-        }, [EffectTrigger.AfterInit(), refreshToken]);
-
-        if (interactionType.Value == null) return null;
-
-        var interactionTypeValue = interactionType.Value;
-
-        void OnDelete()
-        {
-            showAlert("Are you sure you want to delete this interaction type?", result =>
+        var query = UseQuery(
+            key: (nameof(InteractionTypeDetailsBlade), interactionTypeId),
+            fetcher: async ct =>
             {
-                if (result.IsOk())
-                {
-                    Delete(factory);
-                    blades.Pop(refresh: true);
-                }
-            }, "Delete Interaction Type");
-        };
+                await using var db = factory.CreateDbContext();
+                var interactionType = await db.InteractionTypes.SingleOrDefaultAsync(e => e.Id == interactionTypeId, ct);
+                var interactionCount = await db.Interactions.CountAsync(e => e.InteractionType == interactionTypeId, ct);
+                return (interactionType, interactionCount);
+            },
+            tags: [(typeof(InteractionType), interactionTypeId)]
+        );
+
+        if (query.Loading) return Skeleton.Card();
+        if (query.Value.interactionType == null)
+            return new Callout($"Interaction type '{interactionTypeId}' not found.").Variant(CalloutVariant.Warning);
+
+        var interactionTypeValue = query.Value.interactionType;
+        var interactionCount = query.Value.interactionCount;
 
         var dropDown = Icons.Ellipsis
             .ToButton()
             .Ghost()
             .WithDropDown(
-                MenuItem.Default("Delete").Disabled(interactionCount.Value>0).Icon(Icons.Trash).HandleSelect(OnDelete)
+                MenuItem.Default("Delete").Disabled(interactionCount > 0).Icon(Icons.Trash).HandleSelect(async () =>
+                {
+                    await DeleteAsync(factory);
+                    queryService.RevalidateByTag(typeof(InteractionType[]));
+                    blades.Pop();
+                })
             );
 
         var editBtn = new Button("Edit")
@@ -58,23 +59,26 @@ public class InteractionTypeDetailsBlade(int interactionTypeId) : ViewBase
         ).Title("Interaction Type Details");
 
         return new Fragment()
-               | (Layout.Vertical() | detailsCard)
-               | alertView;
+               | new BladeHeader(Text.Literal(interactionTypeValue.Name))
+               | (Layout.Vertical() | detailsCard);
     }
 
-    private void Delete(DataContextFactory dbFactory)
+    private async Task DeleteAsync(DataContextFactory dbFactory)
     {
-        using var db = dbFactory.CreateDbContext();
+        await using var db = dbFactory.CreateDbContext();
 
-        var connectedInteractionsCount = db.Interactions.Count(e => e.InteractionType == interactionTypeId);
+        var connectedInteractionsCount = await db.Interactions.CountAsync(e => e.InteractionType == interactionTypeId);
 
         if (connectedInteractionsCount > 0)
         {
             throw new InvalidOperationException($"Cannot delete interaction type with {connectedInteractionsCount} connected interaction(s).");
         }
 
-        var interactionType = db.InteractionTypes.FirstOrDefault(e => e.Id == interactionTypeId)!;
-        db.InteractionTypes.Remove(interactionType);
-        db.SaveChanges();
+        var interactionType = await db.InteractionTypes.FirstOrDefaultAsync(e => e.Id == interactionTypeId);
+        if (interactionType != null)
+        {
+            db.InteractionTypes.Remove(interactionType);
+            await db.SaveChangesAsync();
+        }
     }
 }

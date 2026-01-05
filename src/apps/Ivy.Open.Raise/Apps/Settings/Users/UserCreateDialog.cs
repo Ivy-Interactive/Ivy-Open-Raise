@@ -31,7 +31,6 @@ public class UserCreateDialog(IState<bool> isOpen, RefreshToken refreshToken) : 
 
         return details
             .ToForm()
-            .Builder(e => e.Title, e => e.ToTextAreaInput())
             .HandleSubmit(OnSubmit)
             .ToDialog(isOpen, title: "New User", submitTitle: "Create");
 

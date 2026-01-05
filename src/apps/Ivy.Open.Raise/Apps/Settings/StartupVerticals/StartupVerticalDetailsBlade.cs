@@ -1,3 +1,5 @@
+using Ivy.Hooks;
+
 namespace Ivy.Open.Raise.Apps.Settings.StartupVerticals;
 
 public class StartupVerticalDetailsBlade(int startupVerticalId) : ViewBase
@@ -5,40 +7,39 @@ public class StartupVerticalDetailsBlade(int startupVerticalId) : ViewBase
     public override object? Build()
     {
         var factory = UseService<DataContextFactory>();
-        var blades = UseContext<IBladeController>();
-        var refreshToken = this.UseRefreshToken();
-        var startupVertical = UseState<StartupVertical?>(() => null!);
-        var investorCount = this.UseState<int>();
-        var (alertView, showAlert) = this.UseAlert();
+        var blades = UseContext<IBladeService>();
+        var queryService = UseService<IQueryService>();
+        var refreshToken = UseRefreshToken();
 
-        UseEffect(async () =>
-        {
-            var db = factory.CreateDbContext();
-            startupVertical.Set(await db.StartupVerticals.SingleOrDefaultAsync(e => e.Id == startupVerticalId));
-            investorCount.Set(await db.Investors.CountAsync(e => e.StartupVerticals.Any(v => v.Id == startupVerticalId)));
-        }, [EffectTrigger.AfterInit(), refreshToken]);
-
-        if (startupVertical.Value == null) return null;
-
-        var startupVerticalValue = startupVertical.Value;
-
-        var onDelete = () =>
-        {
-            showAlert("Are you sure you want to delete this startup vertical?", result =>
+        var query = UseQuery(
+            key: (nameof(StartupVerticalDetailsBlade), startupVerticalId),
+            fetcher: async ct =>
             {
-                if (result.IsOk())
-                {
-                    Delete(factory);
-                    blades.Pop(refresh: true);
-                }
-            }, "Delete Startup Vertical");
-        };
+                await using var db = factory.CreateDbContext();
+                var startupVertical = await db.StartupVerticals.SingleOrDefaultAsync(e => e.Id == startupVerticalId, ct);
+                var investorCount = await db.Investors.CountAsync(e => e.StartupVerticals.Any(v => v.Id == startupVerticalId), ct);
+                return (startupVertical, investorCount);
+            },
+            tags: [(typeof(StartupVertical), startupVerticalId)]
+        );
+
+        if (query.Loading) return Skeleton.Card();
+        if (query.Value.startupVertical == null)
+            return new Callout($"Startup vertical '{startupVerticalId}' not found.").Variant(CalloutVariant.Warning);
+
+        var startupVerticalValue = query.Value.startupVertical;
+        var investorCount = query.Value.investorCount;
 
         var dropDown = Icons.Ellipsis
             .ToButton()
             .Ghost()
             .WithDropDown(
-                MenuItem.Default("Delete").Disabled(investorCount.Value>0).Icon(Icons.Trash).HandleSelect(onDelete)
+                MenuItem.Default("Delete").Disabled(investorCount > 0).Icon(Icons.Trash).HandleSelect(async () =>
+                {
+                    await DeleteAsync(factory);
+                    queryService.RevalidateByTag(typeof(StartupVertical[]));
+                    blades.Pop();
+                })
             );
 
         var editBtn = new Button("Edit")
@@ -58,23 +59,26 @@ public class StartupVerticalDetailsBlade(int startupVerticalId) : ViewBase
         ).Title("Startup Vertical Details");
 
         return new Fragment()
-               | (Layout.Vertical() | detailsCard)
-               | alertView;
+               | new BladeHeader(Text.Literal(startupVerticalValue.Name))
+               | (Layout.Vertical() | detailsCard);
     }
 
-    private void Delete(DataContextFactory dbFactory)
+    private async Task DeleteAsync(DataContextFactory dbFactory)
     {
-        using var db = dbFactory.CreateDbContext();
+        await using var db = dbFactory.CreateDbContext();
 
-        var connectedInvestorsCount = db.Investors.Count(e => e.StartupVerticals.Any(v => v.Id == startupVerticalId));
+        var connectedInvestorsCount = await db.Investors.CountAsync(e => e.StartupVerticals.Any(v => v.Id == startupVerticalId));
 
         if (connectedInvestorsCount > 0)
         {
             throw new InvalidOperationException($"Cannot delete startup vertical with {connectedInvestorsCount} connected investor(s).");
         }
 
-        var startupVertical = db.StartupVerticals.FirstOrDefault(e => e.Id == startupVerticalId)!;
-        db.StartupVerticals.Remove(startupVertical);
-        db.SaveChanges();
+        var startupVertical = await db.StartupVerticals.FirstOrDefaultAsync(e => e.Id == startupVerticalId);
+        if (startupVertical != null)
+        {
+            db.StartupVerticals.Remove(startupVertical);
+            await db.SaveChangesAsync();
+        }
     }
 }

@@ -24,7 +24,6 @@ server.UseBuilder(builder =>
 
 server.Services.UseSmtp();
 server.Services.UseBlobs();
-server.Services.UseGlobalService();
 
 if (server.Configuration.GetValue<string>("OpenAi:ApiKey") is { } openAiApiKey &&
     server.Configuration.GetValue<string>("OpenAi:Endpoint") is { } openAiEndpoint)

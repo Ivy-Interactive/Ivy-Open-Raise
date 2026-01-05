@@ -1,3 +1,5 @@
+using Ivy.Hooks;
+
 namespace Ivy.Open.Raise.Apps.Settings.StartupVerticals;
 
 public class StartupVerticalEditSheet(IState<bool> isOpen, RefreshToken refreshToken, int startupVerticalId) : ViewBase
@@ -5,19 +7,22 @@ public class StartupVerticalEditSheet(IState<bool> isOpen, RefreshToken refreshT
     public override object? Build()
     {
         var factory = UseService<DataContextFactory>();
-        var details = UseState<StartupVertical?>();
-        var loading = UseState(true);
+        var queryService = UseService<IQueryService>();
 
-        UseEffect(async () =>
-        {
-            await using var context = factory.CreateDbContext();
-            details.Set(await context.StartupVerticals.FirstOrDefaultAsync(e => e.Id == startupVerticalId));
-            loading.Set(false);
-        });
+        var startupVerticalQuery = UseQuery(
+            key: (nameof(StartupVerticalEditSheet), startupVerticalId),
+            fetcher: async ct =>
+            {
+                await using var db = factory.CreateDbContext();
+                return await db.StartupVerticals.FirstOrDefaultAsync(e => e.Id == startupVerticalId, ct);
+            },
+            tags: [(typeof(StartupVertical), startupVerticalId)]
+        );
 
-        if (loading.Value) return null;
+        if (startupVerticalQuery.Loading || startupVerticalQuery.Value == null)
+            return Skeleton.Form().ToSheet(isOpen, "Edit Startup Vertical");
 
-        return details
+        return startupVerticalQuery.Value
             .ToForm()
             .Remove(e => e.Id)
             .Place(e => e.Name)
@@ -30,6 +35,7 @@ public class StartupVerticalEditSheet(IState<bool> isOpen, RefreshToken refreshT
             await using var db = factory.CreateDbContext();
             db.StartupVerticals.Update(modifiedStartupVertical);
             await db.SaveChangesAsync();
+            queryService.RevalidateByTag((typeof(StartupVertical), startupVerticalId));
             refreshToken.Refresh();
         }
     }

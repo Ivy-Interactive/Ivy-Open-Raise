@@ -1,3 +1,5 @@
+using Ivy.Hooks;
+
 namespace Ivy.Open.Raise.Apps.Settings.DealStates;
 
 public class DealStateEditSheet(IState<bool> isOpen, RefreshToken refreshToken, int dealStateId) : ViewBase
@@ -5,19 +7,22 @@ public class DealStateEditSheet(IState<bool> isOpen, RefreshToken refreshToken, 
     public override object? Build()
     {
         var factory = UseService<DataContextFactory>();
-        var dealState = UseState<DealState?>();
-        var loading = UseState(true);
+        var queryService = UseService<IQueryService>();
 
-        UseEffect(async () =>
-        {
-            await using var context = factory.CreateDbContext();
-            dealState.Set(await context.DealStates.FirstOrDefaultAsync(e => e.Id == dealStateId));
-            loading.Set(false);
-        });
+        var dealStateQuery = UseQuery(
+            key: (nameof(DealStateEditSheet), dealStateId),
+            fetcher: async ct =>
+            {
+                await using var db = factory.CreateDbContext();
+                return await db.DealStates.FirstOrDefaultAsync(e => e.Id == dealStateId, ct);
+            },
+            tags: [(typeof(DealState), dealStateId)]
+        );
 
-        if (loading.Value) return null;
+        if (dealStateQuery.Loading || dealStateQuery.Value == null)
+            return Skeleton.Form().ToSheet(isOpen, "Edit Deal State");
 
-        return dealState
+        return dealStateQuery.Value
             .ToForm()
             .Remove(e => e.Id)
             .Place(e => e.Name)
@@ -30,6 +35,7 @@ public class DealStateEditSheet(IState<bool> isOpen, RefreshToken refreshToken, 
             await using var db = factory.CreateDbContext();
             db.DealStates.Update(modifiedDealState);
             await db.SaveChangesAsync();
+            queryService.RevalidateByTag((typeof(DealState), dealStateId));
             refreshToken.Refresh();
         }
     }
