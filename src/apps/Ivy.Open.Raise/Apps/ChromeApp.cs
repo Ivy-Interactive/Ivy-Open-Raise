@@ -27,6 +27,14 @@ public class ChromeApp : ViewBase
     
     public override object? Build()
     {
+        var settings = Context.UseOrganizationSettings();
+        if (settings.Loading) return null; 
+        
+        if(!settings.Value.OnboardingCompleted)
+        {
+            return new OnboardingApp();
+        }
+
         return new DefaultSidebarChrome(Settings);
     }
 }

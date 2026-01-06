@@ -73,4 +73,7 @@ public partial class OrganizationSetting
 
     [Column("startup_gov_id")]
     public string? StartupGovId { get; set; }
+    
+    [Column("onboarding_completed")]
+    public bool OnboardingCompleted { get; set; }
 }

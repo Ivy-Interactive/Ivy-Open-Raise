@@ -1,4 +1,4 @@
-using Ivy.Hooks;
+﻿using Ivy.Hooks;
 
 namespace Ivy.Open.Raise.Apps;
 
@@ -8,13 +8,12 @@ public static class Shared
     {
         var factory = context.UseService<DataContextFactory>();
         return context.UseQuery(
-            key: nameof(UseOrganizationSettings),
+            key: typeof(OrganizationSetting),
             fetcher: async ct =>
             {
                 await using var db = factory.CreateDbContext();
                 return await db.OrganizationSettings.FirstOrDefaultAsync(ct);
-            },
-            tags: [typeof(OrganizationSetting)]
+            }
         );
     }
 

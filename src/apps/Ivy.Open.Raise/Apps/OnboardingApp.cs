@@ -103,22 +103,12 @@ public class CompanyStepView(IState<int> stepperIndex) : ViewBase
         var factory = UseService<DataContextFactory>();
         var queryService = UseService<IQueryService>();
 
-        var settingsQuery = UseQuery(
-            key: nameof(CompanyStepView),
-            fetcher: async ct =>
-            {
-                await using var db = factory.CreateDbContext();
-                var settings = await db.OrganizationSettings.FirstOrDefaultAsync(ct)
-                    ?? throw new InvalidOperationException("Organization settings not found.");
-                return CompanyDetails.From(settings);
-            },
-            tags: [typeof(OrganizationSetting)]
-        );
+        var settingsQuery = Context.UseOrganizationSettings();
 
         if (settingsQuery.Loading || settingsQuery.Value == null)
             return Text.Muted("Loading...");
 
-        var details = UseState(() => settingsQuery.Value);
+        var details = UseState(() => CompanyDetails.From(settingsQuery.Value));
 
         return Layout.Vertical()
                | Text.H2("Tell us about your startup")
@@ -190,32 +180,22 @@ public class RaiseStepView(IState<int> stepperIndex) : ViewBase
     {
         var factory = UseService<DataContextFactory>();
 
-        var settingsQuery = UseQuery(
-            key: nameof(RaiseStepView),
-            fetcher: async ct =>
-            {
-                await using var db = factory.CreateDbContext();
-                var settings = await db.OrganizationSettings.FirstOrDefaultAsync(ct)
-                    ?? throw new InvalidOperationException("Organization settings not found.");
-                return (details: RaiseDetails.From(settings), currency: settings.CurrencyId);
-            },
-            tags: [typeof(OrganizationSetting)]
-        );
+        var settingsQuery = Context.UseOrganizationSettings();
 
-        if (settingsQuery.Loading || settingsQuery.Value.details == null)
+        if (settingsQuery.Loading || settingsQuery.Value == null)
             return Text.Muted("Loading...");
 
-        var details = UseState(() => settingsQuery.Value.details);
-        var currency = settingsQuery.Value.currency;
+        var details = UseState(() => RaiseDetails.From(settingsQuery.Value));
+        var currencyId = settingsQuery.Value.CurrencyId;
 
         return Layout.Vertical()
                | Text.H2("How much are you raising?")
                | details.ToForm().Large()
                    .PlaceHorizontal(e => e.RaiseTargetMin, e => e.RaiseTargetMax)
                    .Builder(e => e.StartupStageId, SelectStartupStageBuilder)
-                   .Builder(e => e.RaiseTargetMin, e => e.ToMoneyInput(currency: currency))
-                   .Builder(e => e.RaiseTargetMax, e => e.ToMoneyInput(currency: currency))
-                   .Builder(e => e.RaiseTicketSize, e => e.ToMoneyInput(currency: currency))
+                   .Builder(e => e.RaiseTargetMin, e => e.ToMoneyInput(currency: currencyId))
+                   .Builder(e => e.RaiseTargetMax, e => e.ToMoneyInput(currency: currencyId))
+                   .Builder(e => e.RaiseTicketSize, e => e.ToMoneyInput(currency: currencyId))
                    .SubmitBuilder((saving) => new Button("Next").Icon(Icons.ArrowRight, Align.Right).Disabled(saving).Loading(saving))
                    .HandleSubmit(OnSubmit)
             ;
@@ -254,6 +234,7 @@ public class DeckStepView(IState<int> stepperIndex) : ViewBase
     {
         var factory = UseService<DataContextFactory>();
         var details = UseState(new DeckDetails());
+        var settingsMutation = UseMutation(typeof(OrganizationSetting));
 
         return Layout.Vertical()
                | Text.H2("Upload your deck")
@@ -268,7 +249,19 @@ public class DeckStepView(IState<int> stepperIndex) : ViewBase
         {
             if (details.File?.Content == null) return;
             await CreateDeckAsync(factory, "Deck", details.File);
-            stepperIndex.Incr();
+            
+            await using var context = factory.CreateDbContext();
+
+            var settings = await context.OrganizationSettings
+                .FirstOrDefaultAsync();
+
+            if (settings == null) return;
+
+            settings.OnboardingCompleted = true;
+
+            await context.SaveChangesAsync();
+
+            settingsMutation.Revalidate();
         }
     }
 }
