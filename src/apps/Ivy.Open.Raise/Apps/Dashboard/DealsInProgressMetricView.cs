@@ -4,24 +4,31 @@ public class DealsInProgressMetricView(DateTime fromDate, DateTime toDate) : Vie
 {
     public override object? Build()
     {
-        var factory = UseService<DataContextFactory>();
-        
-        async Task<MetricRecord> CalculateDealsInProgress()
-        {
-            await using var db = factory.CreateDbContext();
-            
-            var current = await db.Deals.Where(d => !d.DealState.IsFinal)
-                .CountAsync();
-
-            return new MetricRecord(
-                MetricFormatted: current.ToString("N0")
-            );
-        }
-
         return new MetricView(
             "Deals in Progress",
             Icons.Clock,
-            CalculateDealsInProgress
+            UseMetricData
+        );
+    }
+
+    private QueryResult<MetricRecord> UseMetricData(IViewContext context)
+    {
+        var factory = context.UseService<DataContextFactory>();
+
+        return context.UseQuery(
+            key: (nameof(DealsInProgressMetricView), fromDate, toDate),
+            fetcher: async ct =>
+            {
+                await using var db = factory.CreateDbContext();
+
+                var current = await db.Deals.Where(d => !d.DealState.IsFinal)
+                    .CountAsync(ct);
+
+                return new MetricRecord(
+                    MetricFormatted: current.ToString("N0")
+                );
+            },
+            options: new QueryOptions { Expiration = TimeSpan.FromMinutes(5) }
         );
     }
 }
