@@ -16,7 +16,7 @@ server.AddConnectionsFromAssembly();
 
 server.UseChrome<ChromeApp>();
 
-server.UseBuilder(builder =>
+server.UseWebApplicationBuilder(builder =>
 {
     builder.Services.AddControllers()
         .AddApplicationPart(Assembly.GetExecutingAssembly());
