@@ -1,3 +1,4 @@
+using Ivy;
 using Ivy.Connections;
 using Ivy.Services;
 
@@ -32,9 +33,9 @@ public class DataConnection : IConnection, IHaveSecrets
             .ToArray();
     }
 
-    public void RegisterServices(IServiceCollection services)
+    public void RegisterServices(Server server)
     {
-        services.AddSingleton<DataContextFactory>();
+        server.Services.AddSingleton<DataContextFactory>();
     }
 
     public Secret[] GetSecrets()
