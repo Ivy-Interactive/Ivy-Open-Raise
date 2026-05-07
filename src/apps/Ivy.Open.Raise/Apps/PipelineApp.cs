@@ -1,9 +1,8 @@
-using Ivy.Hooks;
 using Ivy.Open.Raise.Apps.Pipeline;
 
 namespace Ivy.Open.Raise.Apps;
 
-[App(icon: Icons.Kanban, path: ["Apps"], searchHints: ["pipeline", "kanban", "board", "deals"], title: "Pipeline")]
+[App(icon: Icons.Kanban, group: ["Apps"], searchHints: ["pipeline", "kanban", "board", "deals"], title: "Pipeline")]
 public class PipelineApp : ViewBase
 {
     public override object? Build()
@@ -40,7 +39,7 @@ public class PipelineApp : ViewBase
             .ColumnWidth(Size.Units(35))
             .ColumnOrder(deal => deal.DealStateOrder)
             .CardBuilder(CardBuilder)
-            .HandleMove(OnMove)
+            .OnMove(OnMove)
             ;
 
         var header = Layout.Horizontal() | createBtn;
@@ -60,7 +59,7 @@ public class PipelineApp : ViewBase
             {
                 var deleteBtn = MenuItem.Default("Delete")
                     .Icon(Icons.Trash)
-                    .HandleSelect(async () =>
+                    .OnSelect(async () =>
                     {
                         var source = deals.Value.IsDefaultOrEmpty
                             ? dealsQuery.Value
@@ -88,8 +87,8 @@ public class PipelineApp : ViewBase
                     .Small()
                     .Title(deal.InvestorName)
                     .Icon(dropDown)
-                    .HandleClick(() => showEdit(deal.Id))
-                    .Hover(CardHoverVariant.Pointer)
+                    .OnClick(() => showEdit(deal.Id))
+                    .Hover(HoverEffect.Pointer)
                     .Key(deal.Id);
             }, [deal.Id]);
         }
@@ -256,11 +255,11 @@ public class PipelineApp : ViewBase
 
             if (AmountFrom.HasValue)
             {
-                amount = Ivy.Utils.FormatNumber(AmountFrom.Value, 1);
+                amount = StringHelper.FormatNumber(AmountFrom.Value, 1);
 
                 if (AmountTo.HasValue && AmountTo.Value != AmountFrom.Value)
                 {
-                    amount = $"{amount} - {Ivy.Utils.FormatNumber(AmountFrom.Value, 1)}";
+                    amount = $"{amount} - {StringHelper.FormatNumber(AmountFrom.Value, 1)}";
                 }
             }
 

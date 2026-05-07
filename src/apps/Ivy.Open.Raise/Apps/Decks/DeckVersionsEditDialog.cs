@@ -1,4 +1,3 @@
-using Ivy.Hooks;
 
 namespace Ivy.Open.Raise.Apps.Decks;
 
@@ -25,7 +24,7 @@ public class DeckVersionsEditDialog(IState<bool> isOpen, RefreshToken refreshTok
         return versionQuery.Value
             .ToForm()
             .Remove(e => e.Id, e => e.DeckId, e => e.BlobName, e => e.ContentType, e => e.FileSize, e => e.FileName, e => e.CreatedAt, e => e.UpdatedAt, e => e.DeletedAt)
-            .HandleSubmit(OnSubmit)
+            .OnSubmit(OnSubmit)
             .ToDialog(isOpen, "Edit Version");
 
         async Task OnSubmit(DeckVersion? modifiedDeckVersion)

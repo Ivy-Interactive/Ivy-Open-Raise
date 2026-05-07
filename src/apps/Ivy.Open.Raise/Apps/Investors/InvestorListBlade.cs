@@ -1,4 +1,3 @@
-using Ivy.Hooks;
 
 namespace Ivy.Open.Raise.Apps.Investors;
 
@@ -8,7 +7,7 @@ public class InvestorListBlade : ViewBase
 
     public override object? Build()
     {
-        var blades = UseContext<IBladeService>();
+        var blades = UseContext<IBladeContext>();
         var factory = UseService<DataContextFactory>();
         var refreshToken = UseRefreshToken();
 

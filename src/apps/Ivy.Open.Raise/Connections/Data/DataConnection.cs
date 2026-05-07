@@ -1,6 +1,4 @@
 using Ivy;
-using Ivy.Connections;
-using Ivy.Services;
 
 namespace Ivy.Open.Raise.Connections.Data;
 
@@ -36,6 +34,26 @@ public class DataConnection : IConnection, IHaveSecrets
     public void RegisterServices(Server server)
     {
         server.Services.AddSingleton<DataContextFactory>();
+    }
+
+    public async Task<(bool ok, string? message)> TestConnection(IConfiguration config)
+    {
+        try
+        {
+            var connectionString = config.GetConnectionString("Data");
+            if (string.IsNullOrWhiteSpace(connectionString))
+                return (false, "Connection string 'Data' is not configured.");
+
+            var optionsBuilder = new DbContextOptionsBuilder<DataContext>();
+            optionsBuilder.UseNpgsql(connectionString);
+            await using var context = new DataContext(optionsBuilder.Options);
+            await context.Database.CanConnectAsync();
+            return (true, "Connection successful.");
+        }
+        catch (Exception ex)
+        {
+            return (false, ex.Message);
+        }
     }
 
     public Secret[] GetSecrets()

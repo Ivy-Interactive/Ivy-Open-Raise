@@ -1,4 +1,3 @@
-using Ivy.Hooks;
 using static Ivy.Open.Raise.Apps.Shared;
 
 namespace Ivy.Open.Raise.Apps.Decks;
@@ -37,7 +36,7 @@ public class DeckVersionsCreateDialog(IState<bool> isOpen, RefreshToken refreshT
         return request
             .ToForm()
             .Builder(e => e.File, FileUploadBuilder)
-            .HandleSubmit(OnSubmit)
+            .OnSubmit(OnSubmit)
             .ToDialog(isOpen, title: "New Version", submitTitle: "Create");
 
         async Task OnSubmit(DeckVersionCreateRequest? modifiedRequest)
@@ -61,7 +60,7 @@ public class DeckVersionsCreateDialog(IState<bool> isOpen, RefreshToken refreshT
                 DeckId = deckId,
                 Name = modifiedRequest.Name,
                 IsPrimary = modifiedRequest.MakeCurrent,
-                BlobName = modifiedRequest.File.Content.BlobName,
+                BlobName = modifiedRequest.File.Content.Name,
                 ContentType = modifiedRequest.File.ContentType,
                 FileSize = modifiedRequest.File.Length,
                 FileName = modifiedRequest.File.FileName,

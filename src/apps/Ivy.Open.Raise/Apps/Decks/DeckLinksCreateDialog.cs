@@ -17,7 +17,7 @@ public class DeckLinksCreateDialog(IState<bool> isOpen, RefreshToken refreshToke
         return details
             .ToForm()
             .Builder(e => e.ContactId, e => e.ToAsyncSelectInput(Shared.UseContactSearch, Shared.UseContactLookup, placeholder: "Select Contact"))
-            .HandleSubmit(OnSubmit)
+            .OnSubmit(OnSubmit)
             .ToDialog(isOpen, title: "New Link", submitTitle: "Create");
 
         async Task OnSubmit(DeckLinkCreateRequest request)

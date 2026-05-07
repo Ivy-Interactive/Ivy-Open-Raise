@@ -1,4 +1,3 @@
-using Ivy.Hooks;
 using Ivy.Open.Raise.Apps.Pipeline;
 
 namespace Ivy.Open.Raise.Apps.Investors;
@@ -10,7 +9,7 @@ public class InvestorDetailsBlade(Guid investorId) : ViewBase
     public override object? Build()
     {
         var factory = UseService<DataContextFactory>();
-        var blades = UseContext<IBladeService>();
+        var blades = UseContext<IBladeContext>();
         var queryService = UseService<IQueryService>();
         var refreshToken = UseRefreshToken();
         var (editView, showEdit) = UseTrigger((isOpen) => new InvestorEditSheet(isOpen, refreshToken, investorId));
@@ -62,13 +61,13 @@ public class InvestorDetailsBlade(Guid investorId) : ViewBase
             .ToButton()
             .Ghost()
             .WithDropDown(
-                MenuItem.Default("Delete").Icon(Icons.Trash).HandleSelect(async () =>
+                MenuItem.Default("Delete").Icon(Icons.Trash).OnSelect(async () =>
                 {
                     await DeleteAsync(factory);
                     queryService.RevalidateByTag(typeof(Investor[]));
                     blades.Pop();
                 }),
-                MenuItem.Default("Edit").Icon(Icons.Pencil).HandleSelect(showEdit)
+                MenuItem.Default("Edit").Icon(Icons.Pencil).OnSelect(showEdit)
             );
 
         var addDealBtn = new Button("Add Deal")
@@ -96,7 +95,7 @@ public class InvestorDetailsBlade(Guid investorId) : ViewBase
             {
                 investorValue.Name,
                 Type = investorValue.InvestorType.Name,
-                Address = (Layout.Vertical().Align(Align.Right).Gap(0)
+                Address = (Layout.Vertical().AlignContent(Align.Right).Gap(0)
                            | investorValue.AddressStreet
                            | (investorValue.AddressZip + " " + investorValue.AddressCity).Trim().NullIfEmpty()
                            | investorValue.AddressCountry?.Name),
@@ -104,17 +103,17 @@ public class InvestorDetailsBlade(Guid investorId) : ViewBase
                 CheckSize = Utils.FormatMoneyRange(currency, investorValue.CheckSizeMin, investorValue.CheckSizeMax),
             }
             .ToDetails()
-            .MultiLine(e => e.Thesis)
+            .Multiline(e => e.Thesis)
             .RemoveEmpty();
 
         var detailsCard = new Card(
             content: details,
-            footer: Layout.Horizontal().Gap(1).Align(Align.Right)
+            footer: Layout.Horizontal().Gap(1).AlignContent(Align.Right)
                     | addDealBtn
                     | addContactBtn
         )
             .Title("Investor Details")
-            .Icon(Layout.Horizontal().Gap(0).Align(Align.Right) | socials | dropDown).Width(Size.Units(100));
+            .Icon(Layout.Horizontal().Gap(0).AlignContent(Align.Right) | socials | dropDown).Width(Size.Units(100));
 
         var dealCards = deals.Select(e => new DealCardView(e, refreshToken, currency)).ToArray();
         var contactCards = contacts.Select(e => new ContactCardView(e, refreshToken)).ToArray();
@@ -148,7 +147,7 @@ public class DealCardView(DealDto deal, RefreshToken refreshToken, string curren
 
         var deleteBtn = MenuItem.Default("Delete")
             .Icon(Icons.Trash)
-            .HandleSelect(async () =>
+            .OnSelect(async () =>
             {
                 await DeleteAsync(factory);
                 queryService.RevalidateByTag(typeof(Deal[]));
@@ -160,7 +159,7 @@ public class DealCardView(DealDto deal, RefreshToken refreshToken, string curren
             .Ghost()
             .WithDropDown(
                 deleteBtn,
-                MenuItem.Default("Edit").Icon(Icons.Pencil).HandleSelect(showEdit)
+                MenuItem.Default("Edit").Icon(Icons.Pencil).OnSelect(showEdit)
             );
 
         var badge = new Badge(deal.State).Outline();
@@ -206,7 +205,7 @@ public class ContactCardView(Contact contact, RefreshToken refreshToken) : ViewB
 
         var deleteBtn = MenuItem.Default("Delete")
             .Icon(Icons.Trash)
-            .HandleSelect(async () =>
+            .OnSelect(async () =>
             {
                 await DeleteAsync(factory);
                 queryService.RevalidateByTag(typeof(Contact[]));
@@ -218,7 +217,7 @@ public class ContactCardView(Contact contact, RefreshToken refreshToken) : ViewB
             .Ghost()
             .WithDropDown(
                 deleteBtn,
-                MenuItem.Default("Edit").Icon(Icons.Pencil).HandleSelect(showEdit)
+                MenuItem.Default("Edit").Icon(Icons.Pencil).OnSelect(showEdit)
             );
 
         if (!string.IsNullOrEmpty(contact.Email))
@@ -236,7 +235,7 @@ public class ContactCardView(Contact contact, RefreshToken refreshToken) : ViewB
 
         var body = new Card(content)
             .Title(contact.FirstName + " " + contact.LastName)
-            .Icon(Layout.Horizontal().Gap(0).Align(Align.Right) | details | dropDown);
+            .Icon(Layout.Horizontal().Gap(0).AlignContent(Align.Right) | details | dropDown);
 
         return new Fragment()
                | body

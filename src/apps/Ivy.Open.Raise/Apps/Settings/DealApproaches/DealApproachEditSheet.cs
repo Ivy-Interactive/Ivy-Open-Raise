@@ -1,4 +1,3 @@
-using Ivy.Hooks;
 
 namespace Ivy.Open.Raise.Apps.Settings.DealApproaches;
 
@@ -25,7 +24,7 @@ public class DealApproachEditSheet(IState<bool> isOpen, RefreshToken refreshToke
         return dealApproachQuery.Value
             .ToForm()
             .Remove(e => e.Id)
-            .HandleSubmit(OnSubmit)
+            .OnSubmit(OnSubmit)
             .ToSheet(isOpen, "Edit Deal Approach");
 
         async Task OnSubmit(DealApproach? modifiedDealApproach)

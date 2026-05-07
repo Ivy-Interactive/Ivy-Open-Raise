@@ -1,4 +1,3 @@
-using Ivy.Hooks;
 
 namespace Ivy.Open.Raise.Apps.Settings.DealStates;
 
@@ -26,7 +25,7 @@ public class DealStateEditSheet(IState<bool> isOpen, RefreshToken refreshToken, 
             .ToForm()
             .Remove(e => e.Id)
             .Place(e => e.Name)
-            .HandleSubmit(OnSubmit)
+            .OnSubmit(OnSubmit)
             .ToSheet(isOpen, "Edit Deal State");
 
         async Task OnSubmit(DealState? modifiedDealState)

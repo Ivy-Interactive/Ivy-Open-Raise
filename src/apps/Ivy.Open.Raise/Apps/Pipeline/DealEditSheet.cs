@@ -1,4 +1,3 @@
-using Ivy.Hooks;
 using static Ivy.Open.Raise.Apps.Shared;
 
 namespace Ivy.Open.Raise.Apps.Pipeline;
@@ -37,11 +36,11 @@ public class DealEditSheet(IState<bool> isOpen, RefreshToken refreshToken, Guid 
             .Place(e => e.Contact) //todo ivy: why isn't Contact placed correctly
             .PlaceHorizontal(e => e.AmountFrom, e => e.AmountTo)
             .Builder(e => e.Priority, e => e.ToFeedbackInput())
-            .Builder(e => e.Notes, e => e.ToTextAreaInput())
-            .Builder(e => e.NextActionNotes, e => e.ToTextAreaInput())
+            .Builder(e => e.Notes, e => e.ToTextareaInput())
+            .Builder(e => e.NextActionNotes, e => e.ToTextareaInput())
             .Remove(e => e.Id, e => e.CreatedAt, e => e.UpdatedAt, e => e.DeletedAt, e => e.Order)
             .Builder(e => e.NextAction, e => e.ToDateInput())
-            .HandleSubmit(OnSubmit)
+            .OnSubmit(OnSubmit)
             .ToSheet(isOpen, "Edit Deal");
 
         async Task OnSubmit(Deal? modifiedDeal)

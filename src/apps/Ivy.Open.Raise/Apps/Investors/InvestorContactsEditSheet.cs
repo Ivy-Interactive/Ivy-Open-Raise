@@ -1,4 +1,3 @@
-using Ivy.Hooks;
 
 namespace Ivy.Open.Raise.Apps.Investors;
 
@@ -31,7 +30,7 @@ public class InvestorContactsEditSheet(IState<bool> isOpen, RefreshToken refresh
             .Remove(e => e.Id, e => e.CreatedAt, e => e.UpdatedAt, e => e.DeletedAt, e => e.InvestorId)
             .Label(e => e.LinkedinUrl, "LinkedIn Profile")
             .Label(e => e.XUrl, "X Profile")
-            .HandleSubmit(OnSubmit)
+            .OnSubmit(OnSubmit)
             .ToSheet(isOpen, "Edit Contact");
 
         async Task OnSubmit(Contact? modifiedContact)

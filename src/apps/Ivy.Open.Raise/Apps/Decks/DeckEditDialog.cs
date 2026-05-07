@@ -1,4 +1,3 @@
-using Ivy.Hooks;
 
 namespace Ivy.Open.Raise.Apps.Decks;
 
@@ -25,7 +24,7 @@ public class DeckEditDialog(IState<bool> isOpen, RefreshToken refreshToken, Guid
         return deckQuery.Value
             .ToForm()
             .Remove(e => e.Id, e => e.CreatedAt, e => e.UpdatedAt, e => e.DeletedAt)
-            .HandleSubmit(OnSubmit)
+            .OnSubmit(OnSubmit)
             .ToDialog(isOpen, "Edit Deck");
 
         async Task OnSubmit(Deck? modifiedDeck)

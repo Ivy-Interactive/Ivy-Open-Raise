@@ -1,5 +1,4 @@
 using System.Reflection;
-using Ivy.Filters;
 using Ivy.Open.Raise;
 using Ivy.Open.Raise.Apps;
 using Microsoft.Extensions.AI;
@@ -14,7 +13,7 @@ server.UseHotReload();
 server.AddAppsFromAssembly();
 server.AddConnectionsFromAssembly();
 
-server.UseChrome<ChromeApp>();
+server.UseAppShell<ChromeApp>();
 
 server.UseWebApplicationBuilder(builder =>
 {

@@ -1,4 +1,3 @@
-using Ivy.Hooks;
 
 namespace Ivy.Open.Raise.Apps.Settings.Users;
 
@@ -30,7 +29,7 @@ public class UserEditSheet(IState<bool> isOpen, RefreshToken refreshToken, Guid 
             .Builder(e => e.LinkedinUrl, e => e.ToUrlInput())
             .Builder(e => e.XUrl, e => e.ToUrlInput())
             .Remove(e => e.Id, e => e.CreatedAt, e => e.UpdatedAt, e => e.DeletedAt)
-            .HandleSubmit(OnSubmit)
+            .OnSubmit(OnSubmit)
             .ToSheet(isOpen, "Edit User");
 
         async Task OnSubmit(User? modifiedUser)

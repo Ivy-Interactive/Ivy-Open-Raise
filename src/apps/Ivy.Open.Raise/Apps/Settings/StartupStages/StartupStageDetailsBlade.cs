@@ -1,4 +1,3 @@
-using Ivy.Hooks;
 
 namespace Ivy.Open.Raise.Apps.Settings.StartupStages;
 
@@ -7,7 +6,7 @@ public class StartupStageDetailsBlade(int startupStageId) : ViewBase
     public override object? Build()
     {
         var factory = UseService<DataContextFactory>();
-        var blades = UseContext<IBladeService>();
+        var blades = UseContext<IBladeContext>();
         var queryService = UseService<IQueryService>();
         var refreshToken = UseRefreshToken();
 
@@ -34,7 +33,7 @@ public class StartupStageDetailsBlade(int startupStageId) : ViewBase
             .ToButton()
             .Ghost()
             .WithDropDown(
-                MenuItem.Default("Delete").Disabled(organizationSettingsCount > 0).Icon(Icons.Trash).HandleSelect(async () =>
+                MenuItem.Default("Delete").Disabled(organizationSettingsCount > 0).Icon(Icons.Trash).OnSelect(async () =>
                 {
                     await DeleteAsync(factory);
                     queryService.RevalidateByTag(typeof(StartupStage[]));
@@ -53,7 +52,7 @@ public class StartupStageDetailsBlade(int startupStageId) : ViewBase
                 startupStageValue.Name,
                 OrganizationSettings = organizationSettingsCount
             }.ToDetails(),
-            footer: Layout.Horizontal().Width(Size.Full()).Gap(1).Align(Align.Right)
+            footer: Layout.Horizontal().Width(Size.Full()).Gap(1).AlignContent(Align.Right)
                     | dropDown
                     | editBtn
         ).Title("Startup Stage Details");

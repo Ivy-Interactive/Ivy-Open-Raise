@@ -1,4 +1,3 @@
-using Ivy.Hooks;
 
 namespace Ivy.Open.Raise.Apps.Settings.InvestorTypes;
 
@@ -26,7 +25,7 @@ public class InvestorTypeEditSheet(IState<bool> isOpen, RefreshToken refreshToke
             .ToForm()
             .Remove(e => e.Id)
             .Place(e => e.Name)
-            .HandleSubmit(OnSubmit)
+            .OnSubmit(OnSubmit)
             .ToSheet(isOpen, "Edit Investor Type");
 
         async Task OnSubmit(InvestorType? modifiedInvestorType)

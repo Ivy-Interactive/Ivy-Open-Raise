@@ -31,7 +31,7 @@ public class UserCreateDialog(IState<bool> isOpen, RefreshToken refreshToken) : 
 
         return details
             .ToForm()
-            .HandleSubmit(OnSubmit)
+            .OnSubmit(OnSubmit)
             .ToDialog(isOpen, title: "New User", submitTitle: "Create");
 
         async Task OnSubmit(UserCreateRequest request)

@@ -1,4 +1,3 @@
-using Ivy.Hooks;
 
 namespace Ivy.Open.Raise.Apps.Decks;
 
@@ -31,7 +30,7 @@ public class DeckVersionsBlade(Guid deckId) : ViewBase
 
         MenuItem CreateDeleteBtn(Guid id) => MenuItem.Default("Delete")
             .Icon(Icons.Trash)
-            .HandleSelect(async () =>
+            .OnSelect(async () =>
             {
                 await DeleteAsync(factory, id);
                 versionsQuery.Mutator.Revalidate();
@@ -58,15 +57,15 @@ public class DeckVersionsBlade(Guid deckId) : ViewBase
                 dv.Name,
                 FileName = (Layout.Vertical().Gap(0)
                             | new Button(dv.FileName).Variant(ButtonVariant.Inline)
-                            | Text.Muted(Ivy.Utils.FormatBytes(dv.FileSize))),
+                            | Text.Muted(StringHelper.FormatBytes(dv.FileSize))),
                 _ = Layout.Horizontal().Gap(1)
                     | Icons.Ellipsis
                         .ToButton()
                         .Ghost()
                         .WithDropDown(
                             CreateDeleteBtn(dv.Id),
-                            MenuItem.Default("Edit").Icon(Icons.Pencil).HandleSelect(() => showEdit(dv.Id)),
-                            MenuItem.Default("Make Current").Icon(Icons.Crown).HandleSelect(() => OnMakeCurrent(dv.Id))
+                            MenuItem.Default("Edit").Icon(Icons.Pencil).OnSelect(() => showEdit(dv.Id)),
+                            MenuItem.Default("Make Current").Icon(Icons.Crown).OnSelect(() => OnMakeCurrent(dv.Id))
                         )
             })
             .ToTable()

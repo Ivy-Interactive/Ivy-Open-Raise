@@ -15,7 +15,7 @@ public class InvestorTypeCreateDialog(IState<bool> isOpen, RefreshToken refreshT
 
         return details
             .ToForm()
-            .HandleSubmit(OnSubmit)
+            .OnSubmit(OnSubmit)
             .ToDialog(isOpen, title: "New Investor Type", submitTitle: "Create");
 
         async Task OnSubmit(InvestorTypeCreateRequest request)

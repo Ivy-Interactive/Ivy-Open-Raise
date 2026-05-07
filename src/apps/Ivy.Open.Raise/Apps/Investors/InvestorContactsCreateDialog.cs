@@ -30,7 +30,7 @@ public class InvestorContactsCreateDialog(IState<bool> isOpen, RefreshToken refr
             .Builder(e => e.Email, e => e.ToEmailInput())
             .Builder(e => e.LinkedinUrl, e => e.ToUrlInput())
             .Builder(e => e.XUrl, e => e.ToUrlInput())
-            .HandleSubmit(OnSubmit)
+            .OnSubmit(OnSubmit)
             .ToDialog(isOpen, title: "New Contact", submitTitle: "Create");
 
         async Task OnSubmit(ContactCreateRequest request)

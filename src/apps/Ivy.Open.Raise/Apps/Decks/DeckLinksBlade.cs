@@ -1,4 +1,3 @@
-using Ivy.Hooks;
 
 namespace Ivy.Open.Raise.Apps.Decks;
 
@@ -8,7 +7,7 @@ public class DeckLinksBlade(Guid deckId) : ViewBase
 
     public override object? Build()
     {
-        var args = UseService<Ivy.Apps.AppContext>();
+        var args = UseService<AppContext>();
         var factory = UseService<DataContextFactory>();
         var refreshToken = UseRefreshToken();
         var client = UseService<IClientProvider>();
@@ -43,7 +42,7 @@ public class DeckLinksBlade(Guid deckId) : ViewBase
 
         MenuItem CreateDeleteBtn(Guid id) => MenuItem.Default("Delete")
             .Icon(Icons.Trash)
-            .HandleSelect(async () =>
+            .OnSelect(async () =>
             {
                 await DeleteAsync(factory, id);
                 linksQuery.Mutator.Revalidate();
@@ -72,20 +71,20 @@ public class DeckLinksBlade(Guid deckId) : ViewBase
                             .Ghost()
                             .WithDropDown(
                                 CreateDeleteBtn(dl.Id),
-                                MenuItem.Default("Edit").Icon(Icons.Pencil).HandleSelect(() => showEdit(dl.Id))
+                                MenuItem.Default("Edit").Icon(Icons.Pencil).OnSelect(() => showEdit(dl.Id))
                             )
                         | Icons.Clipboard
                             .ToButton()
                             .Outline()
                             .Tooltip("Copy Link")
-                            .HandleClick(() => OnCopy(dl.Secret))
+                            .OnClick(() => OnCopy(dl.Secret))
                 })
                 .ToTable()
                 .Width(Size.Units(120))
                 .ColumnWidth(e => e.Reference, Size.Fraction(0.5f))
                 .ColumnWidth(e => e.Contact, Size.Fraction(0.5f))
                 .ColumnWidth(e => e.Views, Size.Units(50))
-                .Align(e => e.Views, Align.Right)
+                .AlignContent(e => e.Views, Align.Right)
                 .ColumnWidth(e => e._, Size.Fit())
             ;
 

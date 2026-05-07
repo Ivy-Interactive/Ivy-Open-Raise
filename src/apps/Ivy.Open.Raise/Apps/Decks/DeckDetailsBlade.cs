@@ -1,4 +1,3 @@
-using Ivy.Hooks;
 
 namespace Ivy.Open.Raise.Apps.Decks;
 
@@ -7,7 +6,7 @@ public class DeckDetailsBlade(Guid deckId) : ViewBase
     public override object? Build()
     {
         var factory = UseService<DataContextFactory>();
-        var blades = UseContext<IBladeService>();
+        var blades = UseContext<IBladeContext>();
         var client = UseService<IClientProvider>();
         var blobService = UseService<IBlobService>();
         var queryService = UseService<IQueryService>();
@@ -54,13 +53,13 @@ public class DeckDetailsBlade(Guid deckId) : ViewBase
             .ToButton()
             .Ghost()
             .WithDropDown(
-                MenuItem.Default("Delete").Icon(Icons.Trash).HandleSelect(async () =>
+                MenuItem.Default("Delete").Icon(Icons.Trash).OnSelect(async () =>
                 {
                     await DeleteAsync(factory);
                     queryService.RevalidateByTag(typeof(Deck[]));
                     blades.Pop();
                 }),
-                MenuItem.Default("Edit").Icon(Icons.Pencil).HandleSelect(showDeckEdit)
+                MenuItem.Default("Edit").Icon(Icons.Pencil).OnSelect(showDeckEdit)
             );
 
         var detailsCard = new Card(
@@ -70,8 +69,8 @@ public class DeckDetailsBlade(Guid deckId) : ViewBase
                     Current = (currentVersion != null ?
                         (object)(Layout.Vertical().Gap(0)
                             | Text.Inline(currentVersion.Name)
-                            | new Button(currentVersion.FileName).Inline().HandleClick(OnDownloadVersion).Width(Size.Fit().Max(Size.Units(50)))
-                            | Text.Muted(Ivy.Utils.FormatBytes(currentVersion.FileSize))
+                            | new Button(currentVersion.FileName).Inline().OnClick(OnDownloadVersion).Width(Size.Fit().Max(Size.Units(50)))
+                            | Text.Muted(StringHelper.FormatBytes(currentVersion.FileSize))
                             )
                         : Callout.Warning("There's no current version"))
                 }

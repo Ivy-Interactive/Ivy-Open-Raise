@@ -1,6 +1,4 @@
-﻿using Ivy.Hooks;
-
-namespace Ivy.Open.Raise.Apps;
+﻿namespace Ivy.Open.Raise.Apps;
 
 public static class Shared
 {
@@ -344,7 +342,7 @@ public static class Shared
             UpdatedAt = DateTime.UtcNow,
             CreatedAt = DateTime.UtcNow,
             IsPrimary = true,
-            BlobName = file.Content.BlobName,
+            BlobName = file.Content.Name,
             ContentType = file.ContentType,
             FileSize = file.Length,
             FileName = file.FileName,

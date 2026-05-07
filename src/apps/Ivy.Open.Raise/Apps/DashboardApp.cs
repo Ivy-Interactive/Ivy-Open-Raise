@@ -2,7 +2,7 @@ using Ivy.Open.Raise.Apps.Dashboard;
 
 namespace Ivy.Open.Raise.Apps;
 
-[App(icon: Icons.LayoutDashboard, path: ["Apps"])]
+[App(icon: Icons.LayoutDashboard, group: ["Apps"])]
 public class DashboardApp : ViewBase
 {
     public override object? Build()

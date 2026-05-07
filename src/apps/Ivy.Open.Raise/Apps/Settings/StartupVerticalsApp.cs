@@ -2,7 +2,7 @@ using Ivy.Open.Raise.Apps.Settings.StartupVerticals;
 
 namespace Ivy.Open.Raise.Apps.Settings;
 
-[App(icon: Icons.Briefcase, path:["Apps", "Settings"], title: "Verticals", isVisible:false)]
+[App(icon: Icons.Briefcase, group:["Apps", "Settings"], title: "Verticals", isVisible:false)]
 public class StartupVerticalsApp : ViewBase
 {
     public override object? Build()

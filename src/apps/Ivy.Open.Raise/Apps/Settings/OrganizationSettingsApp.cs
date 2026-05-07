@@ -1,9 +1,8 @@
-using Ivy.Hooks;
 using static Ivy.Open.Raise.Apps.Shared;
 
 namespace Ivy.Open.Raise.Apps.Settings;
 
-[App(order:-1, icon:Icons.Settings, path:["Apps", "Settings"], title:"General", isVisible:false)]
+[App(order:-1, icon:Icons.Settings, group:["Apps", "Settings"], title:"General", isVisible:false)]
 public class OrganizationSettingsApp : ViewBase
 {
     public override object? Build()
@@ -25,8 +24,8 @@ public class OrganizationSettingsApp : ViewBase
 
         var form = settings
             .ToForm()
-            .Builder(e => e.OutreachBody, e => e.ToTextAreaInput().Height(30))
-            .Builder(e => e.ElevatorPitch, e => e.ToTextAreaInput().Height(30))
+            .Builder(e => e.OutreachBody, e => e.ToTextareaInput().Rows(30))
+            .Builder(e => e.ElevatorPitch, e => e.ToTextareaInput().Rows(30))
             .Builder(e => e.CurrencyId, SelectCurrencyBuilder)
             .Builder(e => e.CountryId, SelectCountryBuilder)
             .Builder(e => e.StartupStageId, SelectStartupStageBuilder)
@@ -61,7 +60,7 @@ public class OrganizationSettingsApp : ViewBase
                 e => e.OutreachSubject,
                 e => e.OutreachBody)
             .Remove(e => e.Id)
-            .HandleSubmit(OnSubmit);
+            .OnSubmit(OnSubmit);
 
         return
             Layout.TopCenter()
