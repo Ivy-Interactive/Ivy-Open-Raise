@@ -7,11 +7,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ivy.Open.Raise", "src\apps\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ivy.Open.Raise.Deploy", "src\apps\Ivy.Open.Raise.Deploy\Ivy.Open.Raise.Deploy.csproj", "{3DF1DAF9-43D9-45C6-8446-4A1F0288B1AA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ivy", "..\Ivy-Framework\Ivy\Ivy.csproj", "{7F20583D-6A39-45FB-83CA-73693FA86CB9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ivy", "..\Ivy-Framework\src\Ivy\Ivy.csproj", "{7F20583D-6A39-45FB-83CA-73693FA86CB9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ivy.Samples.Shared", "..\Ivy-Framework\Ivy.Samples.Shared\Ivy.Samples.Shared.csproj", "{9C17FC1B-1F85-464B-ABFA-6FB567967A95}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ivy.Samples.Shared", "..\Ivy-Framework\src\Ivy.Samples.Shared\Ivy.Samples.Shared.csproj", "{9C17FC1B-1F85-464B-ABFA-6FB567967A95}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ivy.Samples", "..\Ivy-Framework\Ivy.Samples\Ivy.Samples.csproj", "{813C3B1A-7E47-4DC5-A4AC-075312CA0B38}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ivy.Samples", "..\Ivy-Framework\src\Ivy.Samples\Ivy.Samples.csproj", "{813C3B1A-7E47-4DC5-A4AC-075312CA0B38}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -36,7 +36,7 @@ public class DealCreateDialog(IState<bool> isOpen, RefreshToken refreshToken) : 
             .Builder(e => e.DealStateId, e => e.ToAsyncSelectInput(UseDealStateSearch, UseDealStateLookup, placeholder: "Select Deal State"))
             .Builder(e => e.OwnerId, e => e.ToAsyncSelectInput(UseUserSearch, UseUserLookup, placeholder: "Select Owner"))
             .Place(e => e.Amount, e => e.ContactId, e => e.DealStateId)
-            .HandleSubmit(OnSubmit)
+            .OnSubmit(OnSubmit)
             .ToDialog(isOpen, title: "New Deal", submitTitle: "Create");
 
         async Task OnSubmit(DealCreateRequest request)

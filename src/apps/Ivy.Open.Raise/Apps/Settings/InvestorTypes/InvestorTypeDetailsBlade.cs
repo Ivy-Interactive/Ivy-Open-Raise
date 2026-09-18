@@ -1,4 +1,3 @@
-using Ivy.Hooks;
 
 namespace Ivy.Open.Raise.Apps.Settings.InvestorTypes;
 
@@ -7,7 +6,7 @@ public class InvestorTypeDetailsBlade(int investorTypeId) : ViewBase
     public override object? Build()
     {
         var factory = UseService<DataContextFactory>();
-        var blades = UseContext<IBladeService>();
+        var blades = UseContext<IBladeContext>();
         var queryService = UseService<IQueryService>();
         var refreshToken = UseRefreshToken();
 
@@ -34,7 +33,7 @@ public class InvestorTypeDetailsBlade(int investorTypeId) : ViewBase
             .ToButton()
             .Ghost()
             .WithDropDown(
-                MenuItem.Default("Delete").Disabled(investorCount > 0).Icon(Icons.Trash).HandleSelect(async () =>
+                MenuItem.Default("Delete").Disabled(investorCount > 0).Icon(Icons.Trash).OnSelect(async () =>
                 {
                     await DeleteAsync(factory);
                     queryService.RevalidateByTag(typeof(InvestorType[]));
@@ -53,7 +52,7 @@ public class InvestorTypeDetailsBlade(int investorTypeId) : ViewBase
                 investorTypeValue.Name,
                 Investors = investorCount
             }.ToDetails(),
-            footer: Layout.Horizontal().Width(Size.Full()).Gap(1).Align(Align.Right)
+            footer: Layout.Horizontal().Width(Size.Full()).Gap(1).AlignContent(Align.Right)
                     | dropDown
                     | editBtn
         ).Title("Investor Type Details");

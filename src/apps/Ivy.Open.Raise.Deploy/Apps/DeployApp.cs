@@ -1,4 +1,4 @@
-namespace Ivy.Open.Raise.Deploy.Apps;
+﻿namespace Ivy.Open.Raise.Deploy.Apps;
 
 [App(icon: Icons.Rocket, title: "Deploy Open-Raise")]
 public class DeployApp : ViewBase
@@ -230,22 +230,22 @@ public class DeployApp : ViewBase
                 .Label("Server")
                 .Required()
 
-                | Text.Small("Minimum 3 vCPU is recommended for this deployment.")
+                | Text.P("Minimum 3 vCPU is recommended for this deployment.").Small()
                     .Color(Colors.Orange)
 
                 // Services Section
                 | new Separator()
                 | Text.H3("Services Included in This Deployment")
-                | (Layout.Horizontal().Gap(8).Align(Align.Center)
-                    | (Layout.Vertical().Align(Align.Center)
+                | (Layout.Horizontal().Gap(8).AlignContent(Align.Center)
+                    | (Layout.Vertical().AlignContent(Align.Center)
                         | new Icon(Icons.Container, Colors.Blue)
-                        | Text.Small("Open-Raise Container"))
-                    | (Layout.Vertical().Align(Align.Center)
+                        | Text.P("Open-Raise Container").Small())
+                    | (Layout.Vertical().AlignContent(Align.Center)
                         | new Icon(Icons.Database, Colors.Gray)
-                        | Text.Small("Postgres Database"))
-                    | (Layout.Vertical().Align(Align.Center)
+                        | Text.P("Postgres Database").Small())
+                    | (Layout.Vertical().AlignContent(Align.Center)
                         | new Icon(Icons.Circle, Colors.Red)
-                        | Text.Small("Redis")))
+                        | Text.P("Redis").Small()))
 
                 // LLM Provider Section 
                 | new Separator()

@@ -15,7 +15,7 @@ public class StartupStageCreateDialog(IState<bool> isOpen, RefreshToken refreshT
 
         return details
             .ToForm()
-            .HandleSubmit(OnSubmit)
+            .OnSubmit(OnSubmit)
             .ToDialog(isOpen, title: "New Startup Stage", submitTitle: "Create");
 
         async Task OnSubmit(StartupStageCreateRequest request)

@@ -1,4 +1,3 @@
-using Ivy.Hooks;
 
 namespace Ivy.Open.Raise.Apps.Settings.InteractionTypes;
 
@@ -25,7 +24,7 @@ public class InteractionTypeEditSheet(IState<bool> isOpen, RefreshToken refreshT
         return interactionTypeQuery.Value
             .ToForm()
             .Remove(e => e.Id)
-            .HandleSubmit(OnSubmit)
+            .OnSubmit(OnSubmit)
             .ToSheet(isOpen, "Edit Interaction Type");
 
         async Task OnSubmit(InteractionType? modifiedInteractionType)

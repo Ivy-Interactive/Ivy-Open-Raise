@@ -1,10 +1,9 @@
 using Ivy.Core.Helpers;
-using Ivy.Hooks;
 using static Ivy.Open.Raise.Apps.Shared;
 
 namespace Ivy.Open.Raise.Apps;
 
-[App(isVisible: true, icon: Icons.Rocket, path: ["Hidden"])]
+[App(isVisible: true, icon: Icons.Rocket, group: ["Hidden"])]
 public class OnboardingApp : ViewBase
 {
     private StepperItem[] GetSteps(int selectedIndex) =>
@@ -52,7 +51,7 @@ public class WelcomeStepView(IState<int> stepperIndex) : ViewBase
                | Text.H1("Welcome to Ivy Raise")
                | Text.Markdown("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.")
                | new Button("Get Started").Primary().Large().Icon(Icons.ArrowRight, Align.Right)
-                   .HandleClick(stepperIndex.Incr);
+                   .OnClick(stepperIndex.Incr);
     }
 }
 
@@ -116,7 +115,7 @@ public class CompanyStepView(IState<int> stepperIndex) : ViewBase
                    .Builder(e => e.CurrencyId, SelectCurrencyBuilder)
                    .Builder(e => e.CountryId, SelectCountryBuilder)
                    .SubmitBuilder((saving) => new Button("Next").Icon(Icons.ArrowRight, Align.Right).Disabled(saving).Loading(saving))
-                   .HandleSubmit(OnSubmit)
+                   .OnSubmit(OnSubmit)
             ;
 
         async Task OnSubmit(CompanyDetails? details)
@@ -197,7 +196,7 @@ public class RaiseStepView(IState<int> stepperIndex) : ViewBase
                    .Builder(e => e.RaiseTargetMax, e => e.ToMoneyInput(currency: currencyId))
                    .Builder(e => e.RaiseTicketSize, e => e.ToMoneyInput(currency: currencyId))
                    .SubmitBuilder((saving) => new Button("Next").Icon(Icons.ArrowRight, Align.Right).Disabled(saving).Loading(saving))
-                   .HandleSubmit(OnSubmit)
+                   .OnSubmit(OnSubmit)
             ;
 
         async Task OnSubmit(RaiseDetails? details)
@@ -242,7 +241,7 @@ public class DeckStepView(IState<int> stepperIndex) : ViewBase
                    .Large()
                    .Builder(e => e.File, FileUploadBuilder)
                    .SubmitBuilder((saving) => new Button("Finish").Icon(Icons.Check, Align.Right).Disabled(saving).Loading(saving))
-                   .HandleSubmit(OnSubmit)
+                   .OnSubmit(OnSubmit)
             ;
 
         async Task OnSubmit(DeckDetails details)

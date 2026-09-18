@@ -15,7 +15,7 @@ public class StartupVerticalCreateDialog(IState<bool> isOpen, RefreshToken refre
 
         return details
             .ToForm()
-            .HandleSubmit(OnSubmit)
+            .OnSubmit(OnSubmit)
             .ToDialog(isOpen, title: "New Startup Vertical", submitTitle: "Create");
 
         async Task OnSubmit(StartupVerticalCreateRequest request)

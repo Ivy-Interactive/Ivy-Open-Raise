@@ -15,7 +15,7 @@ public class InteractionTypeCreateDialog(IState<bool> isOpen, RefreshToken refre
 
         return details
             .ToForm()
-            .HandleSubmit(OnSubmit)
+            .OnSubmit(OnSubmit)
             .ToDialog(isOpen, title: "New Interaction Type", submitTitle: "Create");
 
         async Task OnSubmit(InteractionTypeCreateRequest request)

@@ -1,4 +1,3 @@
-using Ivy.Hooks;
 
 namespace Ivy.Open.Raise.Apps.Settings.StartupVerticals;
 
@@ -8,7 +7,7 @@ public class StartupVerticalListBlade : ViewBase
 
     public override object? Build()
     {
-        var blades = UseContext<IBladeService>();
+        var blades = UseContext<IBladeContext>();
         var refreshToken = UseRefreshToken();
 
         var filter = UseState("");

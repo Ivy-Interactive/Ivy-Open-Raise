@@ -15,7 +15,7 @@ public class DealStateCreateDialog(IState<bool> isOpen, RefreshToken refreshToke
 
         return details
             .ToForm()
-            .HandleSubmit(OnSubmit)
+            .OnSubmit(OnSubmit)
             .ToDialog(isOpen, title: "New Deal State", submitTitle: "Create");
 
         async Task OnSubmit(DealStateCreateRequest request)

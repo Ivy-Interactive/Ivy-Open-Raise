@@ -1,4 +1,3 @@
-using Ivy.Hooks;
 
 namespace Ivy.Open.Raise.Apps.Decks;
 
@@ -26,7 +25,7 @@ public class DeckLinksEditDialog(IState<bool> isOpen, RefreshToken refreshToken,
             .ToForm()
             .Builder(e => e.ContactId, e => e.ToAsyncSelectInput(Shared.UseContactSearch, Shared.UseContactLookup, placeholder: "Select Contact"))
             .Remove(e => e.Id, e => e.DeckId, e => e.CreatedAt, e => e.UpdatedAt, e => e.DeletedAt, e => e.Secret)
-            .HandleSubmit(OnSubmit)
+            .OnSubmit(OnSubmit)
             .ToDialog(isOpen, "Edit Deck Link");
 
         async Task OnSubmit(DeckLink? modifiedDeckLink)

@@ -1,4 +1,3 @@
-using Ivy.Hooks;
 using static Ivy.Open.Raise.Apps.Shared;
 
 namespace Ivy.Open.Raise.Apps.Investors;
@@ -39,11 +38,11 @@ public class InvestorEditSheet(IState<bool> isOpen, RefreshToken refreshToken, G
             .Place(e => e.Name, e => e.InvestorTypeId, e => e.Thesis)
             .PlaceHorizontal(e => e.CheckSizeMin, e => e.CheckSizeMax)
             .Group("Address", e => e.AddressStreet, e => e.AddressZip, e => e.AddressCity, e => e.AddressCountryId)
-            .Builder(e => e.Thesis, e => e.ToTextAreaInput())
+            .Builder(e => e.Thesis, e => e.ToTextareaInput())
             .Builder(e => e.AddressCountryId, SelectCountryBuilder)
             .Builder(e => e.InvestorTypeId, SelectInvestorTypeBuilder)
             .Remove(e => e.Id, e => e.CreatedAt, e => e.UpdatedAt, e => e.DeletedAt)
-            .HandleSubmit(OnSubmit)
+            .OnSubmit(OnSubmit)
             .ToSheet(isOpen, "Edit Investor");
 
         async Task OnSubmit(Investor? modifiedInvestor)

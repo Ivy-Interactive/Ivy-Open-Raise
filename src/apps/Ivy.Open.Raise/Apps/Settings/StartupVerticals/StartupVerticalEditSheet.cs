@@ -1,4 +1,3 @@
-using Ivy.Hooks;
 
 namespace Ivy.Open.Raise.Apps.Settings.StartupVerticals;
 
@@ -26,7 +25,7 @@ public class StartupVerticalEditSheet(IState<bool> isOpen, RefreshToken refreshT
             .ToForm()
             .Remove(e => e.Id)
             .Place(e => e.Name)
-            .HandleSubmit(OnSubmit)
+            .OnSubmit(OnSubmit)
             .ToSheet(isOpen, "Edit Startup Vertical");
 
         async Task OnSubmit(StartupVertical? modifiedStartupVertical)

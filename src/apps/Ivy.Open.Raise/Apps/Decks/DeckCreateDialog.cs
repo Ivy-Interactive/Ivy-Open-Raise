@@ -21,7 +21,7 @@ public class DeckCreateDialog(IState<bool> isOpen, RefreshToken refreshToken) : 
         return deckState
             .ToForm()
             .Builder(e => e.File, FileUploadBuilder)
-            .HandleSubmit(OnSubmit)
+            .OnSubmit(OnSubmit)
             .ToDialog(isOpen, title: "New Deck", submitTitle: "Create");
         
         async Task OnSubmit(DeckCreateRequest details)
