@@ -24,8 +24,8 @@ public class OrganizationSettingsApp : ViewBase
 
         var form = settings
             .ToForm()
-            .Builder(e => e.OutreachBody, e => e.ToTextareaInput().Height(Size.Units(30)))
-            .Builder(e => e.ElevatorPitch, e => e.ToTextareaInput().Height(Size.Units(30)))
+            .Builder(e => e.OutreachBody, e => e.ToTextareaInput().Rows(30))
+            .Builder(e => e.ElevatorPitch, e => e.ToTextareaInput().Rows(30))
             .Builder(e => e.CurrencyId, SelectCurrencyBuilder)
             .Builder(e => e.CountryId, SelectCountryBuilder)
             .Builder(e => e.StartupStageId, SelectStartupStageBuilder)

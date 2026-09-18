@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using Ivy.Open.Raise;
 using Ivy.Open.Raise.Apps;
 using Microsoft.Extensions.AI;
